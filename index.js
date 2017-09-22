@@ -42,16 +42,20 @@ const myAwesomeModule = new AwesomeModule(AWESOME_MODULE_NAME, {
       app.use('/api', this.api.module);
 
       // Register every exposed frontend scripts
-      const jsFiles = glob.sync([
-        FRONTEND_JS_PATH + MODULE_NAME + '.app.js',
+      const frontendJsFilesFullPath = glob.sync([
+        FRONTEND_JS_PATH + MODULE_NAME + '.module.js',
         FRONTEND_JS_PATH + '*.js',
         FRONTEND_JS_PATH + '*/!(*spec).js',
         FRONTEND_JS_PATH + '**/*/!(*spec).js'
-      ]).map(function(filepath) {
+      ]);
+
+      const frontendJsFilesUri = frontendJsFilesFullPath.map(function(filepath) {
         return filepath.replace(FRONTEND_JS_PATH, '');
       });
 
-      webserverWrapper.injectAngularAppModules(MODULE_NAME, jsFiles, [MODULE_NAME], ['esn']);
+      webserverWrapper.injectAngularAppModules(MODULE_NAME, frontendJsFilesUri, AWESOME_MODULE_NAME, ['esn'], {
+        localJsFiles: frontendJsFilesFullPath
+      });
 
       const lessFile = path.resolve(__dirname, `./frontend/app/${MODULE_NAME}.styles.less`);
 
