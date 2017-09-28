@@ -10,7 +10,7 @@ const basePath = path.resolve(__dirname + '/../../node_modules/linagora-rse');
 const tmpPath = path.resolve(__dirname + '/../..', testConfig.tmp);
 const backendPath = path.normalize(__dirname + '/../../backend');
 const host = testConfig.host;
-const MODULE_NAME = 'awesome.module.seed';
+const MODULE_NAME = 'linagora.esn.group';
 let rse;
 
 before(function(done) {

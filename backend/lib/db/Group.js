@@ -1,5 +1,7 @@
 'use strict';
 
+const CONSTANTS = require('../constants');
+
 module.exports = dependencies => {
   const baseCollaboration = dependencies('db').mongo.models['base-collaboration'];
   const collaborationModule = dependencies('collaboration');
@@ -11,7 +13,7 @@ module.exports = dependencies => {
     email: {type: String, required: true, unique: true}
   };
 
-  const GroupSchema = baseCollaboration(GroupDefinition, 'group');
+  const GroupSchema = baseCollaboration(GroupDefinition, CONSTANTS.OBJECT_TYPE);
 
-  return collaborationModule.registerCollaborationModel('group', 'group', GroupSchema);
+  return collaborationModule.registerCollaborationModel(CONSTANTS.OBJECT_TYPE, CONSTANTS.MODEL_NAME, GroupSchema);
 };
