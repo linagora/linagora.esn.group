@@ -1,7 +1,5 @@
 'use strict';
 
-const MODULE_DIR_NAME = '/linagora.esn.group';
-
 module.exports = function(config) {
   config.set({
     basePath: '../../',
@@ -30,8 +28,8 @@ module.exports = function(config) {
     browsers: ['PhantomJS', 'Chrome', 'Firefox'],
     reporters: ['coverage', 'spec'],
     preprocessors: {
-      'frontend/app/**/*.js': ['coverage'],
-      '**/*.jade': ['ng-jade2module']
+      'frontend/app/**/!(*spec).js': ['coverage'],
+      'frontend/app/**/*.pug': ['ng-jade2module']
     },
 
     plugins: [
@@ -48,11 +46,18 @@ module.exports = function(config) {
 
     ngJade2ModulePreprocessor: {
       stripPrefix: 'frontend',
-      prependPrefix: MODULE_DIR_NAME,
+      cacheIdFromPath: function(filepath) {
+        var cacheId = filepath.replace(/.pug$/, '.html').replace(/^frontend/, '/group');
+
+        return cacheId;
+      },
+      prependPrefix: '/linagora.esn.group',
       // setting this option will create only a single module that contains templates
       // from all the files, so you can load them all with module('templates')
       jadeRenderConfig: {
-        basedir: require('path').resolve(__dirname, '../../node_modules/linagora-rse/frontend/views')
+        __: function(str) {
+          return str;
+        }
       },
       moduleName: 'jadeTemplates'
     }
