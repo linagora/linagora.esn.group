@@ -62,7 +62,7 @@ const myAwesomeModule = new AwesomeModule(AWESOME_MODULE_NAME, {
         localJsFiles: frontendJsFilesFullPath
       });
 
-      const lessFile = path.resolve(__dirname, `./frontend/app/${MODULE_NAME}.styles.less`);
+      const lessFile = path.join(FRONTEND_JS_PATH, 'app.less');
 
       webserverWrapper.injectLess(MODULE_NAME, [lessFile], 'esn');
 
