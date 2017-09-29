@@ -6,7 +6,7 @@ module.exports = function(dependencies, lib) {
 
   const router = express.Router();
 
-  require('./group')(dependencies, lib, router);
+  require('./groups')(dependencies, lib, router);
 
   return router;
 };

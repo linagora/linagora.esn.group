@@ -1,5 +1,7 @@
 'use strict';
 
+const { DEFAULT_OFFSET, DEFAULT_LIMIT } = require('./constants');
+
 module.exports = dependencies => {
   const mongoose = dependencies('db').mongo.mongoose;
   const Group = mongoose.model('Group');
@@ -12,45 +14,16 @@ module.exports = dependencies => {
     updateById
   };
 
-  function create(options, callback) {
-    const group = new Group(options);
-
-    group.save((err, saved) => {
-      if (err) {
-        callback(err);
-      }
-
-      callback(null, saved);
-    });
+  function create(group) {
+    return Group.create(group);
   }
 
-  function list(options = {}, callback) {
-    const sort = 'timestamps.creation';
-
-    let groupQuery = Group.find({});
-
-    Group.find(groupQuery).count().exec((err, count) => {
-      if (err) {
-        return callback(err);
-      }
-
-      groupQuery = groupQuery.skip(options.offset);
-
-      if (options.limit > 0) {
-        groupQuery = groupQuery.limit(options.limit);
-      }
-
-        groupQuery.sort(sort).exec((err, groups) => {
-          if (err) {
-            return callback(err);
-          }
-
-          callback(null, {
-            total_count: count,
-            list: groups || []
-          });
-        });
-    });
+  function list(options = {}) {
+    return Group
+      .find({})
+      .skip(+options.offset || DEFAULT_OFFSET)
+      .limit(+options.limit || DEFAULT_LIMIT)
+      .exec();
   }
 
   function deleteById(groupId, callback) {
@@ -63,7 +36,7 @@ module.exports = dependencies => {
     Group.findOneAndUpdate({ _id: groupId }, { $set: modifiedGroup }, options, callback);
   }
 
-  function getById(id, callback) {
-    Group.findById(id).exec(callback);
+  function getById(id) {
+    return Group.findOne({ _id: id });
   }
 };

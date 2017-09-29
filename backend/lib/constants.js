@@ -6,5 +6,7 @@ module.exports = {
   MEMBER_TYPES: {
     USER: 'user',
     EMAIL: 'email'
-  }
+  },
+  DEFAULT_OFFSET: 0,
+  DEFAULT_LIMIT: 50
 };

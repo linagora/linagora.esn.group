@@ -4,16 +4,27 @@ module.exports = dependencies => {
   const logger = dependencies('logger');
 
   return {
-    sendStatus500Error
+    send500Error,
+    send404Error
   };
 
-  function sendStatus500Error(details, err, res) {
+  function send500Error(details, err, res) {
     logger.error(details, err);
 
     return res.status(500).json({
       error: {
         code: 500,
         message: 'Server Error',
+        details
+      }
+    });
+  }
+
+  function send404Error(details, res) {
+    return res.status(404).json({
+      error: {
+        code: 404,
+        message: 'Not Found',
         details
       }
     });
