@@ -1,5 +1,6 @@
 'use strict';
 
+const emailAddresses = require('email-addresses');
 const CONSTANTS = require('../constants');
 
 module.exports = dependencies => {
@@ -7,13 +8,21 @@ module.exports = dependencies => {
   const collaborationModule = dependencies('collaboration');
 
   const GroupDefinition = {
-    name: {type: String},
-    // collaboration type
-    type: {type: String, trim: true, required: true, default: 'open'},
-    email: {type: String, required: true, unique: true}
+    name: { type: String, trim: true },
+    email: {
+      type: String,
+      required: true,
+      trim: true,
+      unique: true,
+      validate: [validateEmail, 'Invalid email address']
+    }
   };
 
   const GroupSchema = baseCollaboration(GroupDefinition, CONSTANTS.OBJECT_TYPE);
 
   return collaborationModule.registerCollaborationModel(CONSTANTS.OBJECT_TYPE, CONSTANTS.MODEL_NAME, GroupSchema);
 };
+
+function validateEmail(email) {
+  return emailAddresses.parseOneAddress(email) !== null;
+}
