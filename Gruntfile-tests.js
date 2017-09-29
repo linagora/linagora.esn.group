@@ -6,7 +6,7 @@ module.exports = function(grunt) {
   let KARMA_REPORTERS = (grunt.option('reporter') || '').split(',').filter(Boolean);
 
   if (!KARMA_REPORTERS.length) {
-    KARMA_REPORTERS = CI ? ['spec', 'coverage'] : ['dots'];
+    KARMA_REPORTERS = CI ? ['dots', 'coverage'] : ['spec'];
   }
 
   grunt.initConfig({
