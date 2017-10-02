@@ -1,0 +1,8 @@
+.row.flex-vertical-centered
+  .col-md-4.col-xs-4.lv-title
+    h5 {{::$ctrl.group.name}}
+  .col-md-5.col-xs-5.lv-title
+    a(ng-href='mailto:{{::$ctrl.group.email}}', op-inbox-compose)
+      | {{::$ctrl.group.email}}
+  .col-md-3.col-xs-3.lv-title
+    span {{::$ctrl.group.members.length}} #{__('member(s)')}
