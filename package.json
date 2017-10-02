@@ -37,7 +37,7 @@
     "karma-ng-jade2module-preprocessor": "linagora/karma-ng-jade2module-preprocessor#9fb962530b01",
     "karma-phantomjs-launcher": "1.0.2",
     "karma-spec-reporter": "0.0.26",
-    "linagora-rse": "linagora/openpaas-esn#master",
+    "linagora-rse": "github:linagora/openpaas-esn#master",
     "mocha": "3.0.2",
     "mockery": "1.7.0",
     "mongoose": "4.4.11",
