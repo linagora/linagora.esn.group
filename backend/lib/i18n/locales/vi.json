@@ -5,7 +5,16 @@
   "Information": "Thông tin",
   "Name:": "Tên:",
   "Email:": "Thư điện tử:",
-  "Members": "Thành viên",
   "Back": "Quay lại",
-  "No member": "Không có thành viên nào"
+  "No member": "Không có thành viên nào",
+  "New group": "Nhóm mới",
+  "Cancel": "Hủy",
+  "Create": "Tạo",
+  "Name": "Tên",
+  "Email": "Thư điện tử",
+  "Members": "Thành viên",
+  "Creating group...": "Đang tạo nhóm...",
+  "Group created": "Đã tạo nhóm",
+  "Failed to create group": "Tạo nhóm thất bại",
+  "Type a name or email...": "Nhập tên người dùng hoặc email..."
 }

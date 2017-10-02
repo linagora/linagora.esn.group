@@ -14,3 +14,4 @@ sub-header
         | #{__('No group')}
     div(ng-if='$ctrl.infiniteScrollDisabled')
       li.text-center(openpaas-logo-spinner, spinner-start-active='1', spinner-size='0.5')
+fab(icon="plus", ng-click="$ctrl.onCreateBtnClick()")

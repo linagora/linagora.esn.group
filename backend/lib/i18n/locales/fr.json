@@ -1,11 +1,20 @@
 {
-  "Groups": "Groups",
-  "No group": "No group",
-  "member(s)": "membre (s)",
-  "Information": "Information",
   "Name:": "Nom:",
   "Email:": "Email:",
-  "Members": "Membres",
+  "Groups": "Groupes",
+  "No group": "Aucun groupe",
+  "member(s)": "membre (s)",
+  "Information": "Information",
   "Back": "Retour",
-  "No member": "Aucun membre"
+  "No member": "Aucun membre",
+  "New group": "New group",
+  "Cancel": "Annuler",
+  "Create": "Créer",
+  "Name": "Nom",
+  "Email": "Email",
+  "Members": "Membres",
+  "Creating group...": "Création d'groupe...",
+  "Group created": "Créé par l'groupe",
+  "Failed to create group": "Impossible de créer un groupe",
+  "Type a name or email...": "Entrer un nom ou email..."
 }

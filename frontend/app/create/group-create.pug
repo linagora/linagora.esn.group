@@ -1,0 +1,16 @@
+.modal.group-create
+  form(name="form", ng-submit="$ctrl.create(); $hide()")
+    .modal-dialog
+      .modal-content
+        .modal-header
+          button.close(type="button", data-dismiss="modal", aria-label="Close", ng-click="$hide()")
+            span(aria-hidden="true") &times;
+          h4.modal-title #{__('New group')}
+        .body
+          group-form(group="$ctrl.group", new-members="$ctrl.newMembers")
+        .modal-footer.flex
+          .flex-vertical-centered.flex-end
+            button.btn.btn-link(type="button", ng-click="$hide()")
+              | #{__('Cancel')}
+            button.btn.btn-primary(type="submit", ng-disabled="form.$invalid")
+              | #{__('Create')}

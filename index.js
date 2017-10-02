@@ -49,10 +49,8 @@ const myAwesomeModule = new AwesomeModule(AWESOME_MODULE_NAME, {
 
       // Register every exposed frontend scripts
       const frontendJsFilesFullPath = glob.sync([
-        FRONTEND_JS_PATH + MODULE_NAME + '.module.js',
-        FRONTEND_JS_PATH + '*.js',
-        FRONTEND_JS_PATH + '*/!(*spec).js',
-        FRONTEND_JS_PATH + '**/*/!(*spec).js'
+        FRONTEND_JS_PATH + '**/*.module.js',
+        FRONTEND_JS_PATH + '**/!(*spec).js'
       ]);
 
       const frontendJsFilesUri = frontendJsFilesFullPath.map(function(filepath) {
