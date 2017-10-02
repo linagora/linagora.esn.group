@@ -7,12 +7,23 @@
     $stateProvider
       .state('group', {
         url: '/group',
-        template: '<h1>This is group state</h1>',
+        templateUrl: '/group/app/app.html',
         resolve: {
           isAdmin: function($location, session) {
             return session.ready.then(function() {
               if (!session.userIsDomainAdministrator()) { $location.path('/'); }
             });
+          }
+        },
+        deepStateRedirect: {
+          default: 'group.list'
+        }
+      })
+      .state('group.list', {
+        url: '/list',
+        views: {
+          'root@group': {
+            template: '<group-list />'
           }
         }
       });
