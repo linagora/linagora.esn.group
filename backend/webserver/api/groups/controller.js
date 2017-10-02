@@ -1,18 +1,20 @@
 'use strict';
 
-const Q = require('q');
+const q = require('q');
+const { OBJECT_TYPE } = require('../../../lib/constants');
 
 module.exports = function(dependencies, lib) {
-
   const coreUser = dependencies('user');
   const coreTuple = dependencies('tuple');
-  const { denormalize } = require('./denormalize')(dependencies);
+  const coreCollaboration = dependencies('collaboration');
+  const { denormalize, denormalizeMember } = require('./denormalize')(dependencies);
   const { send500Error } = require('../utils')(dependencies);
 
   return {
     create,
     list,
-    get
+    get,
+    getMembers
   };
 
   function create(req, res) {
@@ -26,7 +28,7 @@ module.exports = function(dependencies, lib) {
     const memberEmails = req.body.members || [];
     const memberPromises = memberEmails.map(buildMemberFromEmail);
 
-    Q.all(memberPromises)
+    q.all(memberPromises)
       .then(members => {
         group.members = members;
 
@@ -37,7 +39,7 @@ module.exports = function(dependencies, lib) {
       .catch(err => send500Error('Unable to create group', err, res));
 
     function buildMemberFromEmail(email) {
-      return Q.ninvoke(coreUser, 'findByEmail', email)
+      return q.ninvoke(coreUser, 'findByEmail', email)
         .then(user => {
           if (user) {
             return coreTuple.user(user._id);
@@ -66,5 +68,20 @@ module.exports = function(dependencies, lib) {
 
   function get(req, res) {
     res.status(200).json(denormalize(req.group));
+  }
+
+  function getMembers(req, res) {
+    const query = {
+      limit: +req.query.limit,
+      offset: +req.query.offset
+    };
+
+    q.denodeify(coreCollaboration.member.getMembers)(req.group, OBJECT_TYPE, query)
+      .then(members => members.map(denormalizeMember))
+      .then(members => {
+        res.header('X-ESN-Items-Count', members.length);
+        res.status(200).json(members);
+      })
+      .catch(err => send500Error('Unable to list group members', err, res));
   }
 };

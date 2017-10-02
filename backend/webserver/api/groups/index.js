@@ -32,4 +32,13 @@ module.exports = function(dependencies, lib, router) {
     middleware.load,
     controller.get
   );
+
+  router.get('/groups/:id/members',
+    authorizationMW.requiresAPILogin,
+    domainMW.loadDomainByHostname,
+    helperMW.checkIdInParams('id', MODEL_NAME),
+    middleware.canGet,
+    middleware.load,
+    controller.getMembers
+  );
 };

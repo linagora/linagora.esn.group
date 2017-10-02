@@ -1,8 +1,11 @@
 'use strict';
 
-module.exports = () => {
+module.exports = dependencies => {
+  const { memberDenormalize } = dependencies('collaboration');
+
   return {
-    denormalize
+    denormalize,
+    denormalizeMember
   };
 
   function denormalize(group) {
@@ -12,6 +15,14 @@ module.exports = () => {
       email: group.email,
       creator: group.creator,
       members: group.members
+    };
+  }
+
+  function denormalizeMember(member) {
+    return {
+      objectType: member.objectType,
+      timestamps: member.timestamps,
+      member: memberDenormalize.denormalize(member.objectType, member.member)
     };
   }
 };

@@ -8,7 +8,8 @@
     return {
       create: create,
       get: get,
-      list: list
+      list: list,
+      getMembers: getMembers
     };
 
     /**
@@ -36,6 +37,16 @@
      */
     function list(options) {
       return groupRestangular.all('groups').getList(options);
+    }
+
+    /**
+     * Get group members
+     * @param  {String} groupId - The group ID
+     * @param  {Object} options - Query option, possible attributes are limit and offset
+     * @return {Promise}        - Resolve response with member list
+     */
+    function getMembers(groupId, options) {
+      return groupRestangular.one('groups', groupId).all('members').getList(options);
     }
   }
 })(angular);
