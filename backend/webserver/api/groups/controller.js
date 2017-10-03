@@ -12,9 +12,11 @@ module.exports = function(dependencies, lib) {
 
   return {
     create,
+    deleteGroup,
     list,
     get,
-    getMembers
+    getMembers,
+    update
   };
 
   function create(req, res) {
@@ -83,5 +85,23 @@ module.exports = function(dependencies, lib) {
         res.status(200).json(members);
       })
       .catch(err => send500Error('Unable to list group members', err, res));
+  }
+
+  function update(req, res) {
+    const options = {
+      name: req.body.name,
+      email: req.body.email
+    };
+
+    lib.group.updateById(req.group._id, options)
+      .then(denormalize)
+      .then(denormalized => res.status(200).json(denormalized))
+      .catch(err => send500Error('Unable to update group info', err, res));
+  }
+
+  function deleteGroup(req, res) {
+    lib.group.deleteById(req.params.id)
+      .then(() => res.status(204).end())
+      .catch(err => send500Error('Unable to delete group', err, res));
   }
 };
