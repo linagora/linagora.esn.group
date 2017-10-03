@@ -156,7 +156,7 @@ describe('The groups API', () => {
 
   describe('GET /groups/:id', () => {
     it('should return 401 if not logged in', function(done) {
-      this.helpers.api.requireLogin(app, 'post', '/api/groups', done);
+      this.helpers.api.requireLogin(app, 'get', '/api/groups/groupId', done);
     });
 
     it('should return 404 if group is not found', function(done) {
@@ -206,6 +206,71 @@ describe('The groups API', () => {
             });
           }))
         .catch(done);
+    });
+  });
+
+  describe('GET /groups/:id/members', function() {
+    let currentLib;
+    let createdGroup;
+
+    beforeEach(function(done) {
+      currentLib = this.helpers.modules.current.lib.lib;
+      const group = {
+        name: 'Group',
+        email: 'example@lngr.com',
+        members: [
+          {
+            member: {
+              id: 'outsider@external.org',
+              objectType: 'email'
+            }
+          }, {
+            member: {
+              id: String(user._id),
+              objectType: 'user'
+            }
+          }
+        ]
+      };
+
+      currentLib.group.create(group)
+        .then(group => {
+          createdGroup = group;
+          done();
+        })
+        .catch(done);
+    });
+
+    it('should respond 401 if not logged in', function(done) {
+      this.helpers.api.requireLogin(app, 'get', `/api/groups/${createdGroup.id}/members`, done);
+    });
+
+    it('should respond 404 if group is not found', function(done) {
+      this.helpers.api.loginAsUser(app, user.emails[0], password, (err, requestAsMember) => {
+        if (err) {
+          return done(err);
+        }
+        const req = requestAsMember(request(app).get('/api/groups/invalid/members'));
+
+        req.expect(404);
+        req.end(done);
+      });
+    });
+
+    it('should respond 200 with member list', function(done) {
+      this.helpers.api.loginAsUser(app, user.emails[0], password, (err, requestAsMember) => {
+        if (err) {
+          return done(err);
+        }
+
+        requestAsMember(request(app).get(`/api/groups/${createdGroup.id}/members`))
+          .expect(200)
+          .end((err, res) => {
+            expect(err).to.not.exist;
+            expect(res.body).to.have.length(createdGroup.members.length);
+            done();
+          });
+      });
     });
   });
 });

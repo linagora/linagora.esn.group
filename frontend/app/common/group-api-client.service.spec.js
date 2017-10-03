@@ -47,4 +47,20 @@ describe('The groupApiClient service', function() {
       $httpBackend.flush();
     });
   });
+
+  describe('The getMembers fn', function() {
+    it('should GET to right endpoint to get group members', function() {
+      var groupId = '123';
+      var options = {
+        limit: 10,
+        offset: 0
+      };
+
+      $httpBackend.expectGET('/group/api/groups/' + groupId + '/members?limit=' + options.limit + '&offset=' + options.offset).respond(200, []);
+
+      groupApiClient.getMembers(groupId, options);
+
+      $httpBackend.flush();
+    });
+  });
 });
