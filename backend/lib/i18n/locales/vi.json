@@ -1,5 +1,11 @@
 {
   "Groups": "Nhóm",
   "No group": "Không có nhóm",
-  "member(s)": "thành viên"
+  "member(s)": "thành viên",
+  "Information": "Thông tin",
+  "Name:": "Tên:",
+  "Email:": "Thư điện tử:",
+  "Members": "Thành viên",
+  "Back": "Quay lại",
+  "No member": "Không có thành viên nào"
 }

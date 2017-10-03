@@ -1,5 +1,11 @@
 {
   "Groups": "Groups",
   "No group": "No group",
-  "member(s)": "member(s)"
+  "member(s)": "member(s)",
+  "Information": "Information",
+  "Name:": "Name:",
+  "Email:": "Email:",
+  "Members": "Members",
+  "Back": "Back",
+  "No member": "No member"
 }

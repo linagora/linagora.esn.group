@@ -3,7 +3,8 @@
 
   angular.module('linagora.esn.group')
 
-  .config(function($stateProvider) {
+  .config(function($stateProvider, $urlRouterProvider) {
+    $urlRouterProvider.when('/group', '/group/list');
     $stateProvider
       .state('group', {
         url: '/group',
@@ -14,9 +15,6 @@
               if (!session.userIsDomainAdministrator()) { $location.path('/'); }
             });
           }
-        },
-        deepStateRedirect: {
-          default: 'group.list'
         }
       })
       .state('group.list', {
@@ -24,6 +22,14 @@
         views: {
           'root@group': {
             template: '<group-list />'
+          }
+        }
+      })
+      .state('group.display', {
+        url: '/:groupId',
+        views: {
+          'root@group': {
+            template: '<group-display />'
           }
         }
       });

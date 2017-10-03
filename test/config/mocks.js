@@ -10,9 +10,11 @@ angular.module('pascalprecht.translate', [])
       $get: angular.noop
     };
   });
-  angular.module('esn.http', [])
-    .factory('httpErrorHandler', function() {
-      return {
-        redirectToLogin: angular.noop
-      };
-    });
+angular.module('esn.http', [])
+  .factory('httpErrorHandler', function() {
+    return {
+      redirectToLogin: angular.noop
+    };
+  });
+
+angular.module('esn.infinite-list', []);
