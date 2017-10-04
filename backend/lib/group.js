@@ -26,14 +26,12 @@ module.exports = dependencies => {
       .exec();
   }
 
-  function deleteById(groupId, callback) {
-    Group.remove({ _id: groupId }, callback);
+  function deleteById(groupId) {
+    return Group.remove({ _id: groupId }).exec();
   }
 
-  function updateById(groupId, modifiedGroup, callback) {
-    const options = { new: true };
-
-    Group.findOneAndUpdate({ _id: groupId }, { $set: modifiedGroup }, options, callback);
+  function updateById(groupId, modified) {
+    return Group.findOneAndUpdate({ _id: groupId }, { $set: modified }, { new: true }).exec();
   }
 
   function getById(id) {

@@ -7,7 +7,7 @@ const Q = require('q');
 const MODULE_NAME = 'linagora.esn.group';
 
 describe('The groups API', () => {
-  let user, app, deployOptions;
+  let app, deployOptions, user, lib;
   const password = 'secret';
 
   beforeEach(function(done) {
@@ -31,6 +31,7 @@ describe('The groups API', () => {
           return done(err);
         }
         user = models.users[0];
+        lib = this.helpers.modules.current.lib.lib;
 
         done();
       });
@@ -210,11 +211,9 @@ describe('The groups API', () => {
   });
 
   describe('GET /groups/:id/members', function() {
-    let currentLib;
     let createdGroup;
 
     beforeEach(function(done) {
-      currentLib = this.helpers.modules.current.lib.lib;
       const group = {
         name: 'Group',
         email: 'example@lngr.com',
@@ -233,7 +232,7 @@ describe('The groups API', () => {
         ]
       };
 
-      currentLib.group.create(group)
+      lib.group.create(group)
         .then(group => {
           createdGroup = group;
           done();
@@ -253,7 +252,12 @@ describe('The groups API', () => {
         const req = requestAsMember(request(app).get('/api/groups/invalid/members'));
 
         req.expect(404);
-        req.end(done);
+        req.end((err, res) => {
+          expect(err).to.not.exist;
+          expect(res.body.error.details).to.equal('Group not found');
+
+          done();
+        });
       });
     });
 
@@ -271,6 +275,142 @@ describe('The groups API', () => {
             done();
           });
       });
+    });
+  });
+
+  describe('POST /groups/:id', () => {
+    const group = {
+      name: 'example',
+      email: 'example@lngr.org',
+      members: []
+    };
+
+    it('should return 401 if not logged in', function(done) {
+      this.helpers.api.requireLogin(app, 'post', '/api/groups/invalid', done);
+    });
+
+    it('should return 404 if group not found', function(done) {
+      this.helpers.api.loginAsUser(app, user.emails[0], password, (err, requestAsMember) => {
+        if (err) {
+          return done(err);
+        }
+        const req = requestAsMember(request(app).post('/api/groups/invalid'));
+
+        req.expect(404);
+        req.end((err, res) => {
+          expect(err).to.not.exist;
+          expect(res.body.error.details).to.equal('Group not found');
+
+          done();
+        });
+      });
+    });
+
+    it('should return 400 if no name and email given', function(done) {
+      lib.group.create(group)
+        .then(created => this.helpers.api.loginAsUser(app, user.emails[0], password, (err, requestAsMember) => {
+          if (err) {
+            return done(err);
+          }
+          const req = requestAsMember(request(app).post(`/api/groups/${String(created._id)}`));
+
+          req.expect(400);
+          req.send({});
+          req.end((err, res) => {
+            expect(err).to.not.exist;
+            expect(res.body.error.details).to.equal('Invalid request body');
+
+            done();
+          });
+        }))
+        .catch(done);
+    });
+
+    it('should return 400 if email is not valid', function(done) {
+      lib.group.create(group)
+        .then(created => this.helpers.api.loginAsUser(app, user.emails[0], password, (err, requestAsMember) => {
+          if (err) {
+            return done(err);
+          }
+          const req = requestAsMember(request(app).post(`/api/groups/${String(created._id)}`));
+
+          req.expect(400);
+          req.send({ email: 'invalid' });
+          req.end((err, res) => {
+            expect(err).to.not.exist;
+            expect(res.body.error.details).to.equal('Invalid email address');
+
+            done();
+          });
+        }))
+        .catch(done);
+    });
+
+    it('should return 200 with updated group', function(done) {
+      const updatedGroup = {
+        name: 'updated',
+        email: 'success@here.now'
+      };
+
+      lib.group.create(group)
+        .then(created => this.helpers.api.loginAsUser(app, user.emails[0], password, (err, requestAsMember) => {
+          if (err) {
+            return done(err);
+          }
+          const req = requestAsMember(request(app).post(`/api/groups/${String(created._id)}`));
+
+          req.expect(200);
+          req.send(updatedGroup);
+          req.end((err, res) => {
+            expect(err).to.not.exist;
+            expect(res.body).to.shallowDeepEqual(updatedGroup);
+
+            done();
+          });
+        }))
+        .catch(done);
+    });
+  });
+
+  describe('DELETE /groups/:id', () => {
+    const group = {
+      name: 'example',
+      email: 'example@lngr.org',
+      members: []
+    };
+
+    it('should return 401 if not logged in', function(done) {
+      this.helpers.api.requireLogin(app, 'delete', '/api/groups/groupid', done);
+    });
+
+    it('should return 404 if group not found', function(done) {
+      this.helpers.api.loginAsUser(app, user.emails[0], password, (err, requestAsMember) => {
+        if (err) {
+          return done(err);
+        }
+        const req = requestAsMember(request(app).delete('/api/groups/invalid'));
+
+        req.expect(404);
+        req.end(done);
+      });
+    });
+
+    it('should return 204 after deleting group', function(done) {
+      lib.group.create(group)
+        .then(created => this.helpers.api.loginAsUser(app, user.emails[0], password, (err, requestAsMember) => {
+          if (err) {
+            return done(err);
+          }
+          const req = requestAsMember(request(app).delete(`/api/groups/${String(created._id)}`));
+
+          req.expect(204);
+          req.end(err => {
+            expect(err).to.not.exist;
+
+            done();
+          });
+        }))
+        .catch(done);
     });
   });
 });

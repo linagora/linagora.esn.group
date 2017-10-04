@@ -33,6 +33,24 @@ module.exports = function(dependencies, lib, router) {
     controller.get
   );
 
+  router.post('/groups/:id',
+    authorizationMW.requiresAPILogin,
+    domainMW.loadDomainByHostname,
+    helperMW.checkIdInParams('id', MODEL_NAME),
+    middleware.canUpdate,
+    middleware.validateNameAndEmail,
+    middleware.load,
+    controller.update
+  );
+
+  router.delete('/groups/:id',
+    authorizationMW.requiresAPILogin,
+    domainMW.loadDomainByHostname,
+    helperMW.checkIdInParams('id', MODEL_NAME),
+    middleware.canDelete,
+    controller.deleteGroup
+  );
+
   router.get('/groups/:id/members',
     authorizationMW.requiresAPILogin,
     domainMW.loadDomainByHostname,
