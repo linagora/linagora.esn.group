@@ -7,6 +7,7 @@
     'ui.router',
     'op.dynamicDirective',
     'restangular',
-    'esn.http'
+    'esn.http',
+    'esn.infinite-list'
   ]);
 })(angular);

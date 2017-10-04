@@ -1,0 +1,6 @@
+.pull-left.p-r-15
+  esn-avatar(user-email="::$ctrl.email")
+.media-body
+  .lv-title
+    span
+      a(ng-href='mailto:{{::$ctrl.email}}', op-inbox-compose) {{::$ctrl.email}}
