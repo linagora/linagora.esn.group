@@ -3,7 +3,6 @@
 const request = require('supertest');
 const expect = require('chai').expect;
 const path = require('path');
-const Q = require('q');
 const MODULE_NAME = 'linagora.esn.group';
 
 describe('The groups API', () => {
@@ -119,7 +118,7 @@ describe('The groups API', () => {
       this.helpers.api.requireLogin(app, 'post', '/api/groups', done);
     });
 
-    it('should return 200 with a list of groups', function(done) {
+    it('should return 200 with an ordered list of groups', function(done) {
       const lib = this.helpers.modules.current.lib.lib;
       const group1 = {
         name: 'group1',
@@ -132,10 +131,9 @@ describe('The groups API', () => {
         members: []
       };
 
-      Q.all([
-        lib.group.create(group1),
-        lib.group.create(group2)
-      ]).spread((group_1, group_2) => {
+      lib.group.create(group1)
+        .then(() => lib.group.create(group2))
+        .then(() => {
         this.helpers.api.loginAsUser(app, user.emails[0], password, (err, requestAsMember) => {
           if (err) {
             return done(err);
@@ -145,8 +143,8 @@ describe('The groups API', () => {
           req.expect(200);
           req.end((err, res) => {
             expect(err).to.not.exist;
-            expect(res.body).to.include(Object.assign({ id: String(group_1._id) }, group1));
-            expect(res.body).to.include(Object.assign({ id: String(group_2._id) }, group2));
+            expect(res.body[0].email).to.equal(group2.email);
+            expect(res.body[1].email).to.equal(group1.email);
             done();
           });
         });
