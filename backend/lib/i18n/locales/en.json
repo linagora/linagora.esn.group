@@ -5,7 +5,16 @@
   "Information": "Information",
   "Name:": "Name:",
   "Email:": "Email:",
-  "Members": "Members",
   "Back": "Back",
-  "No member": "No member"
+  "No member": "No member",
+  "New group": "New group",
+  "Cancel": "Cancel",
+  "Create": "Create",
+  "Name": "Name",
+  "Email": "Email",
+  "Members": "Members",
+  "Creating group...": "Creating group...",
+  "Group created": "Group created",
+  "Failed to create group": "Failed to create group",
+  "Type a name or email...": "Type a name or email..."
 }

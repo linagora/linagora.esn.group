@@ -23,6 +23,7 @@ module.exports = dependencies => {
       .find({})
       .skip(+options.offset || DEFAULT_OFFSET)
       .limit(+options.limit || DEFAULT_LIMIT)
+      .sort('-timestamps.creation')
       .exec();
   }
 
