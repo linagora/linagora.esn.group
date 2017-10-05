@@ -19,8 +19,14 @@ module.exports = dependencies => {
   }
 
   function list(options = {}) {
+    const query = {};
+
+    if (options.email) {
+      query.email = options.email;
+    }
+
     return Group
-      .find({})
+      .find(query)
       .skip(+options.offset || DEFAULT_OFFSET)
       .limit(+options.limit || DEFAULT_LIMIT)
       .sort('-timestamps.creation')

@@ -3,6 +3,7 @@
 const request = require('supertest');
 const expect = require('chai').expect;
 const path = require('path');
+const q = require('q');
 const MODULE_NAME = 'linagora.esn.group';
 
 describe('The groups API', () => {
@@ -119,7 +120,6 @@ describe('The groups API', () => {
     });
 
     it('should return 200 with an ordered list of groups', function(done) {
-      const lib = this.helpers.modules.current.lib.lib;
       const group1 = {
         name: 'group1',
         email: 'group1@lngr.com',
@@ -131,8 +131,7 @@ describe('The groups API', () => {
         members: []
       };
 
-      lib.group.create(group1)
-        .then(() => lib.group.create(group2))
+      q.all([lib.group.create(group1), lib.group.create(group2)])
         .then(() => {
         this.helpers.api.loginAsUser(app, user.emails[0], password, (err, requestAsMember) => {
           if (err) {
@@ -143,6 +142,7 @@ describe('The groups API', () => {
           req.expect(200);
           req.end((err, res) => {
             expect(err).to.not.exist;
+            expect(res.body.length).to.equal(2);
             expect(res.body[0].email).to.equal(group2.email);
             expect(res.body[1].email).to.equal(group1.email);
             done();
@@ -150,6 +150,40 @@ describe('The groups API', () => {
         });
       })
       .catch(done);
+    });
+  });
+
+  describe('GET /groups?email=', () => {
+    it('should return 200 with a group matching email query', function(done) {
+      const group1 = {
+        name: 'group1',
+        email: 'group1@lngr.com',
+        members: []
+      };
+      const group2 = {
+        name: 'group2',
+        email: 'group2@lngr.com',
+        members: []
+      };
+
+      q.all([lib.group.create(group1), lib.group.create(group2)])
+        .then(createdGroups => {
+          this.helpers.api.loginAsUser(app, user.emails[0], password, (err, requestAsMember) => {
+            if (err) {
+              return done(err);
+            }
+            const req = requestAsMember(request(app).get(`/api/groups?email=${group2.email}`));
+
+            req.expect(200);
+            req.end((err, res) => {
+              expect(err).to.not.exist;
+              expect(res.body.length).to.equal(1);
+              expect(res.body[0]).to.shallowDeepEqual(Object.assign({ id: String(createdGroups[1]._id) }, group2));
+              done();
+            });
+          });
+        })
+        .catch(done);
     });
   });
 
@@ -171,7 +205,6 @@ describe('The groups API', () => {
     });
 
     it('should return 200 with the requested group', function(done) {
-      const lib = this.helpers.modules.current.lib.lib;
       const group = {
         name: 'Group',
         email: 'example@lngr.com',
