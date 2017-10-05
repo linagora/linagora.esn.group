@@ -57,7 +57,8 @@ module.exports = function(dependencies, lib) {
     const options = {
       limit: +req.query.limit,
       offset: +req.query.offset,
-      email: req.query.email
+      email: req.query.email,
+      domainId: req.domain.id
     };
 
     lib.group.list(options)

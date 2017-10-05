@@ -25,6 +25,10 @@ module.exports = dependencies => {
       query.email = options.email;
     }
 
+    if (options.domainId) {
+      query.domain_ids = options.domainId;
+    }
+
     return Group
       .find(query)
       .skip(+options.offset || DEFAULT_OFFSET)
