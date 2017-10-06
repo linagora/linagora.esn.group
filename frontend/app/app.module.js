@@ -14,6 +14,7 @@
     'esn.session',
     'esn.domain',
     'linagora.esn.contact',
-    'esn.attendee'
+    'esn.attendee',
+    'esn.scroll'
   ]);
 })(angular);
