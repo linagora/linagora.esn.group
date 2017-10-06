@@ -4,10 +4,12 @@ const request = require('supertest');
 const expect = require('chai').expect;
 const path = require('path');
 const q = require('q');
+const _ = require('lodash');
+const ObjectId = require('mongoose').Types.ObjectId;
 const MODULE_NAME = 'linagora.esn.group';
 
 describe('The groups API', () => {
-  let app, deployOptions, user, lib;
+  let app, deployOptions, user, domain, lib;
   const password = 'secret';
 
   beforeEach(function(done) {
@@ -31,6 +33,7 @@ describe('The groups API', () => {
           return done(err);
         }
         user = models.users[0];
+        domain = models.domain;
         lib = this.helpers.modules.current.lib.lib;
 
         done();
@@ -114,76 +117,70 @@ describe('The groups API', () => {
   });
 
   describe('GET /groups', () => {
+    let createdGroup1, createdGroup2;
+
+    beforeEach(function(done) {
+      const group1 = {
+        name: 'group1',
+        domain_ids: [domain._id],
+        email: 'group1@lngr.com',
+        members: []
+      };
+      const group2 = {
+        name: 'group2',
+        domain_ids: [domain._id],
+        email: 'group2@lngr.com',
+        members: []
+      };
+      const groupNotInSameDomain = {
+        name: 'group3',
+        domain_ids: [new ObjectId()],
+        email: 'group3@lngr.com',
+        members: []
+      };
+
+      q.all([group1, group2, groupNotInSameDomain].map(lib.group.create))
+        .spread((g1, g2) => {
+          createdGroup1 = g1;
+          createdGroup2 = g2;
+          done();
+        })
+        .catch(done);
+    });
 
     it('should return 401 if not logged in', function(done) {
       this.helpers.api.requireLogin(app, 'post', '/api/groups', done);
     });
 
-    it('should return 200 with an ordered list of groups', function(done) {
-      const group1 = {
-        name: 'group1',
-        email: 'group1@lngr.com',
-        members: []
-      };
-      const group2 = {
-        name: 'group2',
-        email: 'group2@lngr.com',
-        members: []
-      };
-
-      q.all([lib.group.create(group1), lib.group.create(group2)])
-        .then(() => {
-        this.helpers.api.loginAsUser(app, user.emails[0], password, (err, requestAsMember) => {
-          if (err) {
-            return done(err);
-          }
-          const req = requestAsMember(request(app).get('/api/groups'));
-
-          req.expect(200);
-          req.end((err, res) => {
+    it('should respond 200 with a list of groups in the current user domain domain', function(done) {
+      this.helpers.api.loginAsUser(app, user.emails[0], password, (err, requestAsMember) => {
+        expect(err).to.not.exist;
+        requestAsMember(request(app).get('/api/groups'))
+          .expect(200)
+          .end((err, res) => {
             expect(err).to.not.exist;
-            expect(res.body.length).to.equal(2);
-            expect(res.body[0].email).to.equal(group2.email);
-            expect(res.body[1].email).to.equal(group1.email);
+            expect(res.body).to.have.length(2);
+            expect(_.find(res.body, { id: createdGroup1.id })).to.exist;
+            expect(_.find(res.body, { id: createdGroup2.id })).to.exist;
             done();
           });
-        });
-      })
-      .catch(done);
+      });
     });
-  });
 
-  describe('GET /groups?email=', () => {
-    it('should return 200 with a group matching email query', function(done) {
-      const group1 = {
-        name: 'group1',
-        email: 'group1@lngr.com',
-        members: []
-      };
-      const group2 = {
-        name: 'group2',
-        email: 'group2@lngr.com',
-        members: []
-      };
-
-      q.all([lib.group.create(group1), lib.group.create(group2)])
-        .then(createdGroups => {
-          this.helpers.api.loginAsUser(app, user.emails[0], password, (err, requestAsMember) => {
-            if (err) {
-              return done(err);
-            }
-            const req = requestAsMember(request(app).get(`/api/groups?email=${group2.email}`));
-
-            req.expect(200);
-            req.end((err, res) => {
+    describe('GET /groups?email=', () => {
+      it('should return 200 with a group matching email query', function(done) {
+        this.helpers.api.loginAsUser(app, user.emails[0], password, (err, requestAsMember) => {
+          expect(err).to.not.exist;
+          requestAsMember(request(app).get(`/api/groups?email=${createdGroup1.email}`))
+            .expect(200)
+            .end((err, res) => {
               expect(err).to.not.exist;
               expect(res.body.length).to.equal(1);
-              expect(res.body[0]).to.shallowDeepEqual(Object.assign({ id: String(createdGroups[1]._id) }, group2));
+              expect(res.body[0]).to.shallowDeepEqual({ id: createdGroup1.id });
               done();
             });
-          });
-        })
-        .catch(done);
+        });
+      });
     });
   });
 
