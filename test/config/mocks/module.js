@@ -61,3 +61,7 @@ angular.module('linagora.esn.contact', [])
     return {};
   });
 angular.module('esn.infinite-list', []);
+angular.module('esn.scroll', [])
+  .factory('elementScrollService', function() {
+    return {};
+  });
