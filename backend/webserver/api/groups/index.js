@@ -28,8 +28,8 @@ module.exports = function(dependencies, lib, router) {
     authorizationMW.requiresAPILogin,
     domainMW.loadDomainByHostname,
     helperMW.checkIdInParams('id', MODEL_NAME),
-    middleware.canGet,
     middleware.load,
+    middleware.canGet,
     controller.get
   );
 
@@ -37,9 +37,9 @@ module.exports = function(dependencies, lib, router) {
     authorizationMW.requiresAPILogin,
     domainMW.loadDomainByHostname,
     helperMW.checkIdInParams('id', MODEL_NAME),
-    middleware.canUpdate,
     middleware.validateNameAndEmail,
     middleware.load,
+    middleware.canUpdate,
     controller.update
   );
 
@@ -47,6 +47,7 @@ module.exports = function(dependencies, lib, router) {
     authorizationMW.requiresAPILogin,
     domainMW.loadDomainByHostname,
     helperMW.checkIdInParams('id', MODEL_NAME),
+    middleware.load,
     middleware.canDelete,
     controller.deleteGroup
   );
@@ -55,8 +56,8 @@ module.exports = function(dependencies, lib, router) {
     authorizationMW.requiresAPILogin,
     domainMW.loadDomainByHostname,
     helperMW.checkIdInParams('id', MODEL_NAME),
-    middleware.canGet,
     middleware.load,
+    middleware.canGet,
     controller.getMembers
   );
 };

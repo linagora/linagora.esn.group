@@ -3,16 +3,14 @@
 const request = require('supertest');
 const expect = require('chai').expect;
 const path = require('path');
+const ObjectId = require('mongoose').Types.ObjectId;
+
 const MODULE_NAME = 'linagora.esn.group';
 
-describe('POST /groups/:id', () => {
-  let app, deployOptions, user, lib;
+describe('The update group API: POST /groups/:id', () => {
+  let app, deployOptions, lib;
+  let adminUser, regularUser, domain, group;
   const password = 'secret';
-  const group = {
-    name: 'example',
-    email: 'example@lngr.org',
-    members: []
-  };
 
   beforeEach(function(done) {
     this.helpers.modules.initMidway(MODULE_NAME, err => {
@@ -34,10 +32,21 @@ describe('POST /groups/:id', () => {
         if (err) {
           return done(err);
         }
-        user = models.users[0];
+        adminUser = models.users[0];
+        regularUser = models.users[1];
+        domain = models.domain;
         lib = this.helpers.modules.current.lib.lib;
 
-        done();
+        lib.group.create({
+            name: 'example',
+            email: 'example@lngr.org',
+            domain_ids: [domain.id]
+          })
+          .then(createdGroup => {
+            group = createdGroup;
+            done();
+          })
+          .catch(done);
       });
     });
   });
@@ -51,7 +60,7 @@ describe('POST /groups/:id', () => {
   });
 
   it('should return 404 if group not found', function(done) {
-    this.helpers.api.loginAsUser(app, user.emails[0], password, (err, requestAsMember) => {
+    this.helpers.api.loginAsUser(app, adminUser.emails[0], password, (err, requestAsMember) => {
       if (err) {
         return done(err);
       }
@@ -68,42 +77,90 @@ describe('POST /groups/:id', () => {
   });
 
   it('should return 400 if no name and email given', function(done) {
-    lib.group.create(group)
-      .then(created => this.helpers.api.loginAsUser(app, user.emails[0], password, (err, requestAsMember) => {
-        if (err) {
-          return done(err);
-        }
-        const req = requestAsMember(request(app).post(`/api/groups/${String(created._id)}`));
+    this.helpers.api.loginAsUser(app, adminUser.emails[0], password, (err, requestAsMember) => {
+      if (err) {
+        return done(err);
+      }
+      const req = requestAsMember(request(app).post(`/api/groups/${group.id}`));
 
-        req.expect(400);
-        req.send({});
-        req.end((err, res) => {
-          expect(err).to.not.exist;
-          expect(res.body.error.details).to.equal('Invalid request body');
+      req.expect(400);
+      req.send({});
+      req.end((err, res) => {
+        expect(err).to.not.exist;
+        expect(res.body.error.details).to.equal('Invalid request body');
 
-          done();
-        });
-      }))
-      .catch(done);
+        done();
+      });
+    });
   });
 
   it('should return 400 if email is not valid', function(done) {
-    lib.group.create(group)
-      .then(created => this.helpers.api.loginAsUser(app, user.emails[0], password, (err, requestAsMember) => {
-        if (err) {
-          return done(err);
-        }
-        const req = requestAsMember(request(app).post(`/api/groups/${String(created._id)}`));
+    this.helpers.api.loginAsUser(app, adminUser.emails[0], password, (err, requestAsMember) => {
+      if (err) {
+        return done(err);
+      }
+      const req = requestAsMember(request(app).post(`/api/groups/${group.id}`));
 
-        req.expect(400);
-        req.send({ email: 'invalid' });
-        req.end((err, res) => {
+      req.expect(400);
+      req.send({ email: 'invalid' });
+      req.end((err, res) => {
+        expect(err).to.not.exist;
+        expect(res.body.error.details).to.equal('Invalid email address');
+
+        done();
+      });
+    });
+  });
+
+  it('should respond 403 if the logged in user does not have permission to update group (not a domain admin)', function(done) {
+    const body = {
+      name: 'updated',
+      email: 'success@here.now'
+    };
+
+    this.helpers.api.loginAsUser(app, regularUser.emails[0], password, (err, requestAsMember) => {
+      expect(err).to.not.exist;
+      requestAsMember(request(app).post(`/api/groups/${group.id}`).send(body))
+        .expect(403)
+        .end((err, res) => {
           expect(err).to.not.exist;
-          expect(res.body.error.details).to.equal('Invalid email address');
-
+          expect(res.body).to.deep.equal({
+            error: { code: 403, message: 'Forbidden', details: 'User is not the domain manager' }
+          });
           done();
         });
-      }))
+    });
+  });
+
+  it('should respond 403 if the logged in user does not have permission to get group members (group belongs to another domain)', function(done) {
+    const body = {
+      name: 'updated',
+      email: 'success@here.now'
+    };
+
+    lib.group.create({
+        name: 'Other Group',
+        domain_ids: [new ObjectId()],
+        email: 'example@abc.com'
+      })
+      .then(createdGroup => {
+        this.helpers.api.loginAsUser(app, adminUser.emails[0], password, (err, requestAsMember) => {
+          expect(err).to.not.exist;
+          requestAsMember(request(app).post(`/api/groups/${createdGroup.id}`).send(body))
+            .expect(403)
+            .end((err, res) => {
+              expect(err).to.not.exist;
+              expect(res.body).to.deep.equal({
+                error: {
+                  code: 403,
+                  message: 'Forbidden',
+                  details: `You do not have permission to perfom action on this group: ${createdGroup.id}`
+                }
+              });
+              done();
+            });
+        });
+      })
       .catch(done);
   });
 
@@ -113,22 +170,20 @@ describe('POST /groups/:id', () => {
       email: 'success@here.now'
     };
 
-    lib.group.create(group)
-      .then(created => this.helpers.api.loginAsUser(app, user.emails[0], password, (err, requestAsMember) => {
-        if (err) {
-          return done(err);
-        }
-        const req = requestAsMember(request(app).post(`/api/groups/${String(created._id)}`));
+    this.helpers.api.loginAsUser(app, adminUser.emails[0], password, (err, requestAsMember) => {
+      if (err) {
+        return done(err);
+      }
+      const req = requestAsMember(request(app).post(`/api/groups/${group.id}`));
 
-        req.expect(200);
-        req.send(updatedGroup);
-        req.end((err, res) => {
-          expect(err).to.not.exist;
-          expect(res.body).to.shallowDeepEqual(updatedGroup);
+      req.expect(200);
+      req.send(updatedGroup);
+      req.end((err, res) => {
+        expect(err).to.not.exist;
+        expect(res.body).to.shallowDeepEqual(updatedGroup);
 
-          done();
-        });
-      }))
-      .catch(done);
+        done();
+      });
+    });
   });
 });

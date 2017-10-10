@@ -6,6 +6,7 @@ module.exports = dependencies => {
   return {
     send500Error,
     send404Error,
+    send403Error,
     send400Error
   };
 
@@ -26,6 +27,15 @@ module.exports = dependencies => {
       error: {
         code: 404,
         message: 'Not Found',
+        details
+      }
+    });
+  }
+  function send403Error(details, res) {
+    return res.status(403).json({
+      error: {
+        code: 403,
+        message: 'Forbidden',
         details
       }
     });
