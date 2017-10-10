@@ -90,10 +90,15 @@ module.exports = function(dependencies, lib) {
   }
 
   function update(req, res) {
-    const options = {
-      name: req.body.name,
-      email: req.body.email
-    };
+    const options = {};
+
+    if (req.body.name) {
+      options.name = req.body.name;
+    }
+
+    if (req.body.email) {
+      options.email = req.body.email;
+    }
 
     lib.group.updateById(req.group._id, options)
       .then(denormalize)
