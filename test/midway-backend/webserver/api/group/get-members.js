@@ -3,10 +3,13 @@
 const request = require('supertest');
 const expect = require('chai').expect;
 const path = require('path');
+const ObjectId = require('mongoose').Types.ObjectId;
+
 const MODULE_NAME = 'linagora.esn.group';
 
-describe('GET /groups/:id/members', () => {
-  let app, deployOptions, user, lib, group, createdGroup;
+describe('The get group members API: GET /groups/:id/members', () => {
+  let app, deployOptions, lib;
+  let adminUser, regularUser, domain, group;
   const password = 'secret';
 
   beforeEach(function(done) {
@@ -29,27 +32,33 @@ describe('GET /groups/:id/members', () => {
         if (err) {
           return done(err);
         }
-        user = models.users[0];
+        adminUser = models.users[0];
+        regularUser = models.users[1];
+        domain = models.domain;
         lib = this.helpers.modules.current.lib.lib;
-        group = {
-          name: 'Group',
-          email: 'example@lngr.com',
-          members: [
-            {
-              member: {
-                id: 'outsider@external.org',
-                objectType: 'email'
+        lib.group.create({
+            name: 'Group',
+            email: 'example@lngr.com',
+            domain_ids: [domain.id],
+            members: [
+              {
+                member: {
+                  id: 'outsider@external.org',
+                  objectType: 'email'
+                }
+              }, {
+                member: {
+                  id: adminUser.id,
+                  objectType: 'user'
+                }
               }
-            }, {
-              member: {
-                id: String(user._id),
-                objectType: 'user'
-              }
-            }
-          ]
-        };
-
-        done();
+            ]
+          })
+          .then(createdGroup => {
+            group = createdGroup;
+            done();
+          })
+          .catch(done);
       });
     });
   });
@@ -58,47 +67,78 @@ describe('GET /groups/:id/members', () => {
     this.helpers.mongo.dropDatabase(done);
   });
 
-  beforeEach(function(done) {
-    lib.group.create(group)
-      .then(group => {
-        createdGroup = group;
-        done();
+  it('should respond 401 if not logged in', function(done) {
+    this.helpers.api.requireLogin(app, 'get', `/api/groups/${group.id}/members`, done);
+  });
+
+  it('should respond 404 if group is not found', function(done) {
+    this.helpers.api.loginAsUser(app, adminUser.emails[0], password, (err, requestAsMember) => {
+      if (err) {
+        return done(err);
+      }
+      requestAsMember(request(app).get(`/api/groups/${new ObjectId()}/members`))
+        .expect(404)
+        .end((err, res) => {
+          expect(err).to.not.exist;
+          expect(res.body.error.details).to.equal('Group not found');
+          done();
+        });
+    });
+  });
+
+  it('should respond 403 if the logged in user does not have permission to get group members (not a domain admin)', function(done) {
+    this.helpers.api.loginAsUser(app, regularUser.emails[0], password, (err, requestAsMember) => {
+      expect(err).to.not.exist;
+      requestAsMember(request(app).get(`/api/groups/${group.id}/members`))
+        .expect(403)
+        .end((err, res) => {
+          expect(err).to.not.exist;
+          expect(res.body).to.deep.equal({
+            error: { code: 403, message: 'Forbidden', details: 'User is not the domain manager' }
+          });
+          done();
+        });
+    });
+  });
+
+  it('should respond 403 if the logged in user does not have permission to get group members (group belongs to another domain)', function(done) {
+    lib.group.create({
+        name: 'Other Group',
+        domain_ids: [new ObjectId()],
+        email: 'example@abc.com'
+      })
+      .then(createdGroup => {
+        this.helpers.api.loginAsUser(app, adminUser.emails[0], password, (err, requestAsMember) => {
+          expect(err).to.not.exist;
+          requestAsMember(request(app).get(`/api/groups/${createdGroup.id}/members`))
+            .expect(403)
+            .end((err, res) => {
+              expect(err).to.not.exist;
+              expect(res.body).to.deep.equal({
+                error: {
+                  code: 403,
+                  message: 'Forbidden',
+                  details: `You do not have permission to perfom action on this group: ${createdGroup.id}`
+                }
+              });
+              done();
+            });
+        });
       })
       .catch(done);
   });
 
-  it('should respond 401 if not logged in', function(done) {
-    this.helpers.api.requireLogin(app, 'get', `/api/groups/${createdGroup.id}/members`, done);
-  });
-
-  it('should respond 404 if group is not found', function(done) {
-    this.helpers.api.loginAsUser(app, user.emails[0], password, (err, requestAsMember) => {
-      if (err) {
-        return done(err);
-      }
-      const req = requestAsMember(request(app).get('/api/groups/invalid/members'));
-
-      req.expect(404);
-      req.end((err, res) => {
-        expect(err).to.not.exist;
-        expect(res.body.error.details).to.equal('Group not found');
-
-        done();
-      });
-    });
-  });
-
   it('should respond 200 with member list', function(done) {
-    this.helpers.api.loginAsUser(app, user.emails[0], password, (err, requestAsMember) => {
+    this.helpers.api.loginAsUser(app, adminUser.emails[0], password, (err, requestAsMember) => {
       if (err) {
         return done(err);
       }
 
-      requestAsMember(request(app).get(`/api/groups/${createdGroup.id}/members`))
+      requestAsMember(request(app).get(`/api/groups/${group.id}/members`))
         .expect(200)
         .end((err, res) => {
           expect(err).to.not.exist;
-          expect(res.body).to.have.length(createdGroup.members.length);
+          expect(res.body).to.have.length(group.members.length);
           done();
         });
     });
