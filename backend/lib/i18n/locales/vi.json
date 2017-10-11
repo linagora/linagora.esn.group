@@ -1,5 +1,6 @@
 {
   "Groups": "Nhóm",
+  "Group": "Nhóm",
   "No group": "Không có nhóm",
   "member(s)": "thành viên",
   "Information": "Thông tin",
@@ -14,7 +15,13 @@
   "Email": "Thư điện tử",
   "Members": "Thành viên",
   "Creating group...": "Đang tạo nhóm...",
-  "Group created": "Đã tạo nhóm",
+  "Group created": "Tạo nhóm thành công",
   "Failed to create group": "Tạo nhóm thất bại",
-  "Type a name or email...": "Nhập tên người dùng hoặc email..."
+  "Type a name or email...": "Nhập tên người dùng hoặc email...",
+  "Save": "Lưu",
+  "Close": "Đóng",
+  "Edit group information": "Sửa thông tin nhóm",
+  "Updating group...": "Đang sửa nhóm...",
+  "Group updated": "Sửa nhóm thành công",
+  "Failed to update group": "Sửa nhóm thất bại"
 }
