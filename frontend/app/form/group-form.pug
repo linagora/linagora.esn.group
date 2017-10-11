@@ -6,8 +6,8 @@ ng-form(name="form")
     .col-md-6
       esn-form-group(label=__('Email'))
         input.form-control(type="email", ng-model="$ctrl.group.email", name="groupEmail", required)
-  .row
+  .row(ng-if="!$ctrl.updateMode")
     .col-xs-6
       h5 #{__('Members')}
-  .row
+  .row(ng-if="!$ctrl.updateMode")
     group-member-auto-complete(new-members="$ctrl.newMembers")
