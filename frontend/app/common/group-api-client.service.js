@@ -9,6 +9,7 @@
       create: create,
       get: get,
       list: list,
+      update: update,
       getMembers: getMembers
     };
 
@@ -37,6 +38,16 @@
      */
     function list(options) {
       return groupRestangular.all('groups').getList(options);
+    }
+
+    /**
+     * Update a group
+     * @param  {String} groupId    - The group ID
+     * @param  {Object} updateData - The update object, possible attributes are email and name
+     * @return {Promise}           - Resolve response with updated group
+     */
+    function update(groupId, updateData) {
+      return groupRestangular.one('groups', groupId).customPOST(updateData);
     }
 
     /**
