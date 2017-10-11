@@ -3,9 +3,8 @@
 const emailAddresses = require('email-addresses');
 const composableMW = require('composable-middleware');
 
-module.exports = dependencies => {
+module.exports = (dependencies, lib) => {
   const authorizationMW = dependencies('authorizationMW');
-  const { getById } = require('../../../lib/group')(dependencies);
   const {
     send400Error,
     send403Error,
@@ -20,11 +19,12 @@ module.exports = dependencies => {
     canGet,
     canUpdate,
     load,
-    validateNameAndEmail
+    validateGroupCreation,
+    validateGroupUpdate
   };
 
   function load(req, res, next) {
-    getById(req.params.id)
+    lib.group.getById(req.params.id)
       .then(group => {
         if (group) {
           req.group = group;
@@ -36,16 +36,61 @@ module.exports = dependencies => {
       .catch(err => send500Error('Unable to load group', err, res));
   }
 
-  function validateNameAndEmail(req, res, next) {
-    if (!req.body.name && !req.body.email) {
-      return send400Error('Invalid request body', res);
+  function validateGroupUpdate(req, res, next) {
+    const { name, email } = req.body;
+
+    if (!name && !email) {
+      return send400Error('body must contain at least one of these fields: email, name', res);
     }
 
-    if (emailAddresses.parseOneAddress(req.body.email) === null) {
-      return send400Error('Invalid email address', res);
+    if (!email) {
+      return next();
     }
 
-    next();
+    if (emailAddresses.parseOneAddress(email) === null) {
+      return send400Error('email is not a valid email address', res);
+    }
+
+    lib.group.list({ email })
+      .then(groups => {
+        if (groups.length === 1 && groups[0].email === req.group.email || !groups.length) {
+          return next();
+        }
+
+        send400Error('email is used by another group', res);
+      })
+      .catch(err => send500Error('Unable to validate email', err, res));
+  }
+
+  function validateGroupCreation(req, res, next) {
+    const { name, email, members } = req.body;
+
+    if (!name) {
+      return send400Error('name is required', res);
+    }
+
+    if (!email) {
+      return send400Error('email is required', res);
+    }
+
+    if (emailAddresses.parseOneAddress(email) === null) {
+      return send400Error('email is not a valid email address', res);
+    }
+
+    if (members && !Array.isArray(members)) {
+      return send400Error('members must be an array', res);
+    }
+
+    lib.group.list({ email })
+      .then(groups => {
+        if (groups.length) {
+          return send400Error('email is used by another group', res);
+        }
+        req.body.members = [...new Set(members)].filter(member => emailAddresses.parseOneAddress(member) !== null);
+
+        next();
+      })
+      .catch(err => send500Error('Unable to validate email', err, res));
   }
 
   function canCreate(req, res, next) {

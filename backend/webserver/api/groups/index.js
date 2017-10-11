@@ -8,12 +8,13 @@ module.exports = function(dependencies, lib, router) {
   const domainMW = dependencies('domainMW');
   const helperMW = dependencies('helperMW');
   const controller = require('./controller')(dependencies, lib);
-  const middleware = require('./middleware')(dependencies);
+  const middleware = require('./middleware')(dependencies, lib);
 
   router.post('/groups',
     authorizationMW.requiresAPILogin,
     domainMW.loadDomainByHostname,
     middleware.canCreate,
+    middleware.validateGroupCreation,
     controller.create
   );
 
@@ -37,9 +38,9 @@ module.exports = function(dependencies, lib, router) {
     authorizationMW.requiresAPILogin,
     domainMW.loadDomainByHostname,
     helperMW.checkIdInParams('id', MODEL_NAME),
-    middleware.validateNameAndEmail,
     middleware.load,
     middleware.canUpdate,
+    middleware.validateGroupUpdate,
     controller.update
   );
 
