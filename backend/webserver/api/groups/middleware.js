@@ -19,11 +19,11 @@ module.exports = (dependencies, lib) => {
     canList,
     canGet,
     canUpdate,
-    canRemoveMembers,
+    canUpdateMembers,
     load,
     validateGroupCreation,
     validateGroupUpdate,
-    validateRemoveMembers
+    validateMembers
   };
 
   function load(req, res, next) {
@@ -125,7 +125,7 @@ module.exports = (dependencies, lib) => {
     )(req, res, next);
   }
 
-  function canRemoveMembers(req, res, next) {
+  function canUpdateMembers(req, res, next) {
     return canUpdate(req, res, next);
   }
 
@@ -137,7 +137,7 @@ module.exports = (dependencies, lib) => {
     }
   }
 
-  function validateRemoveMembers(req, res, next) {
+  function validateMembers(req, res, next) {
     const hasInvalidTuple = req.body.some(tuple => {
       if (!tuple) {
         return true;

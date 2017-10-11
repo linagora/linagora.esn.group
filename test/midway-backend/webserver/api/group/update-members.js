@@ -7,7 +7,7 @@ const ObjectId = require('mongoose').Types.ObjectId;
 
 const MODULE_NAME = 'linagora.esn.group';
 
-describe('The remove group members API: POST /groups/:id/members/remove', () => {
+describe('The update group members API: POST /groups/:id/members', () => {
   let app, deployOptions, lib;
   let adminUser, regularUser, domain, group;
   const password = 'secret';
@@ -68,7 +68,20 @@ describe('The remove group members API: POST /groups/:id/members/remove', () => 
   });
 
   it('should respond 401 if not logged in', function(done) {
-    this.helpers.api.requireLogin(app, 'post', `/api/groups/${group.id}/members/remove`, done);
+    this.helpers.api.requireLogin(app, 'post', `/api/groups/${group.id}/members`, done);
+  });
+
+  it('should return 400 if given action on member is not supported', function(done) {
+    this.helpers.api.loginAsUser(app, adminUser.emails[0], password, (err, requestAsMember) => {
+      expect(err).to.not.exist;
+      requestAsMember(request(app).post(`/api/groups/${group.id}/members?action=invalid`).send([]))
+        .expect(400)
+        .end((err, res) => {
+          expect(err).to.not.exist;
+          expect(res.body.error.details).to.equal('invalid is not a valid action on members (add, remove)');
+          done();
+        });
+    });
   });
 
   it('should respond 400 if the body is not an array', function(done) {
@@ -76,7 +89,7 @@ describe('The remove group members API: POST /groups/:id/members/remove', () => 
 
     this.helpers.api.loginAsUser(app, adminUser.emails[0], password, (err, requestAsMember) => {
       expect(err).to.not.exist;
-      requestAsMember(request(app).post(`/api/groups/${group.id}/members/remove`).send(body))
+      requestAsMember(request(app).post(`/api/groups/${group.id}/members?action=add`).send(body))
         .expect(400)
         .end((err, res) => {
           expect(err).to.not.exist;
@@ -91,7 +104,7 @@ describe('The remove group members API: POST /groups/:id/members/remove', () => 
 
     this.helpers.api.loginAsUser(app, adminUser.emails[0], password, (err, requestAsMember) => {
       expect(err).to.not.exist;
-      requestAsMember(request(app).post(`/api/groups/${group.id}/members/remove`).send(body))
+      requestAsMember(request(app).post(`/api/groups/${group.id}/members?action=add`).send(body))
         .expect(400)
         .end((err, res) => {
           expect(err).to.not.exist;
@@ -106,7 +119,7 @@ describe('The remove group members API: POST /groups/:id/members/remove', () => 
 
     this.helpers.api.loginAsUser(app, adminUser.emails[0], password, (err, requestAsMember) => {
       expect(err).to.not.exist;
-      requestAsMember(request(app).post(`/api/groups/${new ObjectId()}/members/remove`).send(body))
+      requestAsMember(request(app).post(`/api/groups/${new ObjectId()}/members?action=remove`).send(body))
         .expect(404)
         .end((err, res) => {
           expect(err).to.not.exist;
@@ -121,7 +134,7 @@ describe('The remove group members API: POST /groups/:id/members/remove', () => 
 
     this.helpers.api.loginAsUser(app, regularUser.emails[0], password, (err, requestAsMember) => {
       expect(err).to.not.exist;
-      requestAsMember(request(app).post(`/api/groups/${group.id}/members/remove`).send(body))
+      requestAsMember(request(app).post(`/api/groups/${group.id}/members?action=add`).send(body))
         .expect(403)
         .end((err, res) => {
           expect(err).to.not.exist;
@@ -144,7 +157,7 @@ describe('The remove group members API: POST /groups/:id/members/remove', () => 
       .then(createdGroup => {
         this.helpers.api.loginAsUser(app, adminUser.emails[0], password, (err, requestAsMember) => {
           expect(err).to.not.exist;
-          requestAsMember(request(app).post(`/api/groups/${createdGroup.id}/members/remove`).send(body))
+          requestAsMember(request(app).post(`/api/groups/${createdGroup.id}/members?action=add`).send(body))
             .expect(403)
             .end((err, res) => {
               expect(err).to.not.exist;
@@ -162,49 +175,80 @@ describe('The remove group members API: POST /groups/:id/members/remove', () => 
       .catch(done);
   });
 
-  it('should respond 204 on success (remove external member)', function(done) {
-    const body = [
-      { objectType: 'email', id: 'outsider@external.org' }
-    ];
+  describe('The remove members API: POST /groups/:id/members?action=remove', function() {
+    it('should respond 204 on success (remove external member)', function(done) {
+      const body = [
+        { objectType: 'email', id: 'outsider@external.org' }
+      ];
 
-    this.helpers.api.loginAsUser(app, adminUser.emails[0], password, (err, requestAsMember) => {
-      expect(err).to.not.exist;
-      requestAsMember(request(app).post(`/api/groups/${group.id}/members/remove`).send(body))
-        .expect(204)
-        .end(err => {
-          expect(err).to.not.exist;
+      this.helpers.api.loginAsUser(app, adminUser.emails[0], password, (err, requestAsMember) => {
+        expect(err).to.not.exist;
+        requestAsMember(request(app).post(`/api/groups/${group.id}/members?action=remove`).send(body))
+          .expect(204)
+          .end(err => {
+            expect(err).to.not.exist;
 
-          lib.group.getById(group.id)
-            .then(group => {
-              expect(group.members).to.have.length(1);
-              expect(group.members[0].member).to.shallowDeepEqual({ objectType: 'user', id: adminUser._id });
-              done();
-            })
-            .catch(err => done(err || 'should resolve'));
-        });
+            lib.group.getById(group.id)
+              .then(group => {
+                expect(group.members).to.have.length(1);
+                expect(group.members[0].member).to.shallowDeepEqual({ objectType: 'user', id: adminUser._id });
+                done();
+              })
+              .catch(err => done(err || 'should resolve'));
+          });
+      });
+    });
+
+    it('should respond 204 on success (remove internal member)', function(done) {
+      const body = [
+        { objectType: 'user', id: adminUser.id }
+      ];
+
+      this.helpers.api.loginAsUser(app, adminUser.emails[0], password, (err, requestAsMember) => {
+        expect(err).to.not.exist;
+        requestAsMember(request(app).post(`/api/groups/${group.id}/members?action=remove`).send(body))
+          .expect(204)
+          .end(err => {
+            expect(err).to.not.exist;
+
+            lib.group.getById(group.id)
+              .then(group => {
+                expect(group.members).to.have.length(1);
+                expect(group.members[0].member).to.deep.equal({ objectType: 'email', id: 'outsider@external.org' });
+                done();
+              })
+              .catch(err => done(err || 'should resolve'));
+          });
+      });
     });
   });
 
-  it('should respond 204 on success (remove internal member)', function(done) {
-    const body = [
-      { objectType: 'user', id: adminUser.id }
-    ];
+  describe('The add members API: POST /api/groups/:id/members?action=add', function() {
+    it('should return 200 with updated group', function(done) {
+      const members = [
+        { id: regularUser.id, objectType: 'user' }
+      ];
 
-    this.helpers.api.loginAsUser(app, adminUser.emails[0], password, (err, requestAsMember) => {
-      expect(err).to.not.exist;
-      requestAsMember(request(app).post(`/api/groups/${group.id}/members/remove`).send(body))
-        .expect(204)
-        .end(err => {
+      this.helpers.api.loginAsUser(app, adminUser.emails[0], password, (err, requestAsMember) => {
+        expect(err).to.not.exist;
+        const req = requestAsMember(request(app).post(`/api/groups/${group.id}/members?action=add`));
+
+        req.expect(200);
+        req.send(members);
+        req.end((err, res) => {
           expect(err).to.not.exist;
+          expect(res.body.members.length).equal(3);
+          expect(res.body.members[2]).to.shallowDeepEqual({
+            member: {
+              id: regularUser.id,
+              objectType: 'user'
+            },
+            status: 'joined'
+          });
 
-          lib.group.getById(group.id)
-            .then(group => {
-              expect(group.members).to.have.length(1);
-              expect(group.members[0].member).to.deep.equal({ objectType: 'email', id: 'outsider@external.org' });
-              done();
-            })
-            .catch(err => done(err || 'should resolve'));
+          done();
         });
+      });
     });
   });
 });

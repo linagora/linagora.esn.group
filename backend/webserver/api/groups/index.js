@@ -62,14 +62,15 @@ module.exports = function(dependencies, lib, router) {
     controller.getMembers
   );
 
-  router.post('/groups/:id/members/remove',
+  router.post('/groups/:id/members',
     authorizationMW.requiresAPILogin,
     domainMW.loadDomainByHostname,
     helperMW.checkIdInParams('id', MODEL_NAME),
+    helperMW.requireInQuery('action'),
     helperMW.requireBodyAsArray,
-    middleware.validateRemoveMembers,
+    middleware.validateMembers,
     middleware.load,
-    middleware.canRemoveMembers,
-    controller.removeMembers
+    middleware.canUpdateMembers,
+    controller.updateMembers
   );
 };
