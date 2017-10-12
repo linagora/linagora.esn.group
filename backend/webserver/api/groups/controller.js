@@ -16,6 +16,7 @@ module.exports = function(dependencies, lib) {
     list,
     get,
     getMembers,
+    removeMembers,
     update
   };
 
@@ -87,6 +88,16 @@ module.exports = function(dependencies, lib) {
         res.status(200).json(members);
       })
       .catch(err => send500Error('Unable to list group members', err, res));
+  }
+
+  function removeMembers(req, res) {
+    const members = req.body;
+
+    q.denodeify(coreCollaboration.member.removeMembers)(req.group, members)
+      .then(() => {
+        res.status(204).end();
+      })
+      .catch(err => send500Error('Unable to remove members', err, res));
   }
 
   function update(req, res) {
