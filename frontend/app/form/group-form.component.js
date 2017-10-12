@@ -7,7 +7,8 @@
     templateUrl: '/group/app/form/group-form.html',
     bindings: {
       group: '=',
-      newMembers: '='
+      newMembers: '=',
+      updateMode: '@'
     }
   });
 })(angular);

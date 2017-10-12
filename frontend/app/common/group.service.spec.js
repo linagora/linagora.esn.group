@@ -78,6 +78,46 @@ describe('The groupService', function() {
     });
   });
 
+  describe('The update function', function() {
+    it('should reject promise when group.id is missing', function(done) {
+      var group = {};
+
+      groupService.update(group).catch(function(err) {
+        expect(err.message).to.equal('group.id is required');
+        done();
+      });
+
+      $rootScope.$digest();
+    });
+
+    it('should call groupApiClient to update group', function() {
+      var group = { id: 123, name: 'my group', email: 'mygroup@email.com' };
+
+      groupApiClient.update = sinon.stub().returns($q.when({}));
+      groupService.update(group);
+      $rootScope.$digest();
+
+      expect(groupApiClient.update).to.have.been.calledWith(group.id, sinon.match({
+        name: group.name,
+        email: group.email
+      }));
+    });
+
+    it('should broadcast event with updated group on success', function() {
+      var group = { id: 123, name: 'my group', email: 'mygroup@email.com' };
+      var response = {
+        data: { name: 'updated group' }
+      };
+
+      groupApiClient.update = sinon.stub().returns($q.when(response));
+      $rootScope.$broadcast = sinon.spy();
+      groupService.update(group);
+      $rootScope.$digest();
+
+      expect($rootScope.$broadcast).to.have.been.calledWith(GROUP_EVENTS.GROUP_UPDATED, response.data);
+    });
+  });
+
   describe('The searchMemberCandidates function', function() {
     var users, contacts;
     var domainSearchMembersProviderMock;

@@ -48,6 +48,22 @@ describe('The groupApiClient service', function() {
     });
   });
 
+  describe('The update fn', function() {
+    it('should POST to right endpoint to udpate', function() {
+      var groupId = '123';
+      var updateData = {
+        name: 'My group',
+        email: 'mygroup@email.com'
+      };
+
+      $httpBackend.expectPOST('/group/api/groups/' + groupId, updateData).respond(200, []);
+
+      groupApiClient.update(groupId, updateData);
+
+      $httpBackend.flush();
+    });
+  });
+
   describe('The getMembers fn', function() {
     it('should GET to right endpoint to get group members', function() {
       var groupId = '123';

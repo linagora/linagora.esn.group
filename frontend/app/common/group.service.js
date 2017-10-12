@@ -20,6 +20,7 @@
 
     return {
       create: create,
+      update: update,
       searchMemberCandidates: searchMemberCandidates
     };
 
@@ -38,6 +39,28 @@
         return groupApiClient.create(group);
       }).then(function(response) {
         $rootScope.$broadcast(GROUP_EVENTS.GROUP_CREATED, response.data);
+      });
+    }
+
+    function update(group) {
+      if (!group || !group.id) {
+        return $q.reject(new Error('group.id is required'));
+      }
+
+      var notificationMessages = {
+        progressing: 'Updating group...',
+        success: 'Group updated',
+        failure: 'Failed to update group'
+      };
+      var updateData = {
+        name: group.name,
+        email: group.email
+      };
+
+      return asyncAction(notificationMessages, function() {
+        return groupApiClient.update(group.id, updateData);
+      }).then(function(response) {
+        $rootScope.$broadcast(GROUP_EVENTS.GROUP_UPDATED, response.data);
       });
     }
 
