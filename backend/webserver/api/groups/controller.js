@@ -8,7 +8,7 @@ module.exports = function(dependencies, lib) {
   const coreTuple = dependencies('tuple');
   const coreCollaboration = dependencies('collaboration');
   const { denormalize, denormalizeMember } = require('./denormalize')(dependencies);
-  const { send500Error } = require('../utils')(dependencies);
+  const { send500Error, send400Error } = require('../utils')(dependencies);
 
   return {
     create,
@@ -16,8 +16,8 @@ module.exports = function(dependencies, lib) {
     list,
     get,
     getMembers,
-    removeMembers,
-    update
+    update,
+    updateMembers
   };
 
   function create(req, res) {
@@ -90,16 +90,6 @@ module.exports = function(dependencies, lib) {
       .catch(err => send500Error('Unable to list group members', err, res));
   }
 
-  function removeMembers(req, res) {
-    const members = req.body;
-
-    q.denodeify(coreCollaboration.member.removeMembers)(req.group, members)
-      .then(() => {
-        res.status(204).end();
-      })
-      .catch(err => send500Error('Unable to remove members', err, res));
-  }
-
   function update(req, res) {
     const options = {};
 
@@ -121,5 +111,24 @@ module.exports = function(dependencies, lib) {
     lib.group.deleteById(req.params.id)
       .then(() => res.status(204).end())
       .catch(err => send500Error('Unable to delete group', err, res));
+  }
+
+  function updateMembers(req, res) {
+    const members = req.body;
+
+    if (req.query.action === 'remove') {
+      return q.denodeify(coreCollaboration.member.removeMembers)(req.group, members)
+        .then(() => res.status(204).end())
+        .catch(err => send500Error('Unable to remove members', err, res));
+    }
+
+    if (req.query.action === 'add') {
+      return q.denodeify(coreCollaboration.member.addMembers)(req.group, members)
+        .then(denormalize)
+        .then(denormalized => res.status(200).json(denormalized))
+        .catch(err => send500Error('Unable to add members', err, res));
+    }
+
+    send400Error(`${req.query.action} is not a valid action on members (add, remove)`, res);
   }
 };
