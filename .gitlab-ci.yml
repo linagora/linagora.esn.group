@@ -12,6 +12,7 @@ test:
     - mongo
     - elasticsearch
     - redis
+    - online.net
   script:
     - npm i
     - npm update

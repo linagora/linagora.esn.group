@@ -5,6 +5,7 @@ const composableMW = require('composable-middleware');
 
 module.exports = (dependencies, lib) => {
   const authorizationMW = dependencies('authorizationMW');
+  const coreTuple = dependencies('tuple');
   const {
     send400Error,
     send403Error,
@@ -18,9 +19,11 @@ module.exports = (dependencies, lib) => {
     canList,
     canGet,
     canUpdate,
+    canRemoveMembers,
     load,
     validateGroupCreation,
-    validateGroupUpdate
+    validateGroupUpdate,
+    validateRemoveMembers
   };
 
   function load(req, res, next) {
@@ -122,12 +125,36 @@ module.exports = (dependencies, lib) => {
     )(req, res, next);
   }
 
+  function canRemoveMembers(req, res, next) {
+    return canUpdate(req, res, next);
+  }
+
   function ensureGroupBoundedToDomain(req, res, next) {
     if (isGroupBoundedToDomain(req.group, req.domain)) {
       next();
     } else {
       send403Error(`You do not have permission to perfom action on this group: ${req.group.id}`, res);
     }
+  }
+
+  function validateRemoveMembers(req, res, next) {
+    const hasInvalidTuple = req.body.some(tuple => {
+      if (!tuple) {
+        return true;
+      }
+
+      try {
+        return !coreTuple.get(tuple.objectType, tuple.id);
+      } catch (err) {
+        return true;
+      }
+    });
+
+    if (hasInvalidTuple) {
+      return send400Error('body must be an array of valid member tuples {objectType, id}', res);
+    }
+
+    next();
   }
 };
 
