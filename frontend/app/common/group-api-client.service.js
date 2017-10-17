@@ -10,7 +10,8 @@
       get: get,
       list: list,
       update: update,
-      getMembers: getMembers
+      getMembers: getMembers,
+      removeMembers: removeMembers
     };
 
     /**
@@ -58,6 +59,16 @@
      */
     function getMembers(groupId, options) {
       return groupRestangular.one('groups', groupId).all('members').getList(options);
+    }
+
+    /**
+     * Remove multiple group members
+     * @param  {String} groupId                   - The group ID
+     * @param  {Array<{objectType, id}>} members  - An array of group member tuples to be removed
+     * @return {Promise}                          - Resolve on success
+     */
+    function removeMembers(groupId, members) {
+      return groupRestangular.one('groups', groupId).post('members', members, { action: 'remove' });
     }
   }
 })(angular);
