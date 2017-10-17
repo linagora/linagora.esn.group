@@ -5,6 +5,7 @@
 
   .constant('GROUP_EVENTS', {
     GROUP_CREATED: 'group:created',
-    GROUP_UPDATED: 'group:updated'
+    GROUP_UPDATED: 'group:updated',
+    GROUP_MEMBERS_REMOVED: 'group:members:removed'
   });
 })(angular);

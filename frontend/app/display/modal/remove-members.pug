@@ -1,0 +1,12 @@
+.modal(tabindex="-1", role="dialog")
+  .modal-dialog
+    .modal-content
+      .modal-header
+        h4.modal-title #{__('Remove members?')}
+      .modal-body
+        p #{__('This action will remove %s selected members from current group.', '{{$ctrl.getNumberOfSelectedItems()}}')}
+      .modal-footer
+        button.btn.btn-link(ng-click="$hide()")
+          | #{__('Cancel')}
+        button.btn.btn-primary(ng-click="$ctrl.removeSelectedMembers(); $hide()")
+          | #{__('Remove')}

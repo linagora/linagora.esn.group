@@ -23,5 +23,12 @@
   "Edit group information": "Edit group information",
   "Updating group...": "Updating group...",
   "Group updated": "Group updated",
-  "Failed to update group": "Failed to update group"
+  "Failed to update group": "Failed to update group",
+  "Remove": "Remove",
+  "%s selected": "%s selected",
+  "Remove members?": "Remove members?",
+  "This action will remove %s selected members from current group.": "This action will remove %s selected members from current group.",
+  "Removing %s members...": "Removing %s members...",
+  "Removed %s members": "Removed %s members",
+  "Failed to remove members": "Failed to remove members"
 }

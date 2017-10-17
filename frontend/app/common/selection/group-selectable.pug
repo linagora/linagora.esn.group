@@ -1,0 +1,5 @@
+.group-selectable(desktop-hover="hovering = hover", ng-click="toggle($event)")
+  ng-transclude(ng-hide="hovering || item.selected")
+  label.checkbox(ng-show="hovering || item.selected")
+    input(type='checkbox', ng-model="item.selected")
+    i.input-helper

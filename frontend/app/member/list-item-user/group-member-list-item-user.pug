@@ -1,1 +1,9 @@
-member-display(member="::$ctrl.user")
+.member-container
+  .pull-left.p-r-15
+    group-selectable(item="$ctrl.member")
+      esn-avatar(user-id="::$ctrl.member.member._id")
+  .media-body(ui-sref="profile({user_id: $ctrl.member.member._id})")
+    .lv-title
+      h4.media-heading {{::$ctrl.member.member.firstname}} {{::$ctrl.member.member.lastname}}
+      span
+        a(ng-href='mailto:{{::$ctrl.member.member.emails[0]}}', op-inbox-compose) {{::$ctrl.member.member.emails[0]}}

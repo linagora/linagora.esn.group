@@ -118,6 +118,43 @@ describe('The groupService', function() {
     });
   });
 
+  describe('The removeMembers function', function() {
+    it('should call groupApiClient to remove group members', function() {
+      var groupId = '123';
+      var members = [{
+        objectType: 'user',
+        id: '456'
+      }, {
+        objectType: 'email',
+        id: 'my@email.com'
+      }];
+
+      groupApiClient.removeMembers = sinon.stub().returns($q.when());
+      groupService.removeMembers(groupId, members);
+      $rootScope.$digest();
+
+      expect(groupApiClient.removeMembers).to.have.been.calledWith(groupId, members);
+    });
+
+    it('should broadcast event with removed members on success', function() {
+      var groupId = '123';
+      var members = [{
+        objectType: 'user',
+        id: '456'
+      }, {
+        objectType: 'email',
+        id: 'my@email.com'
+      }];
+
+      groupApiClient.removeMembers = sinon.stub().returns($q.when());
+      $rootScope.$broadcast = sinon.spy();
+      groupService.removeMembers(groupId, members);
+      $rootScope.$digest();
+
+      expect($rootScope.$broadcast).to.have.been.calledWith(GROUP_EVENTS.GROUP_MEMBERS_REMOVED, members);
+    });
+  });
+
   describe('The searchMemberCandidates function', function() {
     var users, contacts;
     var domainSearchMembersProviderMock;

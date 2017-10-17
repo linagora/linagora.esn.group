@@ -1,6 +1,7 @@
 .pull-left.p-r-15
-  esn-avatar(user-email="::$ctrl.email")
+  group-selectable(item="$ctrl.member")
+    esn-avatar(user-email="::$ctrl.member.member")
 .media-body
   .lv-title
     span
-      a(ng-href='mailto:{{::$ctrl.email}}', op-inbox-compose) {{::$ctrl.email}}
+      a(ng-href='mailto:{{::$ctrl.member.member}}', op-inbox-compose) {{::$ctrl.member.member}}

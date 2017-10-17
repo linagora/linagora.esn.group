@@ -23,5 +23,12 @@
   "Edit group information": "Modifier les informations du groupe",
   "Updating group...": "Mise à jour du groupe...",
   "Group updated": "Groupe mis à jour",
-  "Failed to update group": "Impossible de mettre à jour le groupe"
+  "Failed to update group": "Impossible de mettre à jour le groupe",
+  "Remove": "Retirer",
+  "%s selected": "%s sélectionnés",
+  "Remove members?": "Supprimer des membres?",
+  "This action will remove %s selected members from current group.": "Cette action supprimera %s membres sélectionnés du groupe actuel",
+  "Removing %s members...": "Suppression de 2 membres...",
+  "Removed %s members": "Suppression de %s membres",
+  "Failed to remove members": "Impossible de supprimer des membres"
 }

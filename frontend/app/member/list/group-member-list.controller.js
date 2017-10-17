@@ -4,7 +4,13 @@
   angular.module('linagora.esn.group')
     .controller('GroupMemberListController', GroupMemberListController);
 
-  function GroupMemberListController(infiniteScrollHelper, groupApiClient) {
+  function GroupMemberListController(
+    $scope,
+    _,
+    infiniteScrollHelper,
+    groupApiClient,
+    GROUP_EVENTS
+  ) {
     var self = this;
     var DEFAULT_LIMIT = 20;
 
@@ -17,6 +23,15 @@
 
     function $onInit() {
       self.loadMoreElements = infiniteScrollHelper(self, _loadNextItems);
+      $scope.$on(GROUP_EVENTS.GROUP_MEMBERS_REMOVED, function(event, data) {
+        _onMembersRemoved(data);
+      });
+    }
+
+    function _onMembersRemoved(members) {
+      members.forEach(function(member) {
+        _.remove(self.elements, member);
+      });
     }
 
     function _loadNextItems() {
