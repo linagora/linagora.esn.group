@@ -1,6 +1,7 @@
 'use strict';
 
 const q = require('q');
+const _ = require('lodash');
 const { OBJECT_TYPE } = require('../../../lib/constants');
 
 module.exports = function(dependencies, lib) {
@@ -123,12 +124,50 @@ module.exports = function(dependencies, lib) {
     }
 
     if (req.query.action === 'add') {
-      return q.denodeify(coreCollaboration.member.addMembers)(req.group, members)
-        .then(denormalize)
-        .then(denormalized => res.status(200).json(denormalized))
+      const membersBefore = Array.from(req.group.members);
+
+      return q.all(members.map(verifyAddingMember))
+        .then(members => members.filter(Boolean))
+        .then(members => q.denodeify(coreCollaboration.member.addMembers)(req.group, members))
+        .then(updatedGroup => _.difference(updatedGroup.members, membersBefore))
+        .then(addedMembers => q.all(addedMembers.map(fetchMember)))
+        .then(members => res.status(200).json(members))
         .catch(err => send500Error('Unable to add members', err, res));
     }
 
     send400Error(`${req.query.action} is not a valid action on members (add, remove)`, res);
+  }
+
+  function fetchMember(member) {
+    return q.ninvoke(coreCollaboration.member, 'fetchMember', member.member)
+      .then(fetched => {
+        member.id = member.member.id;
+        member.objectType = member.member.objectType;
+        member.member = fetched;
+
+        return denormalizeMember(member);
+      });
+  }
+
+  function verifyAddingMember(member) {
+    if (member.objectType === 'user') {
+      return q.ninvoke(coreUser, 'get', member.id)
+        .then(user => {
+          if (user) {
+            return member;
+          }
+        });
+    }
+
+    if (member.objectType === 'email') {
+      return q.ninvoke(coreUser, 'findByEmail', member.id)
+        .then(user => {
+          if (user) {
+            return coreTuple.user(user.id);
+          }
+
+          return member;
+        });
+    }
   }
 };

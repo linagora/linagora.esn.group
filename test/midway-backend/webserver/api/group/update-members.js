@@ -224,9 +224,12 @@ describe('The update group members API: POST /groups/:id/members', () => {
   });
 
   describe('The add members API: POST /api/groups/:id/members?action=add', function() {
-    it('should return 200 with updated group', function(done) {
+    it('should return 200 without members which are invalid user or already existing member', function(done) {
       const members = [
-        { id: regularUser.id, objectType: 'user' }
+        { id: new ObjectId(), objectType: 'user'},
+        { id: adminUser.id, objectType: 'user'},
+        { id: adminUser.preferredEmail, objectType: 'email'},
+        { id: 'outsider@external.org', objectType: 'email' }
       ];
 
       this.helpers.api.loginAsUser(app, adminUser.emails[0], password, (err, requestAsMember) => {
@@ -237,15 +240,37 @@ describe('The update group members API: POST /groups/:id/members', () => {
         req.send(members);
         req.end((err, res) => {
           expect(err).to.not.exist;
-          expect(res.body.members.length).equal(3);
-          expect(res.body.members[2]).to.shallowDeepEqual({
-            member: {
-              id: regularUser.id,
-              objectType: 'user'
-            },
-            status: 'joined'
-          });
+          expect(res.body.length).equal(0);
+          done();
+        });
+      });
+    });
 
+    it('should return 200 with resolved added members', function(done) {
+      const members = [
+        { id: regularUser.preferredEmail, objectType: 'email'},
+        { id: 'test@email.com', objectType: 'email'}
+      ];
+
+      this.helpers.api.loginAsUser(app, adminUser.emails[0], password, (err, requestAsMember) => {
+        expect(err).to.not.exist;
+        const req = requestAsMember(request(app).post(`/api/groups/${group.id}/members?action=add`));
+
+        req.expect(200);
+        req.send(members);
+        req.end((err, res) => {
+          expect(err).to.not.exist;
+          expect(res.body.length).equal(2);
+          expect(res.body[0]).to.shallowDeepEqual({
+            objectType: 'user',
+            member: {
+              id: regularUser.id
+            }
+          });
+          expect(res.body[1]).to.shallowDeepEqual({
+            objectType: 'email',
+            member: 'test@email.com'
+          });
           done();
         });
       });
