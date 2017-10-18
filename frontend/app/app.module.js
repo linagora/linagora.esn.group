@@ -12,8 +12,6 @@
     'esn.core',
     'esn.async-action',
     'esn.session',
-    'esn.domain',
-    'linagora.esn.contact',
     'esn.attendee',
     'esn.scroll',
     'esn.ui',

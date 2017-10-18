@@ -8,18 +8,17 @@
     $rootScope,
     $q,
     _,
+    attendeeService,
     esnI18nService,
     asyncAction,
     session,
     groupApiClient,
-    domainSearchMembersProvider,
-    ContactAttendeeProvider,
-    ESN_ATTENDEE_DEFAULT_TEMPLATE_URL,
     GROUP_EVENTS
   ) {
     var MEMBER_SEARCH_LIMIT = 20;
 
     return {
+      addMembers: addMembers,
       create: create,
       update: update,
       removeMembers: removeMembers,
@@ -80,34 +79,42 @@
       });
     }
 
-    function searchMemberCandidates(query) {
-      var searchProviders = [domainSearchMembersProvider.get(session.domain._id), ContactAttendeeProvider];
+    function addMembers(group, members) {
+      if (!group || !group.id) {
+        return $q.reject(new Error('group.id is required'));
+      }
 
-      return $q.all(searchProviders.map(function(provider) {
-        provider.templateUrl = provider.templateUrl || ESN_ATTENDEE_DEFAULT_TEMPLATE_URL;
+      var notificationMessages = {
+        progressing: 'Adding members...',
+        success: esnI18nService.translate('Added %s members', members.length),
+        failure: 'Failed to add members'
+      };
 
-        return provider.searchAttendee(query, MEMBER_SEARCH_LIMIT)
-          .then(function(attendees) {
-            return attendees.map(function(attendee) {
-              return angular.extend(attendee, { templateUrl: provider.templateUrl });
-            });
-          });
-      }))
-      .then(function(arrays) {
-        return arrays.reduce(function(resultArray, currentArray) {
-          return resultArray.concat(currentArray);
-        }, []);
-      })
-      .then(function(candidates) {
-        return candidates.map(function(candidate) {
-          return candidate.email ? candidate : null;
-        }).filter(Boolean);
-      })
-      .then(function(candidates) {
-        return _.uniq(candidates, false, function(candidate) {
-          return candidate.email;
-        });
+      return asyncAction(notificationMessages, function() {
+        return groupApiClient.addMembers(group.id, members);
+      }).then(function(response) {
+        $rootScope.$broadcast(GROUP_EVENTS.GROUP_MEMBERS_ADDED, response.data);
       });
+    }
+
+    function searchMemberCandidates(query, ignoreMembers) {
+      return attendeeService.getAttendeeCandidates(query, MEMBER_SEARCH_LIMIT, ['user', 'contact'])
+        .then(function(candidates) {
+          return candidates.filter(function(candidate) {
+            return candidate.email;
+          });
+        })
+        .then(function(candidates) {
+          if (ignoreMembers) {
+            return candidates.filter(function(candidate) {
+              return !_.any(ignoreMembers, function(ignore) {
+                return ignore.member.id === candidate.id || ignore.member.id === candidate.email;
+              });
+            });
+          }
+
+          return candidates;
+        });
     }
   }
 })(angular);

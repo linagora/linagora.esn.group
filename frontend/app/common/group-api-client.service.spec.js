@@ -98,4 +98,20 @@ describe('The groupApiClient service', function() {
       $httpBackend.flush();
     });
   });
+
+  describe('The addMembers fn', function() {
+    it('should POST to right endpoint to update', function() {
+      var groupId = '123';
+      var membersList = [
+        { id: '2222', objectType: 'user' },
+        { id: 'email@example.com', objectType: 'email' }
+      ];
+
+      $httpBackend.expectPOST('/group/api/groups/' + groupId + '/members?action=add', membersList).respond(200, []);
+
+      groupApiClient.addMembers(groupId, membersList);
+
+      $httpBackend.flush();
+    });
+  });
 });

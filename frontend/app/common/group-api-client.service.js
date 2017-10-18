@@ -6,6 +6,7 @@
 
   function groupApiClient(groupRestangular) {
     return {
+      addMembers: addMembers,
       create: create,
       get: get,
       list: list,
@@ -69,6 +70,16 @@
      */
     function removeMembers(groupId, members) {
       return groupRestangular.one('groups', groupId).post('members', members, { action: 'remove' });
+    }
+
+    /**
+     * Add members to group
+     * @param {String} groupId                   The group ID
+     * @param {Array<{objectType, id}>} members  An array of member tuples which will be added to group
+     * @return {Promise}                         Resolve response with updated group
+     */
+    function addMembers(groupId, members) {
+      return groupRestangular.one('groups', groupId).post('members', members, { action: 'add' });
     }
   }
 })(angular);

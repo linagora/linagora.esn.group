@@ -60,4 +60,21 @@ describe('The GroupMemberListController', function() {
 
     expect(controller.elements).to.deep.equal([]);
   });
+
+  it('should add members to infiniteScroll elements list on MEMBERS_ADDED event', function() {
+    var ctrl = initController();
+    var members = [
+      { id: 'member1', objectType: 'user', member: {} },
+      { id: 'member2', objectType: 'user', member: {} }
+    ];
+
+    ctrl.elements = [];
+
+    $rootScope.$broadcast(GROUP_EVENTS.GROUP_MEMBERS_ADDED, members);
+    $rootScope.$digest();
+
+    expect(ctrl.elements.length).to.equal(2);
+    expect(ctrl.elements).to.include(members[0]);
+    expect(ctrl.elements).to.include(members[1]);
+  });
 });

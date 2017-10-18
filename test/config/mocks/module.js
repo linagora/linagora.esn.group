@@ -14,13 +14,6 @@ angular.module('esn.router', ['ui.router'])
     };
   });
 angular.module('esn.session', []);
-angular.module('esn.domain', [])
-  .factory('domainAPI', function() {
-    return {};
-  })
-  .service('domainSearchMembersProvider', function() {
-    return {};
-  });
 angular.module('esn.form.helper', []);
 angular.module('esn.i18n', [])
   .factory('esnI18nService', function() {
@@ -48,14 +41,11 @@ angular.module('esn.async-action', [])
 angular.module('esn.core', [])
   .constant('_', _);
 angular.module('esn.attendee', [])
-  .constant('ESN_ATTENDEE_DEFAULT_TEMPLATE_URL', '');
-angular.module('esn.domain', [])
-  .service('domainSearchMembersProvider', function() {
-    return {};
-  });
-angular.module('linagora.esn.contact', [])
-  .factory('ContactAttendeeProvider', function() {
-    return {};
+  .constant('ESN_ATTENDEE_DEFAULT_TEMPLATE_URL', '')
+  .factory('attendeeService', function() {
+    return {
+      getAttendeeCandidates: function() {}
+    };
   });
 angular.module('esn.infinite-list', []);
 angular.module('esn.scroll', [])

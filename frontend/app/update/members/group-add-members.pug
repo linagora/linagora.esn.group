@@ -1,0 +1,15 @@
+.modal
+  form(name="form", ng-submit="$ctrl.addMembers(); $hide()")
+    .modal-dialog
+      .modal-content
+        .modal-header
+          button.close(type="button", data-dismiss="modal", aria-label=__('Close'), ng-click="$hide()")
+            span(aria-hidden="true") &times;
+          h4.modal-title #{__('Add members')}
+        group-member-auto-complete(new-members="$ctrl.newMembers", ignore-members="$ctrl.group.members")
+        .modal-footer.flex
+          .flex-vertical-centered.flex-end
+            button.btn.btn-link(type="button", ng-click="$hide()")
+              | #{__('Cancel')}
+            button.btn.btn-primary(type="submit", ng-disabled="form.$invalid || form.$pristine")
+              | #{__('Add')}

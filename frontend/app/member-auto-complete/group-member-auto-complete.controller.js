@@ -7,7 +7,9 @@
   function GroupMemberAutoCompleteController($element, elementScrollService, groupService, _) {
     var self = this;
 
-    self.search = groupService.searchMemberCandidates;
+    self.search = function(query) {
+      return groupService.searchMemberCandidates(query, self.ignoreMembers);
+    };
 
     self.onTagAdding = function($tag) {
       return !_isDuplicatedMember($tag, self.newMembers);

@@ -26,11 +26,20 @@
       $scope.$on(GROUP_EVENTS.GROUP_MEMBERS_REMOVED, function(event, data) {
         _onMembersRemoved(data);
       });
+      $scope.$on(GROUP_EVENTS.GROUP_MEMBERS_ADDED, function(event, data) {
+        _onMembersAdded(data);
+      });
     }
 
     function _onMembersRemoved(members) {
       members.forEach(function(member) {
         _.remove(self.elements, member);
+      });
+    }
+
+    function _onMembersAdded(members) {
+      members.forEach(function(member) {
+        self.elements.unshift(member);
       });
     }
 

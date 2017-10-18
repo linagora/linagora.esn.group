@@ -13,7 +13,9 @@ describe('The groupDisplay component', function() {
   beforeEach(function() {
     module('jadeTemplates');
     angular.mock.module('linagora.esn.group', function($provide) {
-      $provide.value('infiniteScrollHelper', angular.noop);
+      $provide.value('infiniteScrollHelper', function(scope) {
+        scope.elements = scope.elements || [];
+      });
       $provide.value('$modal', sinon.spy());
     });
   });
@@ -117,5 +119,41 @@ describe('The groupDisplay component', function() {
     $rootScope.$digest();
 
     expect(element.find('.members h2').html()).to.contain('Members (0)');
+  });
+
+  it('should open add members dialog when add button is clicked', function() {
+    var element = initComponent();
+
+    element.find('[ng-click="$ctrl.onAddMembersBtnClick()"]').click();
+
+    expect($modal).to.have.been.calledWith(sinon.match({
+      templateUrl: '/group/app/update/members/group-add-members.html',
+      controller: 'GroupAddMembersController'
+    }));
+  });
+
+  it('should update the number of members on members added event', function() {
+    var members = [{
+      member: {
+        objectType: 'user',
+        id: 1
+      }
+    }];
+
+    group.members = members;
+
+    var element = initComponent();
+
+    expect(element.find('.members h2').html()).to.contain('Members (1)');
+
+    $rootScope.$broadcast(GROUP_EVENTS.GROUP_MEMBERS_ADDED, [{
+      objectType: 'email',
+      id: 'my@email.com',
+      member: 'my@email.com'
+    }]);
+
+    $rootScope.$digest();
+
+    expect(element.find('.members h2').html()).to.contain('Members (2)');
   });
 });

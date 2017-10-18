@@ -9,7 +9,7 @@ describe('The groupService', function() {
   var $rootScope;
   var GROUP_EVENTS;
   var groupService, groupApiClient;
-  var ContactAttendeeProvider, domainSearchMembersProvider;
+  var attendeeService;
 
   beforeEach(function() {
     module('linagora.esn.group');
@@ -19,15 +19,13 @@ describe('The groupService', function() {
       _groupService_,
       _groupApiClient_,
       _GROUP_EVENTS_,
-      _ContactAttendeeProvider_,
-      _domainSearchMembersProvider_
+      _attendeeService_
     ) {
       $rootScope = _$rootScope_;
       groupApiClient = _groupApiClient_;
       groupService = _groupService_;
       GROUP_EVENTS = _GROUP_EVENTS_;
-      ContactAttendeeProvider = _ContactAttendeeProvider_;
-      domainSearchMembersProvider = _domainSearchMembersProvider_;
+      attendeeService = _attendeeService_;
     });
   });
 
@@ -155,41 +153,77 @@ describe('The groupService', function() {
     });
   });
 
+  describe('The addMembers function', function() {
+    it('should reject promise when group.id is missing', function(done) {
+      var group = {};
+
+      groupService.addMembers(group).catch(function(err) {
+        expect(err.message).to.equal('group.id is required');
+        done();
+      });
+
+      $rootScope.$digest();
+    });
+
+    it('should call groupApiClient to add members', function() {
+      var group = { id: 123};
+      var members = [
+        { id: 'example@email.com', objectType: 'email' }
+      ];
+
+      groupApiClient.addMembers = sinon.stub().returns($q.when({}));
+      groupService.addMembers(group, members);
+      $rootScope.$digest();
+
+      expect(groupApiClient.addMembers).to.have.been.calledWith(group.id, sinon.match(members));
+    });
+
+    it('should broadcast event with added members on success', function() {
+      var group = { id: 123 };
+      var members = [{ id: 'exmaple@email.com', objectType: 'email' }];
+      var response = {
+        data: [
+          {
+            id: 'exmaple@email.com',
+            objectType: 'email',
+            member: 'exmaple@email.com'
+          }
+        ]
+      };
+
+      groupApiClient.addMembers = sinon.stub().returns($q.when(response));
+      $rootScope.$broadcast = sinon.spy();
+      groupService.addMembers(group, members);
+      $rootScope.$digest();
+
+      expect($rootScope.$broadcast).to.have.been.calledWith(GROUP_EVENTS.GROUP_MEMBERS_ADDED, response.data);
+    });
+  });
+
   describe('The searchMemberCandidates function', function() {
-    var users, contacts;
-    var domainSearchMembersProviderMock;
+    var candidates;
     var query, limit;
 
     beforeEach(function() {
-      domainSearchMembersProviderMock = {};
-      users = [
+      candidates = [
         { email: 'user1@domain.com' },
         { email: 'user2@domain.com' },
-        { email: 'user3@domain.com' }
+        { email: 'user3@domain.com' },
+        { id: 'contact1', email: 'contact1@domain.com' },
+        { id: 'contact2', email: 'contact2@domain.com' }
       ];
 
-      contacts = [
-        { email: 'contact1@abc.com' },
-        { email: 'contact2@abc.com' },
-        { email: 'contact3@abc.com' }
-      ];
       query = 'abc';
       limit = 20;
-
-      domainSearchMembersProvider.get = function() {
-        return domainSearchMembersProviderMock;
-      };
     });
 
-    it('should return a list member candidates includes domain users and contacts', function(done) {
-      ContactAttendeeProvider.searchAttendee = sinon.stub().returns($q.when(contacts));
-      domainSearchMembersProviderMock.searchAttendee = sinon.stub().returns($q.when(users));
+    it('should call attendeeService.getAttendeeCandidates with query, limit, user and contact as required objectTypes', function(done) {
+      attendeeService.getAttendeeCandidates = sinon.stub().returns($q.when(candidates));
 
       groupService.searchMemberCandidates(query)
         .then(function(members) {
-          expect(ContactAttendeeProvider.searchAttendee).to.have.been.calledWith(query, limit);
-          expect(domainSearchMembersProviderMock.searchAttendee).to.have.been.calledWith(query, limit);
-          expect(members).to.shallowDeepEqual(users.concat(contacts));
+          expect(attendeeService.getAttendeeCandidates).to.have.been.calledWith(query, limit, ['user', 'contact']);
+          expect(members).to.shallowDeepEqual(candidates);
 
           done();
         });
@@ -197,17 +231,16 @@ describe('The groupService', function() {
       $rootScope.$digest();
     });
 
-    it('should return a list member candidates with unique emails', function(done) {
-      contacts = [users[0]]; // make a contact have the same email with an user.
+    it('should return a list member candidates as email is a required field', function(done) {
+      var newCandidates = candidates.concat({}); //add a new candidate without email field
 
-      ContactAttendeeProvider.searchAttendee = sinon.stub().returns($q.when(contacts));
-      domainSearchMembersProviderMock.searchAttendee = sinon.stub().returns($q.when(users));
+      attendeeService.getAttendeeCandidates = sinon.stub().returns($q.when(newCandidates));
 
       groupService.searchMemberCandidates(query)
         .then(function(members) {
-          expect(ContactAttendeeProvider.searchAttendee).to.have.been.calledWith(query, limit);
-          expect(domainSearchMembersProviderMock.searchAttendee).to.have.been.calledWith(query, limit);
-          expect(members).to.shallowDeepEqual(users);
+          expect(attendeeService.getAttendeeCandidates).to.have.been.calledWith(query, limit, ['user', 'contact']);
+          expect(members.length).to.equal(candidates.length);
+          expect(members).to.shallowDeepEqual(candidates);
 
           done();
         });
@@ -215,19 +248,21 @@ describe('The groupService', function() {
       $rootScope.$digest();
     });
 
-    it('should return a list member candidates with email is require field', function(done) {
-      var realContacts = angular.copy(contacts);
+    it('should return a list of candidates without ignored members', function(done) {
+      var ignoreCandidates = [
+        { member: { id: candidates[2].email, objectTypes: 'email'} },
+        { member: { id: candidates[3].id, objectTypes: 'user' } }
+      ];
 
-      realContacts.push({}); //create a new contact without email field
-      ContactAttendeeProvider.searchAttendee = sinon.stub().returns($q.when(realContacts));
-      domainSearchMembersProviderMock.searchAttendee = sinon.stub().returns($q.when(users));
+      attendeeService.getAttendeeCandidates = sinon.stub().returns($q.when(candidates));
 
-      groupService.searchMemberCandidates(query)
+      groupService.searchMemberCandidates(query, ignoreCandidates)
         .then(function(members) {
-          expect(ContactAttendeeProvider.searchAttendee).to.have.been.calledWith(query, limit);
-          expect(domainSearchMembersProviderMock.searchAttendee).to.have.been.calledWith(query, limit);
-          expect(members).to.shallowDeepEqual(users.concat(contacts));
-
+          expect(attendeeService.getAttendeeCandidates).to.have.been.calledWith(query, limit, ['user', 'contact']);
+          expect(members.length).to.equal(3);
+          expect(members).to.include(candidates[0]);
+          expect(members).to.include(candidates[1]);
+          expect(members).to.include(candidates[4]);
           done();
         });
 

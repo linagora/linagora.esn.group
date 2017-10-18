@@ -20,5 +20,7 @@ sub-header
 .card.fadeIn200ms.members
   .card-header.ch-alt
     h2 #{__('Members')} ({{$ctrl.group.members.length}})
+    button.btn.bgm-blue.btn-float.waves-effect(ng-click="$ctrl.onAddMembersBtnClick()")
+      i.mdi.mdi-plus
   .card-body
     group-member-list(ng-if="$ctrl.group", group="$ctrl.group")

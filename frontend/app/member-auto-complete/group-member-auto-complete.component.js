@@ -7,7 +7,8 @@
     templateUrl: '/group/app/member-auto-complete/group-member-auto-complete.html',
     controller: 'GroupMemberAutoCompleteController',
     bindings: {
-      newMembers: '='
+      newMembers: '=',
+      ignoreMembers: '<'
     }
   });
 })(angular);
