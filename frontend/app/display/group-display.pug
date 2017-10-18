@@ -1,7 +1,7 @@
 sub-header
   group-display-subheader(title="{{$ctrl.group.name}}")
 
-.card.fadeIn200ms
+.card.fadeIn200ms.information
   .card-header.ch-alt
     h2 #{__('Information')}
     ui.actions
@@ -11,11 +11,11 @@ sub-header
   .card-body.card-padding
     dl.dl-horizontal
       dt #{__('Name:')}
-      dd {{$ctrl.group.name}}
+      dd(title="{{$ctrl.group.name}}") {{$ctrl.group.name}}
     dl.dl-horizontal
       dt #{__('Email:')}
       dd
-        a(ng-href='mailto:{{$ctrl.group.email}}', op-inbox-compose) {{$ctrl.group.email}}
+        a(ng-href='mailto:{{$ctrl.group.email}}', op-inbox-compose, title="{{$ctrl.group.email}}") {{$ctrl.group.email}}
 
 .card.fadeIn200ms
   .card-header.ch-alt
