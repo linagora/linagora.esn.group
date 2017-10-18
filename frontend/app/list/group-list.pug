@@ -1,17 +1,16 @@
 sub-header
   group-list-subheader
 
-.row.all-centered
-  .col-md-9.col-xl-8.col-xs-12
-    .card.fadeIn200ms
-      infinite-list(load-more-elements='$ctrl.loadMoreElements()', scroll-inside-container="$ctrl.scrollInsideContainer")
-        .listview.lv-bordered.lv-lg(ng-if="$ctrl.elements.length > 0")
-          .lv-body
-            group-list-item.lv-item.p-0.clickable(group='group', ng-repeat="group in $ctrl.elements", ui-sref="group.display({ groupId: group.id })")
-    .empty-message(ng-if="!$ctrl.elements.length && $ctrl.infiniteScrollCompleted")
-      img(src="/group/images/group-icon.svg")
-      .message
-        | #{__('No group')}
-    div(ng-if='$ctrl.infiniteScrollDisabled')
-      li.text-center(openpaas-logo-spinner, spinner-start-active='1', spinner-size='0.5')
+.card.fadeIn200ms
+  infinite-list(load-more-elements='$ctrl.loadMoreElements()', scroll-inside-container="$ctrl.scrollInsideContainer")
+    .listview.lv-bordered.lv-lg(ng-if="$ctrl.elements.length > 0")
+      .lv-body
+        group-list-item.lv-item.p-0.clickable(group='group', ng-repeat="group in $ctrl.elements", ui-sref="group.display({ groupId: group.id })")
+.empty-message(ng-if="!$ctrl.elements.length && $ctrl.infiniteScrollCompleted")
+  img(src="/group/images/group-icon.svg")
+  .message
+    | #{__('No group')}
+div(ng-if='$ctrl.infiniteScrollDisabled')
+  li.text-center(openpaas-logo-spinner, spinner-start-active='1', spinner-size='0.5')
+
 fab(icon="plus", ng-click="$ctrl.onCreateBtnClick()")

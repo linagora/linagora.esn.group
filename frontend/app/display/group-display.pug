@@ -1,26 +1,24 @@
 sub-header
   group-display-subheader(title="{{$ctrl.group.name}}")
 
-.row.all-centered
-  .col-md-9.col-xl-8.col-xs-12
-    .card.fadeIn200ms
-      .card-header.ch-alt
-        h2 #{__('Information')}
-        ui.actions
-          li
-            a(href="", title=__('Edit group information') ng-click="$ctrl.onEditBtnClick()")
-              i.mdi.mdi-pencil
-      .card-body.card-padding
-        dl.dl-horizontal
-          dt #{__('Name:')}
-          dd {{$ctrl.group.name}}
-        dl.dl-horizontal
-          dt #{__('Email:')}
-          dd 
-            a(ng-href='mailto:{{$ctrl.group.email}}', op-inbox-compose) {{$ctrl.group.email}}
-        
-    .card.fadeIn200ms
-      .card-header.ch-alt
-        h2 #{__('Members')}
-      .card-body
-        group-member-list(ng-if="$ctrl.group", group="$ctrl.group")
+.card.fadeIn200ms
+  .card-header.ch-alt
+    h2 #{__('Information')}
+    ui.actions
+      li
+        a(href="", title=__('Edit group information') ng-click="$ctrl.onEditBtnClick()")
+          i.mdi.mdi-pencil
+  .card-body.card-padding
+    dl.dl-horizontal
+      dt #{__('Name:')}
+      dd {{$ctrl.group.name}}
+    dl.dl-horizontal
+      dt #{__('Email:')}
+      dd
+        a(ng-href='mailto:{{$ctrl.group.email}}', op-inbox-compose) {{$ctrl.group.email}}
+
+.card.fadeIn200ms
+  .card-header.ch-alt
+    h2 #{__('Members')}
+  .card-body
+    group-member-list(ng-if="$ctrl.group", group="$ctrl.group")
