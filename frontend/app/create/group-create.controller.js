@@ -8,6 +8,7 @@
     var self = this;
 
     self.create = create;
+    self.newMembers = [];
 
     function create() {
       self.group.members = _qualifyMembers(self.newMembers);
