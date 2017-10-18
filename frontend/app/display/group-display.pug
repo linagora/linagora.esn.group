@@ -19,6 +19,6 @@ sub-header
 
 .card.fadeIn200ms
   .card-header.ch-alt
-    h2 #{__('Members')}
+    h2 #{__('Members')} ({{$ctrl.group.members.length}})
   .card-body
     group-member-list(ng-if="$ctrl.group", group="$ctrl.group")
