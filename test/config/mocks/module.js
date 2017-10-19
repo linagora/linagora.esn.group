@@ -22,13 +22,10 @@ angular.module('esn.domain', [])
     return {};
   });
 angular.module('esn.form.helper', []);
-angular.module('pascalprecht.translate', [])
-  .provider('$translate', function() {
+angular.module('esn.i18n', [])
+  .factory('esnI18nService', function() {
     return {
-      useSanitizeValueStrategy: angular.noop,
-      preferredLanguage: angular.noop,
-      useStaticFilesLoader: angular.noop,
-      $get: angular.noop
+      translate: angular.noop
     };
   });
 angular.module('esn.http', [])
@@ -65,3 +62,4 @@ angular.module('esn.scroll', [])
   .factory('elementScrollService', function() {
     return {};
   });
+angular.module('esn.ui', []);

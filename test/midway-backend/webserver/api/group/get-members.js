@@ -139,6 +139,15 @@ describe('The get group members API: GET /groups/:id/members', () => {
         .end((err, res) => {
           expect(err).to.not.exist;
           expect(res.body).to.have.length(group.members.length);
+
+          const members = group.members.map(member => ({
+            objectType: member.member.objectType,
+            id: member.member.id,
+            timestamps: {},
+            member: member.member.objectType === 'email' ? member.member.id : {}
+          }));
+
+          expect(res.body).to.shallowDeepEqual(members);
           done();
         });
     });

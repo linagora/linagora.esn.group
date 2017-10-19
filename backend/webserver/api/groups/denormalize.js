@@ -21,6 +21,7 @@ module.exports = dependencies => {
   function denormalizeMember(member) {
     return {
       objectType: member.objectType,
+      id: member.id,
       timestamps: member.timestamps,
       member: memberDenormalize.denormalize(member.objectType, member.member)
     };

@@ -79,4 +79,23 @@ describe('The groupApiClient service', function() {
       $httpBackend.flush();
     });
   });
+
+  describe('The removeMembers fn', function() {
+    it('should POST to right endpoint to remove group members', function() {
+      var groupId = '123';
+      var members = [{
+        objectType: 'user',
+        id: '456'
+      }, {
+        objectType: 'email',
+        id: 'my@email.com'
+      }];
+
+      $httpBackend.expectPOST('/group/api/groups/' + groupId + '/members?action=remove', members).respond(204);
+
+      groupApiClient.removeMembers(groupId, members);
+
+      $httpBackend.flush();
+    });
+  });
 });

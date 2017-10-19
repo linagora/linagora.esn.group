@@ -8,6 +8,7 @@
     $rootScope,
     $q,
     _,
+    esnI18nService,
     asyncAction,
     session,
     groupApiClient,
@@ -21,6 +22,7 @@
     return {
       create: create,
       update: update,
+      removeMembers: removeMembers,
       searchMemberCandidates: searchMemberCandidates
     };
 
@@ -61,6 +63,20 @@
         return groupApiClient.update(group.id, updateData);
       }).then(function(response) {
         $rootScope.$broadcast(GROUP_EVENTS.GROUP_UPDATED, response.data);
+      });
+    }
+
+    function removeMembers(groupId, members) {
+      var notificationMessages = {
+        progressing: esnI18nService.translate('Removing %s members...', members.length),
+        success: esnI18nService.translate('Removed %s members', members.length),
+        failure: 'Failed to remove members'
+      };
+
+      return asyncAction(notificationMessages, function() {
+        return groupApiClient.removeMembers(groupId, members);
+      }).then(function() {
+        $rootScope.$broadcast(GROUP_EVENTS.GROUP_MEMBERS_REMOVED, members);
       });
     }
 

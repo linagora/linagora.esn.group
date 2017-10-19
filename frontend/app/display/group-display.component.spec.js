@@ -93,4 +93,29 @@ describe('The groupDisplay component', function() {
       controller: 'GroupUpdateController'
     }));
   });
+
+  it('should update the number of members on members removed event', function() {
+    var members = [{
+      member: {
+        objectType: 'user',
+        id: 1
+      }
+    }, {
+      member: {
+        objectType: 'email',
+        id: 'my@email.com'
+      }
+    }];
+
+    group.members = members;
+
+    var element = initComponent();
+
+    expect(element.find('.members h2').html()).to.contain('Members (2)');
+
+    $rootScope.$broadcast(GROUP_EVENTS.GROUP_MEMBERS_REMOVED, [members[0].member, members[1].member]);
+    $rootScope.$digest();
+
+    expect(element.find('.members h2').html()).to.contain('Members (0)');
+  });
 });
