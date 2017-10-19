@@ -8,6 +8,7 @@
     $stateParams,
     $modal,
     $scope,
+    _,
     groupApiClient,
     GROUP_EVENTS
   ) {
@@ -24,7 +25,7 @@
           self.group = resp.data;
         });
 
-      listenOnUpdate();
+      initListeners();
     }
 
     function onEditBtnClick() {
@@ -40,9 +41,15 @@
       });
     }
 
-    function listenOnUpdate() {
+    function initListeners() {
       $scope.$on(GROUP_EVENTS.GROUP_UPDATED, function(event, group) {
         self.group = group;
+      });
+
+      $scope.$on(GROUP_EVENTS.GROUP_MEMBERS_REMOVED, function(event, members) {
+        self.group.members = self.group.members.filter(function(member) {
+          return !_.find(members, member.member);
+        });
       });
     }
   }
