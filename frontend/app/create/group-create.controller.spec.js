@@ -33,6 +33,12 @@ describe('The GroupCreateController', function() {
     return controller;
   }
 
+  it('should initialize newMembers with empty array', function() {
+    var controller = initController();
+
+    expect(controller.newMembers).to.deep.equal([]);
+  });
+
   describe('The create function', function() {
     it('should call groupService.create to create group with right members', function() {
       groupService.create = sinon.spy();

@@ -1,15 +1,23 @@
 @import './list/group-list';
 @import './member/member';
 @import './create/group-create';
+@import './display/group-display';
 @import './update/group-update';
 @import './member-auto-complete/group-member-auto-complete';
 
 .group-root {
-  padding-top: 45px;
+  .full-width;
+  .all-centered;
 
   .card {
     .card-header {
       background: @darkenBgColor;
     }
+  }
+}
+
+@media (min-width: @screen-md-min) {
+  .group-root {
+    padding-top: 45px;
   }
 }
