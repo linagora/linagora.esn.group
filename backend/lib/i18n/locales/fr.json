@@ -30,5 +30,10 @@
   "This action will remove %s selected members from current group.": "Cette action supprimera %s membres sélectionnés du groupe actuel",
   "Removing %s members...": "Suppression de 2 membres...",
   "Removed %s members": "Suppression de %s membres",
-  "Failed to remove members": "Impossible de supprimer des membres"
+  "Failed to remove members": "Impossible de supprimer des membres",
+  "Add": "Ajouter",
+  "Add members": "Ajouter de nouveaux membres",
+  "Added %s members": "%s membres ajoutés",
+  "Failed to add members": "Impossible d'ajouter des membres",
+  "Adding members...": "Ajout de membres ..."
 }
