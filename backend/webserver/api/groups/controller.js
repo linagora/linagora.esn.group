@@ -141,6 +141,7 @@ module.exports = function(dependencies, lib) {
   function fetchMember(member) {
     return q.ninvoke(coreCollaboration.member, 'fetchMember', member.member)
       .then(fetched => {
+        member = member.toObject();
         member.id = member.member.id;
         member.objectType = member.member.objectType;
         member.member = fetched;
