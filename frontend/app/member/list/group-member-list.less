@@ -1,5 +1,22 @@
+@import './selection-header/group-member-list-selection-header';
+
 group-member-list {
   .empty-message {
     padding: 20px;
+  }
+
+  & > .card > .card-header {
+    .flex-vertical-centered;
+
+    padding: 0 16px;
+    height: 63px;
+
+    .title {
+      .ellipsis;
+    }
+
+    group-selection-select-all {
+      margin-right: 15px;
+    }
   }
 }

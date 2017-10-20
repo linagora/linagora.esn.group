@@ -25,7 +25,7 @@
   "Group updated": "Sửa nhóm thành công",
   "Failed to update group": "Sửa nhóm thất bại",
   "Remove": "Xóa",
-  "%s selected": "%s mục được chọn",
+  "%s/%s members selected": "%s/%s thành viên đã được chọn",
   "Remove members?": "Xóa thành viên?",
   "This action will remove %s selected members from current group.": "Hành động nãy sẽ xóa %s thành viên đã chọn khỏi nhóm hiện tại.",
   "Removing %s members...": "Đang xóa %s thành viên...",

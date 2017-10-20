@@ -1,9 +1,18 @@
-infinite-list(load-more-elements='$ctrl.loadMoreElements()', scroll-inside-container="$ctrl.scrollInsideContainer")
-  .listview.lv-bordered.lv-lg(ng-if="$ctrl.elements.length > 0")
-    .lv-body
-      .lv-item.p-0(ng-repeat="member in $ctrl.elements")
-        group-member-list-item(member='member')
-  .empty-message(ng-if="!$ctrl.elements.length && $ctrl.infiniteScrollCompleted")
-    | #{__('No member')}
-  div(ng-if='$ctrl.infiniteScrollDisabled')
-    li.text-center(openpaas-logo-spinner, spinner-start-active='1', spinner-size='0.5')
+.card.fadeIn200ms.members
+  .card-header(esn-header-sticky)
+    group-selection-select-all(ng-show="$ctrl.elements.length", items="$ctrl.elements")
+    group-member-list-selection-header(group="$ctrl.group", members="$ctrl.elements", total="$ctrl.group.members.length")
+    div(group-selection-hide-on-selecting)
+      h2.title #{__('Members')} ({{$ctrl.group.members.length}})
+      button.btn.bgm-blue.btn-float.waves-effect(ng-click="$ctrl.onAddMembersBtnClick()")
+        i.mdi.mdi-plus
+  .card-body
+    infinite-list(load-more-elements='$ctrl.loadMoreElements()', scroll-inside-container="$ctrl.scrollInsideContainer")
+      .listview.lv-bordered.lv-lg(ng-if="$ctrl.elements.length > 0")
+        .lv-body
+          .lv-item.p-0(ng-repeat="member in $ctrl.elements")
+            group-member-list-item(member='member')
+      .empty-message(ng-if="!$ctrl.elements.length && $ctrl.infiniteScrollCompleted")
+        | #{__('No member')}
+      div(ng-if='$ctrl.infiniteScrollDisabled')
+        li.text-center(openpaas-logo-spinner, spinner-start-active='1', spinner-size='0.5')

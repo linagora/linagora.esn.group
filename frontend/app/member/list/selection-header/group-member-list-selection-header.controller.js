@@ -2,22 +2,21 @@
   'use strict';
 
   angular.module('linagora.esn.group')
-    .controller('groupDisplaySubheaderController', groupDisplaySubheaderController);
+    .controller('groupMemberListSelectionHeaderController', groupMemberListSelectionHeaderController);
 
-  function groupDisplaySubheaderController(
+  function groupMemberListSelectionHeaderController(
     groupSelectionService,
     groupService
   ) {
     var self = this;
 
-    self.$onDestroy = $onDestroy;
+    self.$onInit = $onInit;
     self.isSelecting = isSelecting;
     self.getNumberOfSelectedItems = getNumberOfSelectedItems;
-    self.unselectAllItems = unselectAllItems;
     self.removeSelectedMembers = removeSelectedMembers;
 
-    function $onDestroy() {
-      groupSelectionService.unselectAllItems();
+    function $onInit() {
+      self.isSelectedAll = false;
     }
 
     function isSelecting() {
@@ -26,10 +25,6 @@
 
     function getNumberOfSelectedItems() {
       return groupSelectionService.getSelectedItems().length;
-    }
-
-    function unselectAllItems() {
-      return groupSelectionService.unselectAllItems();
     }
 
     function removeSelectedMembers() {
@@ -45,4 +40,5 @@
       });
     }
   }
+
 })(angular);
