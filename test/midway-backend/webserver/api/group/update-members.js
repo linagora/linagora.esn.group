@@ -262,12 +262,14 @@ describe('The update group members API: POST /groups/:id/members', () => {
           expect(err).to.not.exist;
           expect(res.body.length).equal(2);
           expect(res.body[0]).to.shallowDeepEqual({
+            id: regularUser.id,
             objectType: 'user',
             member: {
               id: regularUser.id
             }
           });
           expect(res.body[1]).to.shallowDeepEqual({
+            id: 'test@email.com',
             objectType: 'email',
             member: 'test@email.com'
           });
