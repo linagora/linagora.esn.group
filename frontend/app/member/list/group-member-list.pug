@@ -3,7 +3,9 @@
     group-selection-select-all(ng-show="$ctrl.elements.length", items="$ctrl.elements")
     group-member-list-selection-header(group="$ctrl.group", members="$ctrl.elements", total="$ctrl.group.members.length")
     div(group-selection-hide-on-selecting)
-      h2.title #{__('Members')} ({{$ctrl.group.members.length}})
+      h2.title #{__('Members')}
+        span.hidden-md(ng-if="$ctrl.group.members.length") ({{$ctrl.elements.length}}/{{$ctrl.group.members.length}})
+        span.hidden-xs(ng-if="$ctrl.group.members.length") (#{__('showing %s of %s', '{{$ctrl.elements.length}}', '{{$ctrl.group.members.length}}')})
       button.btn.bgm-blue.btn-float.waves-effect(ng-click="$ctrl.onAddMembersBtnClick()")
         i.mdi.mdi-plus
   .card-body

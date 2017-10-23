@@ -35,5 +35,6 @@
   "Add members": "Thêm thành viên",
   "Added %s members": "Đã thêm %s thành viên",
   "Failed to add members": "Thêm thành viên thất bại",
-  "Adding members...": "Đang thêm thành viên"
+  "Adding members...": "Đang thêm thành viên",
+  "showing %s of %s": "hiển thị %s trong số %s"
 }

@@ -35,5 +35,6 @@
   "Add members": "Ajouter de nouveaux membres",
   "Added %s members": "%s membres ajoutés",
   "Failed to add members": "Impossible d'ajouter des membres",
-  "Adding members...": "Ajout de membres ..."
+  "Adding members...": "Ajout de membres ...",
+  "showing %s of %s": "afficher %s de %s"
 }

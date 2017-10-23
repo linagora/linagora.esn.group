@@ -35,5 +35,6 @@
   "Add members": "Add members",
   "Added %s members": "Added %s members",
   "Failed to add members": "Failed to add members",
-  "Adding members...": "Adding members..."
+  "Adding members...": "Adding members...",
+  "showing %s of %s": "showing %s of %s"
 }
