@@ -6,6 +6,7 @@
 
   function GroupMemberListController(
     $scope,
+    $modal,
     _,
     infiniteScrollHelper,
     groupApiClient,
@@ -13,13 +14,13 @@
   ) {
     var self = this;
     var DEFAULT_LIMIT = 20;
-
     var options = {
       offset: 0,
       limit: DEFAULT_LIMIT
     };
 
     self.$onInit = $onInit;
+    self.onAddMembersBtnClick = onAddMembersBtnClick;
 
     function $onInit() {
       self.loadMoreElements = infiniteScrollHelper(self, _loadNextItems);
@@ -28,6 +29,19 @@
       });
       $scope.$on(GROUP_EVENTS.GROUP_MEMBERS_ADDED, function(event, data) {
         _onMembersAdded(data);
+      });
+    }
+
+    function onAddMembersBtnClick() {
+      $modal({
+        templateUrl: '/group/app/update/members/group-add-members.html',
+        backdrop: 'static',
+        placement: 'center',
+        controllerAs: '$ctrl',
+        controller: 'GroupAddMembersController',
+        locals: {
+          group: self.group
+        }
       });
     }
 

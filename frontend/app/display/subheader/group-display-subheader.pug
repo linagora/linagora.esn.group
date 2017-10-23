@@ -1,15 +1,5 @@
 extends /modules/subheader/centered-subheader.pug
 
 block left
-  div.flex-vertical-centered(ng-if="!$ctrl.isSelecting()")
-    group-subheader-back-button
-    span.title.ellipsis {{$ctrl.group.name}}
-  div.flex-vertical-centered(ng-if="$ctrl.isSelecting()")
-    button.btn.btn-link.btn-icon(href='', ng-click="$ctrl.unselectAllItems()", title=__('Cancel'))
-      i.mdi.mdi-close
-    span.title.extra-title.ellipsis #{__('%s selected', '{{ $ctrl.getNumberOfSelectedItems() }}')}
-
-block right
-  div(ng-if="$ctrl.isSelecting()")
-    button.btn.btn-link.btn-icon(esn-modal-launcher="/group/app/display/modal/remove-members.html", title=__('Remove'))
-      i.mdi.mdi-delete
+  group-subheader-back-button
+  span.title.ellipsis {{$ctrl.title}}

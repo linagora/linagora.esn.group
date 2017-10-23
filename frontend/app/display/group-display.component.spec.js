@@ -113,12 +113,12 @@ describe('The groupDisplay component', function() {
 
     var element = initComponent();
 
-    expect(element.find('.members h2').html()).to.contain('Members (2)');
+    expect(element.find('.members h2').html()).to.contain('(showing 0 of 2)');
 
-    $rootScope.$broadcast(GROUP_EVENTS.GROUP_MEMBERS_REMOVED, [members[0].member, members[1].member]);
+    $rootScope.$broadcast(GROUP_EVENTS.GROUP_MEMBERS_REMOVED, [members[0].member]);
     $rootScope.$digest();
 
-    expect(element.find('.members h2').html()).to.contain('Members (0)');
+    expect(element.find('.members h2').html()).to.contain('(showing 0 of 1)');
   });
 
   it('should open add members dialog when add button is clicked', function() {
@@ -144,7 +144,7 @@ describe('The groupDisplay component', function() {
 
     var element = initComponent();
 
-    expect(element.find('.members h2').html()).to.contain('Members (1)');
+    expect(element.find('.members h2').html()).to.contain('(showing 0 of 1)');
 
     $rootScope.$broadcast(GROUP_EVENTS.GROUP_MEMBERS_ADDED, [{
       objectType: 'email',
@@ -154,6 +154,6 @@ describe('The groupDisplay component', function() {
 
     $rootScope.$digest();
 
-    expect(element.find('.members h2').html()).to.contain('Members (2)');
+    expect(element.find('.members h2').html()).to.contain('(showing 1 of 2)');
   });
 });

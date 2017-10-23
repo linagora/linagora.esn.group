@@ -1,5 +1,5 @@
 sub-header
-  group-display-subheader(group="$ctrl.group")
+  group-display-subheader(data-title="$ctrl.group.name")
 
 .card.fadeIn200ms.information
   .card-header.ch-alt
@@ -17,10 +17,4 @@ sub-header
       dd
         a(ng-href='mailto:{{$ctrl.group.email}}', op-inbox-compose, title="{{$ctrl.group.email}}") {{$ctrl.group.email}}
 
-.card.fadeIn200ms.members
-  .card-header.ch-alt
-    h2 #{__('Members')} ({{$ctrl.group.members.length}})
-    button.btn.bgm-blue.btn-float.waves-effect(ng-click="$ctrl.onAddMembersBtnClick()")
-      i.mdi.mdi-plus
-  .card-body
-    group-member-list(ng-if="$ctrl.group", group="$ctrl.group")
+group-member-list(ng-if="$ctrl.group", group="$ctrl.group")

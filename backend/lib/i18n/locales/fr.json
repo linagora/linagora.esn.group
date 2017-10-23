@@ -25,7 +25,7 @@
   "Group updated": "Groupe mis à jour",
   "Failed to update group": "Impossible de mettre à jour le groupe",
   "Remove": "Retirer",
-  "%s selected": "%s sélectionnés",
+  "%s/%s members selected": "%s/%s membres sélectionnés",
   "Remove members?": "Supprimer des membres?",
   "This action will remove %s selected members from current group.": "Cette action supprimera %s membres sélectionnés du groupe actuel",
   "Removing %s members...": "Suppression de 2 membres...",
@@ -35,5 +35,6 @@
   "Add members": "Ajouter de nouveaux membres",
   "Added %s members": "%s membres ajoutés",
   "Failed to add members": "Impossible d'ajouter des membres",
-  "Adding members...": "Ajout de membres ..."
+  "Adding members...": "Ajout de membres ...",
+  "showing %s of %s": "afficher %s de %s"
 }

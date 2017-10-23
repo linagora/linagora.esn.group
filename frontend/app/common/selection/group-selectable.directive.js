@@ -10,8 +10,7 @@
       transclude: true,
       templateUrl: '/group/app/common/selection/group-selectable.html',
       link: function(scope) {
-        scope.toggle = function(event) {
-          event.preventDefault();
+        scope.toggle = function() {
           groupSelectionService.toggleItemSelection(scope.item);
         };
       },

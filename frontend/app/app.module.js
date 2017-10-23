@@ -4,9 +4,9 @@
   var MODULE_NAME = 'linagora.esn.group';
 
   angular.module(MODULE_NAME, [
-    'esn.router',
     'op.dynamicDirective',
     'restangular',
+    'esn.router',
     'esn.http',
     'esn.infinite-list',
     'esn.core',
@@ -15,6 +15,7 @@
     'esn.attendee',
     'esn.scroll',
     'esn.ui',
-    'esn.i18n'
+    'esn.i18n',
+    'esn.header'
   ]);
 })(angular);

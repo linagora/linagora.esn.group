@@ -1,0 +1,8 @@
+.flex-vertical-centered(ng-if="$ctrl.isSelecting()")
+  h2.title
+    | #{__('%s/%s members selected', '{{ $ctrl.getNumberOfSelectedItems() }}', '{{$ctrl.total}}')}
+    
+  ul.actions 
+    li
+      a(href="", esn-modal-launcher="/group/app/member/list/selection-header/modal/remove-members.html", title=__('Remove'))
+        i.mdi.mdi-delete

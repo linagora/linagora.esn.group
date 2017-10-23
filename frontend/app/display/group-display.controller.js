@@ -17,7 +17,6 @@
 
     self.$onInit = $onInit;
     self.onEditBtnClick = onEditBtnClick;
-    self.onAddMembersBtnClick = onAddMembersBtnClick;
 
     function $onInit() {
       groupApiClient
@@ -36,19 +35,6 @@
         placement: 'center',
         controllerAs: '$ctrl',
         controller: 'GroupUpdateController',
-        locals: {
-          group: self.group
-        }
-      });
-    }
-
-    function onAddMembersBtnClick() {
-      $modal({
-        templateUrl: '/group/app/update/members/group-add-members.html',
-        backdrop: 'static',
-        placement: 'center',
-        controllerAs: '$ctrl',
-        controller: 'GroupAddMembersController',
         locals: {
           group: self.group
         }

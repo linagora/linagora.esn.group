@@ -52,4 +52,6 @@ angular.module('esn.scroll', [])
   .factory('elementScrollService', function() {
     return {};
   });
-angular.module('esn.ui', []);
+angular.module('esn.ui', [])
+  .factory('$modal', function() { return {}; });
+angular.module('esn.header', []);
