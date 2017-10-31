@@ -7,6 +7,11 @@ module.exports = {
     USER: 'user',
     EMAIL: 'email'
   },
+  EVENTS: {
+    CREATED: 'group:created',
+    DELETED: 'group:deleted',
+    UPDATED: 'group:updated'
+  },
   DEFAULT_OFFSET: 0,
   DEFAULT_LIMIT: 50
 };

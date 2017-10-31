@@ -1,8 +1,9 @@
 'use strict';
 
-const { DEFAULT_OFFSET, DEFAULT_LIMIT } = require('./constants');
+const { DEFAULT_OFFSET, DEFAULT_LIMIT, EVENTS } = require('./constants');
 
 module.exports = dependencies => {
+  const pubsub = dependencies('pubsub').local;
   const mongoose = dependencies('db').mongo.mongoose;
   const Group = mongoose.model('Group');
 
@@ -15,7 +16,11 @@ module.exports = dependencies => {
   };
 
   function create(group) {
-    return Group.create(group);
+    return Group.create(group).then(created => {
+      pubsub.topic(EVENTS.CREATED).publish(created);
+
+      return created;
+    });
   }
 
   function list(options = {}) {
@@ -38,11 +43,24 @@ module.exports = dependencies => {
   }
 
   function deleteById(groupId) {
-    return Group.remove({ _id: groupId }).exec();
+    return Group.remove({ _id: groupId })
+      .exec()
+      .then(deleted => {
+        if (deleted) {
+          pubsub.topic(EVENTS.DELETED).publish(deleted);
+        }
+
+        return deleted;
+    });
   }
 
   function updateById(groupId, modified) {
-    return Group.findOneAndUpdate({ _id: groupId }, { $set: modified }, { new: true }).exec();
+    return Group.findOneAndUpdate({ _id: groupId }, { $set: modified }, { new: true }).exec()
+      .then(updated => {
+        pubsub.topic(EVENTS.UPDATED).publish(updated);
+
+        return updated;
+      });
   }
 
   function getById(id) {
