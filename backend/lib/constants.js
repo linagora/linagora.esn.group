@@ -14,7 +14,9 @@ module.exports = {
   },
   SEARCH: {
     TYPE_NAME: 'groups',
-    INDEX_NAME: 'groups.idx'
+    INDEX_NAME: 'groups.idx',
+    DEFAULT_SORT_KEY: 'name',
+    DEFAULT_SORT_ORDER: 'desc'
   },
   DEFAULT_OFFSET: 0,
   DEFAULT_LIMIT: 50
