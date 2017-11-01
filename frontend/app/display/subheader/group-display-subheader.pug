@@ -2,4 +2,8 @@ extends /modules/subheader/centered-subheader.pug
 
 block left
   group-subheader-back-button
-  span.title.ellipsis {{$ctrl.title}}
+  span.title.ellipsis {{$ctrl.group.name}}
+
+block right
+  button.btn-link.btn-icon.button(esn-modal-launcher="/group/app/delete/group-delete.html")
+    i.mdi.mdi-delete

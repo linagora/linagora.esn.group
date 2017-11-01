@@ -66,4 +66,19 @@ describe('The GroupListController', function() {
 
     expect(controller.elements).to.deep.equal(expectGroups);
   });
+
+  it('should remove deleted group when a group is deleted group', function() {
+    var testGroup = { id: 'testgroup' };
+
+    groups.push(testGroup);
+
+    var controller = initController();
+
+    expect(controller.elements).to.include(testGroup);
+
+    $scope.$on = sinon.stub();
+    $rootScope.$broadcast(GROUP_EVENTS.GROUP_DELETED, testGroup);
+
+    expect(controller.elements).to.not.include(testGroup);
+  });
 });

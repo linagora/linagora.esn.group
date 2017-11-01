@@ -8,8 +8,10 @@
     $stateParams,
     $modal,
     $scope,
+    $state,
     _,
     groupApiClient,
+    groupService,
     GROUP_EVENTS
   ) {
     var self = this;
@@ -17,6 +19,7 @@
 
     self.$onInit = $onInit;
     self.onEditBtnClick = onEditBtnClick;
+    self.deleteGroup = deleteGroup;
 
     function $onInit() {
       groupApiClient
@@ -26,6 +29,10 @@
         });
 
       initListeners();
+    }
+
+    function deleteGroup() {
+      return groupService.deleteGroup(self.group);
     }
 
     function onEditBtnClick() {
@@ -44,6 +51,10 @@
     function initListeners() {
       $scope.$on(GROUP_EVENTS.GROUP_UPDATED, function(event, group) {
         self.group = group;
+      });
+
+      $scope.$on(GROUP_EVENTS.GROUP_DELETED, function() {
+        $state.go('group.list');
       });
 
       $scope.$on(GROUP_EVENTS.GROUP_MEMBERS_REMOVED, function(event, members) {

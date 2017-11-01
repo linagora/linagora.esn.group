@@ -20,6 +20,7 @@
     return {
       addMembers: addMembers,
       create: create,
+      deleteGroup: deleteGroup,
       update: update,
       removeMembers: removeMembers,
       searchMemberCandidates: searchMemberCandidates
@@ -115,6 +116,24 @@
 
           return candidates;
         });
+    }
+
+    function deleteGroup(group) {
+      if (!group || !group.id) {
+        return $q.reject(new Error('group ID is required'));
+      }
+
+      var notificationMessages = {
+        progressing: 'Deleting group...',
+        success: 'Group deleted',
+        failure: 'Failed to delete group'
+      };
+
+      return asyncAction(notificationMessages, function() {
+        return groupApiClient.deleteGroup(group.id);
+      }).then(function() {
+        $rootScope.$broadcast(GROUP_EVENTS.GROUP_DELETED, group);
+      });
     }
   }
 })(angular);

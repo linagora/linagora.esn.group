@@ -114,4 +114,16 @@ describe('The groupApiClient service', function() {
       $httpBackend.flush();
     });
   });
+
+  describe('The deleteGroup fn', function() {
+    it('should DELETE to right endpoint to delete group', function() {
+      var groupId = '123';
+
+      $httpBackend.expectDELETE('/group/api/groups/' + groupId).respond(204);
+
+      groupApiClient.deleteGroup(groupId);
+
+      $httpBackend.flush();
+    });
+  });
 });

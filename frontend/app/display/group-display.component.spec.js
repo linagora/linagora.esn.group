@@ -6,7 +6,7 @@
 var expect = chai.expect;
 
 describe('The groupDisplay component', function() {
-  var $rootScope, $compile, $q, $modal;
+  var $rootScope, $compile, $q, $modal, $state;
   var groupApiClient, GROUP_EVENTS;
   var group;
 
@@ -25,6 +25,7 @@ describe('The groupDisplay component', function() {
     _$compile_,
     _$q_,
     _$modal_,
+    _$state_,
     _groupApiClient_,
     _GROUP_EVENTS_
   ) {
@@ -32,6 +33,7 @@ describe('The groupDisplay component', function() {
     $compile = _$compile_;
     $q = _$q_;
     $modal = _$modal_;
+    $state = _$state_;
     groupApiClient = _groupApiClient_;
     GROUP_EVENTS = _GROUP_EVENTS_;
   }));
@@ -155,5 +157,16 @@ describe('The groupDisplay component', function() {
     $rootScope.$digest();
 
     expect(element.find('.members h2').html()).to.contain('(showing 1 of 2)');
+  });
+
+  it('should change state to group list when group is successfully deleted', function() {
+    $state.go = sinon.spy();
+
+    initComponent();
+
+    $rootScope.$broadcast(GROUP_EVENTS.GROUP_DELETED, 'deleted');
+    $rootScope.$digest();
+
+    expect($state.go).has.been.calledWith('group.list');
   });
 });

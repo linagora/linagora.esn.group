@@ -36,5 +36,8 @@
   "Added %s members": "%s membres ajoutés",
   "Failed to add members": "Impossible d'ajouter des membres",
   "Adding members...": "Ajout de membres ...",
-  "showing %s of %s": "afficher %s de %s"
+  "showing %s of %s": "afficher %s de %s",
+  "Delete": "Supprimer",
+  "Delete group?": "Supprimer un groupe?",
+  "Group %s will be deleted and the email address of %s will be no longer available": "Le groupe %s sera supprimé et l'adresse e-mail de %s ne sera plus disponible"
 }

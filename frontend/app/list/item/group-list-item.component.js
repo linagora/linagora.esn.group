@@ -6,7 +6,8 @@
   .component('groupListItem', {
     templateUrl: '/group/app/list/item/group-list-item.html',
     bindings: {
-      group: '<'
+      group: '<',
+      onDeleteBtnClick: '&'
     }
   });
 })(angular);

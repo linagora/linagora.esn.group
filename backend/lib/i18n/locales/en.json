@@ -36,5 +36,8 @@
   "Added %s members": "Added %s members",
   "Failed to add members": "Failed to add members",
   "Adding members...": "Adding members...",
-  "showing %s of %s": "showing %s of %s"
+  "showing %s of %s": "showing %s of %s",
+  "Delete": "Delete",
+  "Delete group?": "Delete group?",
+  "Group %s will be deleted and the email address of %s will be no longer available": "Group %s will be deleted and the email address of %s will be no longer available"
 }

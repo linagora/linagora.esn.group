@@ -5,10 +5,12 @@
     .controller('GroupListController', GroupListController);
 
   function GroupListController(
+    _,
     $scope,
     $modal,
     infiniteScrollHelper,
     groupApiClient,
+    groupService,
     GROUP_EVENTS
   ) {
     var self = this;
@@ -23,10 +25,15 @@
 
     function $onInit() {
       self.onCreateBtnClick = onCreateBtnClick;
+      self.deleteGroup = groupService.deleteGroup;
       self.loadMoreElements = infiniteScrollHelper(self, _loadNextItems);
 
       $scope.$on(GROUP_EVENTS.GROUP_CREATED, function(event, group) {
         _onGroupCreated(group);
+      });
+
+      $scope.$on(GROUP_EVENTS.GROUP_DELETED, function(event, data) {
+        _onGroupDeleted(data);
       });
     }
 
@@ -55,6 +62,10 @@
       }
 
       self.elements.unshift(group);
+    }
+
+    function _onGroupDeleted(deletedGroup) {
+      _.remove(self.elements, { id: deletedGroup.id });
     }
   }
 })(angular);

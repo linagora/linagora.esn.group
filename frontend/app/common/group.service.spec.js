@@ -269,4 +269,21 @@ describe('The groupService', function() {
       $rootScope.$digest();
     });
   });
+
+  describe('The deleteGroup function', function() {
+    it('should broadcast event with deleted group Id when group is deleted', function() {
+      var response = { status: 204 };
+      var group = {
+        id: 123,
+        name: 'Group'
+      };
+
+      groupApiClient.deleteGroup = sinon.stub().returns($q.when(response));
+      $rootScope.$broadcast = sinon.spy();
+      groupService.deleteGroup(group);
+      $rootScope.$digest();
+
+      expect($rootScope.$broadcast).to.have.been.calledWith(GROUP_EVENTS.GROUP_DELETED, group);
+    });
+  });
 });
