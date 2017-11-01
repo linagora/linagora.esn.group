@@ -8,6 +8,7 @@
     return {
       addMembers: addMembers,
       create: create,
+      deleteGroup: deleteGroup,
       get: get,
       list: list,
       update: update,
@@ -80,6 +81,15 @@
      */
     function addMembers(groupId, members) {
       return groupRestangular.one('groups', groupId).post('members', members, { action: 'add' });
+    }
+
+    /**
+     * Delete group
+     * @param  {String} groupId  The group ID
+     * @return {Promise}         Resolve on success
+     */
+    function deleteGroup(groupId) {
+      return groupRestangular.one('groups', groupId).remove();
     }
   }
 })(angular);

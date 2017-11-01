@@ -36,5 +36,8 @@
   "Added %s members": "Đã thêm %s thành viên",
   "Failed to add members": "Thêm thành viên thất bại",
   "Adding members...": "Đang thêm thành viên",
-  "showing %s of %s": "hiển thị %s trong số %s"
+  "showing %s of %s": "hiển thị %s trong số %s",
+  "Delete": "Xóa",
+  "Delete group?": "Xóa nhóm?",
+  "Group %s will be deleted and the email address of %s will be no longer available": "Nhóm %s sẽ bị xóa và địa chỉ email sau %s sẽ không thể sử dụng được nữa."
 }

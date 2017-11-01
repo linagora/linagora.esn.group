@@ -5,7 +5,7 @@ sub-header
   infinite-list(load-more-elements='$ctrl.loadMoreElements()', scroll-inside-container="$ctrl.scrollInsideContainer")
     .listview.lv-bordered.lv-lg(ng-if="$ctrl.elements.length > 0")
       .lv-body
-        group-list-item.lv-item.p-0.clickable(group='group', ng-repeat="group in $ctrl.elements", ui-sref="group.display({ groupId: group.id })")
+        group-list-item.lv-item.p-0.clickable(group='group', on-delete-btn-click="$ctrl.deleteGroup(group)", ng-repeat="group in $ctrl.elements")
 .empty-message(ng-if="!$ctrl.elements.length && $ctrl.infiniteScrollCompleted")
   img(src="/group/images/group-icon.svg")
   .message
