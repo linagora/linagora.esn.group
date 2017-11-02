@@ -12,6 +12,10 @@ module.exports = {
     DELETED: 'group:deleted',
     UPDATED: 'group:updated'
   },
+  SEARCH: {
+    TYPE_NAME: 'groups',
+    INDEX_NAME: 'groups.idx'
+  },
   DEFAULT_OFFSET: 0,
   DEFAULT_LIMIT: 50
 };
