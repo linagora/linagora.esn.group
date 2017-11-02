@@ -58,7 +58,7 @@ module.exports = function(dependencies, lib, router) {
     domainMW.loadDomainByHostname,
     helperMW.checkIdInParams('id', MODEL_NAME),
     middleware.load,
-    middleware.canGet,
+    middleware.canGetMembers,
     controller.getMembers
   );
 

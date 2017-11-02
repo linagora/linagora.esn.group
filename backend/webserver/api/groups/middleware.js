@@ -18,6 +18,7 @@ module.exports = (dependencies, lib) => {
     canDelete,
     canList,
     canGet,
+    canGetMembers,
     canUpdate,
     canUpdateMembers,
     load,
@@ -108,10 +109,14 @@ module.exports = (dependencies, lib) => {
   }
 
   function canList(req, res, next) {
-    authorizationMW.requiresDomainManager(req, res, next);
+    next();
   }
 
   function canGet(req, res, next) {
+    return ensureGroupBoundedToDomain(req, res, next);
+  }
+
+  function canGetMembers(req, res, next) {
     composableMW(
       ensureGroupBoundedToDomain,
       authorizationMW.requiresDomainManager

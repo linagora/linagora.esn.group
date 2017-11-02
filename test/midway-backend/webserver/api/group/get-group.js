@@ -73,21 +73,6 @@ describe('The get group API: GET /groups/:id', () => {
     });
   });
 
-  it('should respond 403 if the logged in user does not have permission to get group (not a domain admin)', function(done) {
-    this.helpers.api.loginAsUser(app, regularUser.emails[0], password, (err, requestAsMember) => {
-      expect(err).to.not.exist;
-      requestAsMember(request(app).get(`/api/groups/${group.id}`))
-        .expect(403)
-        .end((err, res) => {
-          expect(err).to.not.exist;
-          expect(res.body).to.deep.equal({
-            error: { code: 403, message: 'Forbidden', details: 'User is not the domain manager' }
-          });
-          done();
-        });
-    });
-  });
-
   it('should respond 403 if the logged in user does not have permission to get group (group belongs to another domain)', function(done) {
     lib.group.create({
         name: 'Other Group',
@@ -115,7 +100,20 @@ describe('The get group API: GET /groups/:id', () => {
       .catch(done);
   });
 
-  it('should respond 200 with the requested group', function(done) {
+  it('should respond 200 with the group even if current user is not a domain admin', function(done) {
+    this.helpers.api.loginAsUser(app, regularUser.emails[0], password, (err, requestAsMember) => {
+      expect(err).to.not.exist;
+      requestAsMember(request(app).get(`/api/groups/${group.id}`))
+        .expect(200)
+        .end((err, res) => {
+          expect(err).to.not.exist;
+          expect(res.body).to.shallowDeepEqual({ id: group.id });
+          done();
+        });
+    });
+  });
+
+  it('should respond 200 with the requested group when current user is domain admin', function(done) {
     this.helpers.api.loginAsUser(app, adminUser.emails[0], password, (err, requestAsMember) => {
       expect(err).to.not.exist;
 
