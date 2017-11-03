@@ -18,7 +18,8 @@ module.exports = function(dependencies, lib) {
     get,
     getMembers,
     update,
-    updateMembers
+    updateMembers,
+    search
   };
 
   function create(req, res) {
@@ -56,6 +57,10 @@ module.exports = function(dependencies, lib) {
   }
 
   function list(req, res) {
+    req.query.query ? search(req, res) : getList(req, res);
+  }
+
+  function getList(req, res) {
     const options = {
       limit: +req.query.limit,
       offset: +req.query.offset,
@@ -171,4 +176,27 @@ module.exports = function(dependencies, lib) {
         });
     }
   }
+
+  function search(req, res) {
+    const query = {
+      search: req.query.query,
+      limit: +req.query.limit,
+      offset: +req.query.offset,
+      domainId: req.domain.id
+    };
+
+    return lib.search.search(query)
+      .then(searchResult => {
+        res.header('X-ESN-Items-Count', searchResult.total_count);
+
+        return searchResult;
+      })
+      .then(searchResult => searchResult.list.map(group => lib.group.getById(group._id)))
+      .then(promises => q.allSettled(promises))
+      .then(resolvedGroups => resolvedGroups.filter(_ => _.state === 'fulfilled').map(_ => _.value))
+      .then(resolvedGroups => resolvedGroups.filter(Boolean))
+      .then(groups => groups.map(denormalize))
+      .then(denormalized => res.status(200).json(denormalized || []))
+      .catch(err => send500Error('Error while searching groups', err, res));
+    }
 };
