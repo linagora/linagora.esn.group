@@ -86,21 +86,6 @@ describe('The get group members API: GET /groups/:id/members', () => {
     });
   });
 
-  it('should respond 403 if the logged in user does not have permission to get group members (not a domain admin)', function(done) {
-    this.helpers.api.loginAsUser(app, regularUser.emails[0], password, (err, requestAsMember) => {
-      expect(err).to.not.exist;
-      requestAsMember(request(app).get(`/api/groups/${group.id}/members`))
-        .expect(403)
-        .end((err, res) => {
-          expect(err).to.not.exist;
-          expect(res.body).to.deep.equal({
-            error: { code: 403, message: 'Forbidden', details: 'User is not the domain manager' }
-          });
-          done();
-        });
-    });
-  });
-
   it('should respond 403 if the logged in user does not have permission to get group members (group belongs to another domain)', function(done) {
     lib.group.create({
         name: 'Other Group',
@@ -128,7 +113,29 @@ describe('The get group members API: GET /groups/:id/members', () => {
       .catch(done);
   });
 
-  it('should respond 200 with member list', function(done) {
+  it('should respond 200 with the members list if the current user is not a domain admin', function(done) {
+    this.helpers.api.loginAsUser(app, regularUser.emails[0], password, (err, requestAsMember) => {
+      expect(err).to.not.exist;
+      requestAsMember(request(app).get(`/api/groups/${group.id}/members`))
+        .expect(200)
+        .end((err, res) => {
+          expect(err).to.not.exist;
+          expect(res.body).to.have.length(group.members.length);
+
+          const members = group.members.map(member => ({
+            objectType: member.member.objectType,
+            id: member.member.id,
+            timestamps: {},
+            member: member.member.objectType === 'email' ? member.member.id : {}
+          }));
+
+          expect(res.body).to.shallowDeepEqual(members);
+          done();
+        });
+    });
+  });
+
+  it('should respond 200 with member list if the current user is a domain admin', function(done) {
     this.helpers.api.loginAsUser(app, adminUser.emails[0], password, (err, requestAsMember) => {
       if (err) {
         return done(err);
