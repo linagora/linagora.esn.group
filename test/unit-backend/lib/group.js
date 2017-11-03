@@ -1,5 +1,7 @@
 const sinon = require('sinon');
 const { expect } = require('chai');
+const models = require('linagora-rse').core.models;
+const { Event } = models;
 
 describe('The group module', function() {
   let pubsub, db, mongooseModels, topic, _id, group, CONSTANTS;
@@ -18,7 +20,7 @@ describe('The group module', function() {
       Group: {
         create: sinon.stub(),
         findOneAndUpdate: sinon.stub(),
-        remove: sinon.stub()
+        findByIdAndRemove: sinon.stub()
       }
     };
     db = {
@@ -29,6 +31,7 @@ describe('The group module', function() {
       }
     };
 
+    this.moduleHelpers.addDep('core-models', { Event });
     this.moduleHelpers.addDep('pubsub', pubsub);
     this.moduleHelpers.addDep('db', db);
 
@@ -48,7 +51,7 @@ describe('The group module', function() {
         expect(mongooseModels.Group.create).to.have.been.calledWith(group);
         expect(result).to.deep.equals(created);
         expect(pubsub.local.topic).to.have.been.calledWith(CONSTANTS.EVENTS.CREATED);
-        expect(topic.publish).to.have.been.calledWith(created);
+        expect(topic.publish).to.have.been.calledWith(sinon.match.instanceOf(Event));
 
         done();
       });
@@ -66,7 +69,7 @@ describe('The group module', function() {
         expect(mongooseModels.Group.findOneAndUpdate).to.have.been.calledWith({ _id }, { $set: group }, { new: true });
         expect(result).to.deep.equals(updated);
         expect(pubsub.local.topic).to.have.been.calledWith(CONSTANTS.EVENTS.UPDATED);
-        expect(topic.publish).to.have.been.calledWith(updated);
+        expect(topic.publish).to.have.been.calledWith(sinon.match.instanceOf(Event));
 
         done();
       });
@@ -78,13 +81,13 @@ describe('The group module', function() {
       const deleted = { _id, name: 'The Group name' };
 
       pubsub.local.topic.withArgs(CONSTANTS.EVENTS.DELETED).returns(topic);
-      mongooseModels.Group.remove.returns({ exec: () => Promise.resolve(deleted) });
+      mongooseModels.Group.findByIdAndRemove.returns({ exec: () => Promise.resolve(deleted) });
 
       this.getModule().deleteById(_id).then(result => {
-        expect(mongooseModels.Group.remove).to.have.been.calledWith({ _id });
+        expect(mongooseModels.Group.findByIdAndRemove).to.have.been.calledWith(_id);
         expect(result).to.deep.equals(deleted);
         expect(pubsub.local.topic).to.have.been.calledWith(CONSTANTS.EVENTS.DELETED);
-        expect(topic.publish).to.have.been.calledWith(deleted);
+        expect(topic.publish).to.have.been.calledWith(sinon.match.instanceOf(Event));
 
         done();
       });
@@ -92,11 +95,11 @@ describe('The group module', function() {
 
     it('should not publish in topic if group to delete does not exist', function(done) {
       pubsub.local.topic.withArgs(CONSTANTS.EVENTS.DELETED).returns(topic);
-      mongooseModels.Group.remove.returns({ exec: () => Promise.resolve() });
+      mongooseModels.Group.findByIdAndRemove.returns({ exec: () => Promise.resolve() });
 
       this.getModule().deleteById(_id).then(result => {
         expect(result).to.be.undefined;
-        expect(mongooseModels.Group.remove).to.have.been.calledWith({ _id });
+        expect(mongooseModels.Group.findByIdAndRemove).to.have.been.calledWith(_id);
         expect(pubsub.local.topic).to.not.have.been.calledWith(CONSTANTS.EVENTS.DELETED);
         expect(topic.publish).to.not.have.been.called;
 

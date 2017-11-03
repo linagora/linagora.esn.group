@@ -3,7 +3,8 @@ module.exports = {
   getId
 };
 
-function denormalize(group) {
+function denormalize(event) {
+  const group = event.payload;
   const result = {
     name: group.name,
     email: group.email
@@ -16,6 +17,6 @@ function denormalize(group) {
   return result;
 }
 
-function getId(group) {
-  return String(group._id);
+function getId(event) {
+  return String(event.payload._id);
 }

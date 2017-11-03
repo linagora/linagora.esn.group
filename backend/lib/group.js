@@ -1,8 +1,9 @@
 'use strict';
 
-const { DEFAULT_OFFSET, DEFAULT_LIMIT, EVENTS } = require('./constants');
+const { OBJECT_TYPE, DEFAULT_OFFSET, DEFAULT_LIMIT, EVENTS } = require('./constants');
 
 module.exports = dependencies => {
+  const { Event } = dependencies('core-models');
   const pubsub = dependencies('pubsub').local;
   const mongoose = dependencies('db').mongo.mongoose;
   const Group = mongoose.model('Group');
@@ -16,11 +17,7 @@ module.exports = dependencies => {
   };
 
   function create(group) {
-    return Group.create(group).then(created => {
-      pubsub.topic(EVENTS.CREATED).publish(created);
-
-      return created;
-    });
+    return Group.create(group).then(publish.bind(null, EVENTS.CREATED));
   }
 
   function list(options = {}) {
@@ -43,27 +40,26 @@ module.exports = dependencies => {
   }
 
   function deleteById(groupId) {
-    return Group.remove({ _id: groupId })
+    return Group.findByIdAndRemove(groupId)
       .exec()
-      .then(deleted => {
-        if (deleted) {
-          pubsub.topic(EVENTS.DELETED).publish(deleted);
-        }
-
-        return deleted;
-    });
+      .then(publish.bind(null, EVENTS.DELETED));
   }
 
   function updateById(groupId, modified) {
-    return Group.findOneAndUpdate({ _id: groupId }, { $set: modified }, { new: true }).exec()
-      .then(updated => {
-        pubsub.topic(EVENTS.UPDATED).publish(updated);
-
-        return updated;
-      });
+    return Group.findOneAndUpdate({ _id: groupId }, { $set: modified }, { new: true })
+      .exec()
+      .then(publish.bind(null, EVENTS.UPDATED));
   }
 
   function getById(id) {
     return Group.findOne({ _id: id });
+  }
+
+  function publish(topicName, group) {
+    if (group) {
+      pubsub.topic(topicName).publish(new Event(null, topicName, OBJECT_TYPE, String(group._id), group));
+    }
+
+    return group;
   }
 };
