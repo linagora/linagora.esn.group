@@ -1,10 +1,12 @@
 'use strict';
 
-const { OBJECT_TYPE, DEFAULT_OFFSET, DEFAULT_LIMIT, EVENTS } = require('./constants');
+const q = require('q');
+const { DEFAULT_OFFSET, DEFAULT_LIMIT, EVENTS, OBJECT_TYPE, MEMBER_TYPES } = require('./constants');
 
 module.exports = dependencies => {
   const { Event } = dependencies('core-models');
   const pubsub = dependencies('pubsub').local;
+  const coreCollaboration = dependencies('collaboration');
   const mongoose = dependencies('db').mongo.mongoose;
   const Group = mongoose.model('Group');
 
@@ -12,6 +14,8 @@ module.exports = dependencies => {
     create,
     deleteById,
     getById,
+    getMemberEmail,
+    getAllMembers,
     list,
     updateById
   };
@@ -61,5 +65,21 @@ module.exports = dependencies => {
     }
 
     return group;
+  }
+
+  function getMemberEmail(member) {
+    if (member.objectType === MEMBER_TYPES.USER) {
+      return member.member.preferredEmail;
+    } else if (member.objectType === MEMBER_TYPES.EMAIL) {
+      return member.member;
+    }
+
+    return null;
+  }
+
+  function getAllMembers(group) {
+    const query = { limit: group.members.length };
+
+    return q.denodeify(coreCollaboration.member.getMembers)(group, OBJECT_TYPE, query);
   }
 };
