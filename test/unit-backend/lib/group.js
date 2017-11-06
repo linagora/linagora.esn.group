@@ -5,6 +5,7 @@ const { Event } = models;
 
 describe('The group module', function() {
   let pubsub, db, mongooseModels, topic, _id, group, CONSTANTS;
+  let getModule;
 
   beforeEach(function() {
     CONSTANTS = require(this.moduleHelpers.backendPath + '/lib/constants');
@@ -35,9 +36,7 @@ describe('The group module', function() {
     this.moduleHelpers.addDep('pubsub', pubsub);
     this.moduleHelpers.addDep('db', db);
 
-    this.getModule = function() {
-      return require(this.moduleHelpers.backendPath + '/lib/group')(this.moduleHelpers.dependencies);
-    };
+    getModule = () => require(this.moduleHelpers.backendPath + '/lib/group')(this.moduleHelpers.dependencies);
   });
 
   describe('The create function', function() {
@@ -47,7 +46,7 @@ describe('The group module', function() {
       pubsub.local.topic.withArgs(CONSTANTS.EVENTS.CREATED).returns(topic);
       mongooseModels.Group.create.returns(Promise.resolve(created));
 
-      this.getModule().create(group).then(result => {
+      getModule().create(group).then(result => {
         expect(mongooseModels.Group.create).to.have.been.calledWith(group);
         expect(result).to.deep.equals(created);
         expect(pubsub.local.topic).to.have.been.calledWith(CONSTANTS.EVENTS.CREATED);
@@ -65,7 +64,7 @@ describe('The group module', function() {
       pubsub.local.topic.withArgs(CONSTANTS.EVENTS.UPDATED).returns(topic);
       mongooseModels.Group.findOneAndUpdate.returns({ exec: () => Promise.resolve(updated) });
 
-      this.getModule().updateById(_id, group).then(result => {
+      getModule().updateById(_id, group).then(result => {
         expect(mongooseModels.Group.findOneAndUpdate).to.have.been.calledWith({ _id }, { $set: group }, { new: true });
         expect(result).to.deep.equals(updated);
         expect(pubsub.local.topic).to.have.been.calledWith(CONSTANTS.EVENTS.UPDATED);
@@ -83,7 +82,7 @@ describe('The group module', function() {
       pubsub.local.topic.withArgs(CONSTANTS.EVENTS.DELETED).returns(topic);
       mongooseModels.Group.findByIdAndRemove.returns({ exec: () => Promise.resolve(deleted) });
 
-      this.getModule().deleteById(_id).then(result => {
+      getModule().deleteById(_id).then(result => {
         expect(mongooseModels.Group.findByIdAndRemove).to.have.been.calledWith(_id);
         expect(result).to.deep.equals(deleted);
         expect(pubsub.local.topic).to.have.been.calledWith(CONSTANTS.EVENTS.DELETED);
@@ -97,7 +96,7 @@ describe('The group module', function() {
       pubsub.local.topic.withArgs(CONSTANTS.EVENTS.DELETED).returns(topic);
       mongooseModels.Group.findByIdAndRemove.returns({ exec: () => Promise.resolve() });
 
-      this.getModule().deleteById(_id).then(result => {
+      getModule().deleteById(_id).then(result => {
         expect(result).to.be.undefined;
         expect(mongooseModels.Group.findByIdAndRemove).to.have.been.calledWith(_id);
         expect(pubsub.local.topic).to.not.have.been.calledWith(CONSTANTS.EVENTS.DELETED);
@@ -105,6 +104,58 @@ describe('The group module', function() {
 
         done();
       });
+    });
+  });
+
+  describe('The getMemberEmail function', function() {
+    it('should should return preferred email of user member', function() {
+      const member = {
+        objectType: 'user',
+        member: {
+          preferredEmail: 'user@email.com'
+        }
+      };
+
+      expect(
+        getModule().getMemberEmail(member)
+      ).to.equal(member.member.preferredEmail);
+    });
+
+    it('should should return plain email of email member', function() {
+      const member = {
+        objectType: 'email',
+        member: 'member@email.com'
+      };
+
+      expect(
+        getModule().getMemberEmail(member)
+      ).to.equal(member.member);
+    });
+  });
+
+  describe('The getAllMembers function', function() {
+    let collaborationMock;
+
+    beforeEach(function() {
+      collaborationMock = {};
+      this.moduleHelpers.addDep('collaboration', collaborationMock);
+    });
+
+    it('should call collaboration module to get all group members', function(done) {
+      const group = {
+        members: [{}, {}, {}]
+      };
+
+      collaborationMock.member = {
+        getMembers(collaboration, objectType, query) {
+          expect(collaboration).to.deep.equal(group);
+          expect(objectType).to.equal(CONSTANTS.OBJECT_TYPE);
+          expect(query).to.deep.equal({ limit: group.members.length });
+          done();
+        }
+      };
+
+      getModule().getAllMembers(group);
     });
   });
 });
