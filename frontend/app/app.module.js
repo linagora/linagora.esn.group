@@ -7,6 +7,7 @@
     'op.dynamicDirective',
     'restangular',
     'esn.router',
+    'esn.member',
     'esn.http',
     'esn.infinite-list',
     'esn.core',

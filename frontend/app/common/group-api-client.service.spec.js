@@ -2,9 +2,13 @@
 
 describe('The groupApiClient service', function() {
   var $httpBackend;
-  var groupApiClient;
+  var groupApiClient, groupId;
 
   beforeEach(module('linagora.esn.group'));
+
+  beforeEach(function() {
+    groupId = '123';
+  });
 
   beforeEach(inject(function(_$httpBackend_, _groupApiClient_) {
     $httpBackend = _$httpBackend_;
@@ -24,8 +28,6 @@ describe('The groupApiClient service', function() {
 
   describe('The get fn', function() {
     it('should GET to right endpoint to get group by ID', function() {
-      var groupId = '123';
-
       $httpBackend.expectGET('/group/api/groups/' + groupId).respond(200);
 
       groupApiClient.get(groupId);
@@ -48,9 +50,20 @@ describe('The groupApiClient service', function() {
     });
   });
 
+  describe('The getFromEmail function', function() {
+    it('should GET to right endpoint to get groups', function() {
+      var email = 'groups@open-paas.org';
+
+      $httpBackend.expectGET('/group/api/groups?email=' + email + '&limit=1').respond(200, []);
+
+      groupApiClient.getFromEmail(email);
+
+      $httpBackend.flush();
+    });
+  });
+
   describe('The update fn', function() {
     it('should POST to right endpoint to udpate', function() {
-      var groupId = '123';
       var updateData = {
         name: 'My group',
         email: 'mygroup@email.com'
@@ -66,7 +79,6 @@ describe('The groupApiClient service', function() {
 
   describe('The getMembers fn', function() {
     it('should GET to right endpoint to get group members', function() {
-      var groupId = '123';
       var options = {
         limit: 10,
         offset: 0
@@ -80,9 +92,18 @@ describe('The groupApiClient service', function() {
     });
   });
 
+  describe('The getAllMembers fn', function() {
+    it('should GET to right endpoint to get group members', function() {
+      $httpBackend.expectGET('/group/api/groups/' + groupId + '/members?limit=0').respond(200, []);
+
+      groupApiClient.getAllMembers(groupId);
+
+      $httpBackend.flush();
+    });
+  });
+
   describe('The removeMembers fn', function() {
     it('should POST to right endpoint to remove group members', function() {
-      var groupId = '123';
       var members = [{
         objectType: 'user',
         id: '456'
@@ -101,7 +122,6 @@ describe('The groupApiClient service', function() {
 
   describe('The addMembers fn', function() {
     it('should POST to right endpoint to update', function() {
-      var groupId = '123';
       var membersList = [
         { id: '2222', objectType: 'user' },
         { id: 'email@example.com', objectType: 'email' }
@@ -117,8 +137,6 @@ describe('The groupApiClient service', function() {
 
   describe('The deleteGroup fn', function() {
     it('should DELETE to right endpoint to delete group', function() {
-      var groupId = '123';
-
       $httpBackend.expectDELETE('/group/api/groups/' + groupId).respond(204);
 
       groupApiClient.deleteGroup(groupId);
