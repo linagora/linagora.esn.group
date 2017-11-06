@@ -126,4 +126,20 @@ describe('The groupApiClient service', function() {
       $httpBackend.flush();
     });
   });
+
+  describe('The Search fn', function() {
+    it('should GET to right endpoint to get groups with the query', function() {
+      var options = {
+        limit: 10,
+        offset: 0,
+        query: 'test'
+      };
+
+      $httpBackend.expectGET('/group/api/groups?limit=' + options.limit + '&offset=' + options.offset + '&query=' + options.query).respond(200, []);
+
+      groupApiClient.search(options.query, options.limit, options.offset);
+
+      $httpBackend.flush();
+    });
+  });
 });

@@ -11,5 +11,9 @@
         dynamicDirectiveService.addInjection('esn-application-menu', group);
       }
     });
+  })
+
+  .run(function(attendeeService, groupAttendeeProvider) {
+    attendeeService.addProvider(groupAttendeeProvider);
   });
 })(angular);

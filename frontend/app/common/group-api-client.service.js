@@ -13,7 +13,8 @@
       list: list,
       update: update,
       getMembers: getMembers,
-      removeMembers: removeMembers
+      removeMembers: removeMembers,
+      search: search
     };
 
     /**
@@ -90,6 +91,22 @@
      */
     function deleteGroup(groupId) {
       return groupRestangular.one('groups', groupId).remove();
+    }
+
+    /**
+     * Search group
+     * @param {String} query                     The query
+     * @param {String || Number} limit           The limit
+     * @param {String || Number} offset          The offset
+     */
+    function search(query, limit, offset) {
+      var options = {
+        query: query,
+        limit: limit,
+        offset: offset
+      };
+
+      return list(options);
     }
   }
 })(angular);
