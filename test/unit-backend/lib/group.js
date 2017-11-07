@@ -9,7 +9,7 @@ describe('The group module', function() {
 
   beforeEach(function() {
     CONSTANTS = require(this.moduleHelpers.backendPath + '/lib/constants');
-    _id = 1;
+    _id = '1';
     group = { name: 'The group name' };
     pubsub = {
       local: {
@@ -20,6 +20,7 @@ describe('The group module', function() {
     mongooseModels = {
       Group: {
         create: sinon.stub(),
+        findOne: sinon.stub(),
         findOneAndUpdate: sinon.stub(),
         findByIdAndRemove: sinon.stub()
       }
@@ -50,7 +51,13 @@ describe('The group module', function() {
         expect(mongooseModels.Group.create).to.have.been.calledWith(group);
         expect(result).to.deep.equals(created);
         expect(pubsub.local.topic).to.have.been.calledWith(CONSTANTS.EVENTS.CREATED);
-        expect(topic.publish).to.have.been.calledWith(sinon.match.instanceOf(Event));
+        expect(topic.publish).to.have.been.calledWith(
+          sinon.match.instanceOf(Event).and(sinon.match({
+            id: _id,
+            name: CONSTANTS.EVENTS.CREATED,
+            payload: created
+          }))
+        );
 
         done();
       });
@@ -62,13 +69,20 @@ describe('The group module', function() {
       const updated = { _id, name: 'The Group name' };
 
       pubsub.local.topic.withArgs(CONSTANTS.EVENTS.UPDATED).returns(topic);
-      mongooseModels.Group.findOneAndUpdate.returns({ exec: () => Promise.resolve(updated) });
+      mongooseModels.Group.findOneAndUpdate.returns({ exec: () => Promise.resolve(group) });
+      mongooseModels.Group.findOne.returns(Promise.resolve(updated));
 
       getModule().updateById(_id, group).then(result => {
-        expect(mongooseModels.Group.findOneAndUpdate).to.have.been.calledWith({ _id }, { $set: group }, { new: true });
+        expect(mongooseModels.Group.findOneAndUpdate).to.have.been.calledWith({ _id }, { $set: group });
         expect(result).to.deep.equals(updated);
         expect(pubsub.local.topic).to.have.been.calledWith(CONSTANTS.EVENTS.UPDATED);
-        expect(topic.publish).to.have.been.calledWith(sinon.match.instanceOf(Event));
+        expect(topic.publish).to.have.been.calledWith(
+          sinon.match.instanceOf(Event).and(sinon.match({
+            id: _id,
+            name: CONSTANTS.EVENTS.UPDATED,
+            payload: { old: group, new: updated }
+          }))
+        );
 
         done();
       });
@@ -86,7 +100,13 @@ describe('The group module', function() {
         expect(mongooseModels.Group.findByIdAndRemove).to.have.been.calledWith(_id);
         expect(result).to.deep.equals(deleted);
         expect(pubsub.local.topic).to.have.been.calledWith(CONSTANTS.EVENTS.DELETED);
-        expect(topic.publish).to.have.been.calledWith(sinon.match.instanceOf(Event));
+        expect(topic.publish).to.have.been.calledWith(
+          sinon.match.instanceOf(Event).and(sinon.match({
+            id: _id,
+            name: CONSTANTS.EVENTS.DELETED,
+            payload: deleted
+          }))
+        );
 
         done();
       });

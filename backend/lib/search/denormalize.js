@@ -1,10 +1,12 @@
+const { EVENTS } = require('../constants');
+
 module.exports = {
   denormalize,
   getId
 };
 
 function denormalize(event) {
-  const group = event.payload;
+  const group = extractGroupFromEvent(event);
   const result = {
     name: group.name,
     email: group.email
@@ -18,5 +20,17 @@ function denormalize(event) {
 }
 
 function getId(event) {
-  return String(event.payload._id);
+  return extractGroupIdFromEvent(event);
+}
+
+function extractGroupFromEvent(event) {
+  if (event.name === EVENTS.UPDATED) {
+    return event.payload.new;
+  }
+
+  return event.payload;
+}
+
+function extractGroupIdFromEvent(event) {
+  return String(event.id);
 }
