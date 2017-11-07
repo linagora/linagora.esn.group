@@ -14,6 +14,7 @@ angular.module('esn.router', ['ui.router'])
     };
   });
 angular.module('esn.session', []);
+angular.module('esn.member', []);
 angular.module('esn.form.helper', []);
 angular.module('esn.i18n', [])
   .factory('esnI18nService', function() {

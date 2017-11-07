@@ -10,8 +10,10 @@
       create: create,
       deleteGroup: deleteGroup,
       get: get,
+      getFromEmail: getFromEmail,
       list: list,
       update: update,
+      getAllMembers: getAllMembers,
       getMembers: getMembers,
       removeMembers: removeMembers,
       search: search
@@ -36,8 +38,16 @@
     }
 
     /**
+     * Get a group from its email
+     * @param {String} email - The group email
+     */
+    function getFromEmail(email) {
+      return list({email: email, limit: 1});
+    }
+
+    /**
      * List group
-     * @param  {Object} options - Query option, possible attributes are limit and offset
+     * @param  {Object} options - Query option, possible attributes are limit, offset and email
      * @return {Promise}        - Resolve response with group list
      */
     function list(options) {
@@ -52,6 +62,14 @@
      */
     function update(groupId, updateData) {
       return groupRestangular.one('groups', groupId).customPOST(updateData);
+    }
+
+    /**
+     * Get all the members of a given group
+     * @param {String} groupId - The group ID
+     */
+    function getAllMembers(groupId) {
+      return getMembers(groupId, { limit: 0 });
     }
 
     /**
