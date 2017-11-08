@@ -39,5 +39,6 @@
   "showing %s of %s": "showing %s of %s",
   "Delete": "Delete",
   "Delete group?": "Delete group?",
-  "Group %s will be deleted and the email address of %s will be no longer available": "Group %s will be deleted and the email address of %s will be no longer available"
+  "Group %s will be deleted and the email address of %s will be no longer available": "Group %s will be deleted and the email address of %s will be no longer available",
+  "Invalid email": "Invalid email"
 }

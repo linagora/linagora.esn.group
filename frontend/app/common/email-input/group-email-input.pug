@@ -1,0 +1,3 @@
+esn-form-group(label=__('Email'), form='$ctrl.form', pattern-error-message=__('Invalid email'))
+  input.form-control(type="text", maxlength="255", pattern="[a-zA-Z0-9._%+-]{6,255}", ng-model="$ctrl.emailName", ng-change="$ctrl.buildEmail()", name="groupEmail", required)
+span @{{::$ctrl.domainName}}
