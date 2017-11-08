@@ -1,4 +1,4 @@
-.modal.group-create
+.modal.group-modal.full-screen
   form(name="form", ng-submit="$ctrl.create(); $hide()")
     .modal-dialog
       .modal-content
@@ -6,7 +6,7 @@
           button.close(type="button", data-dismiss="modal", aria-label="Close", ng-click="$hide()")
             span(aria-hidden="true") &times;
           h4.modal-title #{__('New group')}
-        .body
+        .modal-body
           group-form(group="$ctrl.group", new-members="$ctrl.newMembers")
         .modal-footer.flex
           .flex-vertical-centered.flex-end

@@ -33,7 +33,7 @@ describe('The groupForm component', function() {
     var element = initComponent();
 
     expect(element.find('input[ng-model="$ctrl.group.name"]')).to.have.length(1);
-    expect(element.find('input[ng-model="$ctrl.group.email"]')).to.have.length(1);
+    expect(element.find('group-email-input')).to.have.length(1);
     expect(element.find('group-member-auto-complete')).to.have.length(1);
   });
 

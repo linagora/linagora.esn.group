@@ -1,8 +1,6 @@
 @import './list/group-list';
 @import './member/member';
-@import './create/group-create';
 @import './display/group-display';
-@import './update/group-update';
 @import './member-auto-complete/group-member-auto-complete';
 @import './common/common';
 
@@ -13,6 +11,16 @@
   .card {
     .card-header {
       background: @darkenBgColor;
+    }
+  }
+}
+
+.group-modal {
+  &.modal.full-screen .modal-dialog .modal-content .modal-body {
+    padding: 25px 20px 0 20px;
+
+    .form-group {
+      margin-bottom: 10px;
     }
   }
 }
