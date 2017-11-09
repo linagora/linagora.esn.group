@@ -21,7 +21,11 @@ module.exports = dependencies => {
   };
 
   function create(group) {
-    return Group.create(group).then(publish.bind(null, EVENTS.CREATED));
+    return Group.create(group).then(group => {
+      publish(EVENTS.CREATED, { id: String(group._id), payload: group });
+
+      return group;
+    });
   }
 
   function list(options = {}) {
@@ -46,25 +50,30 @@ module.exports = dependencies => {
   function deleteById(groupId) {
     return Group.findByIdAndRemove(groupId)
       .exec()
-      .then(publish.bind(null, EVENTS.DELETED));
+      .then(group => {
+        publish(EVENTS.DELETED, { id: groupId, payload: group });
+
+        return group;
+      });
   }
 
   function updateById(groupId, modified) {
-    return Group.findOneAndUpdate({ _id: groupId }, { $set: modified }, { new: true })
+    return Group.findOneAndUpdate({ _id: groupId }, { $set: modified })
       .exec()
-      .then(publish.bind(null, EVENTS.UPDATED));
+      .then(oldGroup =>
+        getById(groupId).then(newGroup => {
+          publish(EVENTS.UPDATED, {
+            id: groupId,
+            payload: { old: oldGroup, new: newGroup }
+          });
+
+          return newGroup;
+        })
+      );
   }
 
   function getById(id) {
     return Group.findOne({ _id: id });
-  }
-
-  function publish(topicName, group) {
-    if (group) {
-      pubsub.topic(topicName).publish(new Event(null, topicName, OBJECT_TYPE, String(group._id), group));
-    }
-
-    return group;
   }
 
   function getMemberEmail(member) {
@@ -81,5 +90,11 @@ module.exports = dependencies => {
     const query = { limit: group.members.length };
 
     return q.denodeify(coreCollaboration.member.getMembers)(group, OBJECT_TYPE, query);
+  }
+
+  function publish(topicName, { id, payload }) {
+    if (id && payload) {
+      pubsub.topic(topicName).publish(new Event(null, topicName, OBJECT_TYPE, String(id), payload));
+    }
   }
 };
