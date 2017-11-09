@@ -5,7 +5,7 @@ const expect = require('chai').expect;
 const path = require('path');
 const MODULE_NAME = 'linagora.esn.group';
 
-describe('POST /groups', () => {
+describe('The create group API: POST /groups', () => {
   let app, deployOptions, user, lib;
   const password = 'secret';
 
@@ -36,7 +36,10 @@ describe('POST /groups', () => {
   });
 
   afterEach(function(done) {
-    this.helpers.mongo.dropDatabase(done);
+    this.helpers.mongo.dropDatabase(err => {
+      if (err) return done(err);
+      this.testEnv.core.db.mongo.mongoose.connection.close(done);
+    });
   });
 
   it('should return 401 if not logged in', function(done) {
