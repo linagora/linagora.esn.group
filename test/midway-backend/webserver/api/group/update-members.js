@@ -64,7 +64,10 @@ describe('The update group members API: POST /groups/:id/members', () => {
   });
 
   afterEach(function(done) {
-    this.helpers.mongo.dropDatabase(done);
+    this.helpers.mongo.dropDatabase(err => {
+      if (err) return done(err);
+      this.testEnv.core.db.mongo.mongoose.connection.close(done);
+    });
   });
 
   it('should respond 401 if not logged in', function(done) {
