@@ -19,6 +19,7 @@ module.exports = dependencies => {
     getAllMembers,
     list,
     removeMembers,
+    resolveMember,
     updateById
   };
 
@@ -81,6 +82,15 @@ module.exports = dependencies => {
 
         return data;
       });
+  }
+
+  function resolveMember(memberTuple) {
+    return coreCollaboration.memberResolver.resolve(memberTuple)
+      .then(member => ({
+        id: memberTuple.id,
+        objectType: memberTuple.objectType,
+        member
+      }));
   }
 
   function updateById(groupId, modified) {

@@ -1,3 +1,4 @@
+const q = require('q');
 const sinon = require('sinon');
 const { expect } = require('chai');
 const models = require('linagora-rse').core.models;
@@ -230,6 +231,29 @@ describe('The group module', function() {
               payload: { group, members }
             }))
           );
+
+          done();
+        })
+        .catch(err => done(err || 'should resolve'));
+    });
+  });
+
+  describe('The resolveMember function', function() {
+    it('should resolve member and keep the tuple information', function(done) {
+      const memberTuple = { objectType: 'user', id: '123' };
+      const user = { id: '123', name: 'Alice' };
+
+      collaborationMock.memberResolver = {
+        resolve: sinon.stub().returns(q.resolve(user))
+      };
+
+      getModule().resolveMember(memberTuple)
+        .then(member => {
+          expect(member).to.deep.equal({
+            id: memberTuple.id,
+            objectType: memberTuple.objectType,
+            member: user
+          });
 
           done();
         })
