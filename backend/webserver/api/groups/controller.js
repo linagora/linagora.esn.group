@@ -2,14 +2,14 @@
 
 const q = require('q');
 const _ = require('lodash');
-const { OBJECT_TYPE } = require('../../../lib/constants');
+const { OBJECT_TYPE, MEMBER_TYPES } = require('../../../lib/constants');
 
 module.exports = function(dependencies, lib) {
   const coreUser = dependencies('user');
   const coreTuple = dependencies('tuple');
   const coreCollaboration = dependencies('collaboration');
   const { denormalize, denormalizeMember } = require('./denormalize')(dependencies);
-  const { send500Error, send400Error } = require('../utils')(dependencies);
+  const { send500Error, send409Error, send400Error } = require('../utils')(dependencies);
 
   return {
     create,
@@ -120,27 +120,84 @@ module.exports = function(dependencies, lib) {
   }
 
   function updateMembers(req, res) {
-    const members = req.body;
-
     if (req.query.action === 'remove') {
-      return q.denodeify(coreCollaboration.member.removeMembers)(req.group, members)
-        .then(() => res.status(204).end())
-        .catch(err => send500Error('Unable to remove members', err, res));
+      return removeMembers(req, res);
     }
 
     if (req.query.action === 'add') {
-      const membersBefore = Array.from(req.group.members);
-
-      return q.all(members.map(verifyAddingMember))
-        .then(members => members.filter(Boolean))
-        .then(members => q.denodeify(coreCollaboration.member.addMembers)(req.group, members))
-        .then(updatedGroup => _.difference(updatedGroup.members, membersBefore))
-        .then(addedMembers => q.all(addedMembers.map(fetchMember)))
-        .then(members => res.status(200).json(members))
-        .catch(err => send500Error('Unable to add members', err, res));
+      return addMembers(req, res);
     }
 
     send400Error(`${req.query.action} is not a valid action on members (add, remove)`, res);
+  }
+
+  function addMembers(req, res) {
+    const group = req.group;
+
+    q.all(req.body.map(verifyMemberTuple))
+      .then(members => {
+        const invalidMembers = req.body.filter((member, index) => !members[index]);
+
+        if (invalidMembers.length > 0) {
+          return send400Error(`some members are invalid ${JSON.stringify(invalidMembers)}`, res);
+        }
+
+        const alreadyAddedMembers = members.filter(member => isMember(group, member));
+
+        if (alreadyAddedMembers.length > 0) {
+          return send409Error(`some members are already added: ${JSON.stringify(alreadyAddedMembers)}`, res);
+        }
+
+        const membersBefore = group.members.slice(0);
+
+        lib.group.addMembers(group, members)
+          .then(updatedGroup => _.difference(updatedGroup.members, membersBefore))
+          .then(addedMembers => q.all(addedMembers.map(fetchMember)))
+          .then(members => res.status(200).json(members))
+          .catch(err => send500Error('Unable to add members', err, res));
+      });
+  }
+
+  function removeMembers(req, res) {
+    const group = req.group;
+    const members = req.body;
+    const alreadyRemovedMembers = members.filter(member => !isMember(group, member));
+
+    if (alreadyRemovedMembers.length > 0) {
+      return send400Error(`some members are not belonged to group: ${JSON.stringify(alreadyRemovedMembers)}`, res);
+    }
+
+    lib.group.removeMembers(group, members)
+      .then(() => res.status(204).end())
+      .catch(err => send500Error('Unable to remove members', err, res));
+  }
+
+  function isMember(group, member) {
+    return member && group.members.some(memberObj =>
+      String(memberObj.member.id) === String(member.id) && memberObj.member.objectType === member.objectType
+    );
+  }
+
+  function verifyMemberTuple(member) {
+    if (member.objectType === MEMBER_TYPES.USER) {
+      return q.ninvoke(coreUser, 'get', member.id)
+        .then(user => {
+          if (user) {
+            return member;
+          }
+        });
+    }
+
+    if (member.objectType === MEMBER_TYPES.EMAIL) {
+      return q.ninvoke(coreUser, 'findByEmail', member.id)
+        .then(user => {
+          if (user) {
+            return coreTuple.user(user.id);
+          }
+
+          return member;
+        });
+    }
   }
 
   function fetchMember(member) {
@@ -153,28 +210,6 @@ module.exports = function(dependencies, lib) {
 
         return denormalizeMember(member);
       });
-  }
-
-  function verifyAddingMember(member) {
-    if (member.objectType === 'user') {
-      return q.ninvoke(coreUser, 'get', member.id)
-        .then(user => {
-          if (user) {
-            return member;
-          }
-        });
-    }
-
-    if (member.objectType === 'email') {
-      return q.ninvoke(coreUser, 'findByEmail', member.id)
-        .then(user => {
-          if (user) {
-            return coreTuple.user(user.id);
-          }
-
-          return member;
-        });
-    }
   }
 
   function search(req, res) {

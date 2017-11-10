@@ -4,7 +4,7 @@ const models = require('linagora-rse').core.models;
 const { Event } = models;
 
 describe('The group module', function() {
-  let pubsub, db, mongooseModels, topic, _id, group, CONSTANTS;
+  let pubsub, db, mongooseModels, topic, _id, group, collaborationMock, CONSTANTS;
   let getModule;
 
   beforeEach(function() {
@@ -32,12 +32,42 @@ describe('The group module', function() {
         }
       }
     };
+    collaborationMock = {};
 
     this.moduleHelpers.addDep('core-models', { Event });
     this.moduleHelpers.addDep('pubsub', pubsub);
     this.moduleHelpers.addDep('db', db);
+    this.moduleHelpers.addDep('collaboration', collaborationMock);
 
     getModule = () => require(this.moduleHelpers.backendPath + '/lib/group')(this.moduleHelpers.dependencies);
+  });
+
+  describe('The addMembers function', function() {
+    it('should add members to group and publish event on success', function(done) {
+      const group = { id: '123' };
+      const members = [{}, {}];
+
+      collaborationMock.member = {
+        addMembers: sinon.spy(function(g, m, callback) { callback(); })
+      };
+      pubsub.local.topic.withArgs(CONSTANTS.EVENTS.MEMBERS_ADDED).returns(topic);
+
+      getModule().addMembers(group, members)
+        .then(() => {
+          expect(collaborationMock.member.addMembers).to.have.been.calledOnce;
+          expect(collaborationMock.member.addMembers).to.have.been.calledWith(group, members);
+          expect(topic.publish).to.have.been.calledWith(
+            sinon.match.instanceOf(Event).and(sinon.match({
+              id: group.id,
+              name: CONSTANTS.EVENTS.MEMBERS_ADDED,
+              payload: { group, members }
+            }))
+          );
+
+          done();
+        })
+        .catch(err => done(err || 'should resolve'));
+    });
   });
 
   describe('The create function', function() {
@@ -176,6 +206,34 @@ describe('The group module', function() {
       };
 
       getModule().getAllMembers(group);
+    });
+  });
+
+  describe('The removeMembers function', function() {
+    it('should remove members from group and publish event on success', function(done) {
+      const group = { id: '123' };
+      const members = [{}, {}];
+
+      collaborationMock.member = {
+        removeMembers: sinon.spy(function(g, m, callback) { callback(); })
+      };
+      pubsub.local.topic.withArgs(CONSTANTS.EVENTS.MEMBERS_REMOVED).returns(topic);
+
+      getModule().removeMembers(group, members)
+        .then(() => {
+          expect(collaborationMock.member.removeMembers).to.have.been.calledOnce;
+          expect(collaborationMock.member.removeMembers).to.have.been.calledWith(group, members);
+          expect(topic.publish).to.have.been.calledWith(
+            sinon.match.instanceOf(Event).and(sinon.match({
+              id: group.id,
+              name: CONSTANTS.EVENTS.MEMBERS_REMOVED,
+              payload: { group, members }
+            }))
+          );
+
+          done();
+        })
+        .catch(err => done(err || 'should resolve'));
     });
   });
 });

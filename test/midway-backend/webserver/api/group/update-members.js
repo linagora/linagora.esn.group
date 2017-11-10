@@ -117,6 +117,36 @@ describe('The update group members API: POST /groups/:id/members', () => {
     });
   });
 
+  it('should respond 400 if the body contains invalid user tuple (invalid user ID)', function(done) {
+    const body = [{ objectType: 'user', id: 'not a user ID' }];
+
+    this.helpers.api.loginAsUser(app, adminUser.emails[0], password, (err, requestAsMember) => {
+      expect(err).to.not.exist;
+      requestAsMember(request(app).post(`/api/groups/${group.id}/members?action=add`).send(body))
+        .expect(400)
+        .end((err, res) => {
+          expect(err).to.not.exist;
+          expect(res.body.error.details).to.equal('body must be an array of valid member tuples {objectType, id}');
+          done();
+        });
+    });
+  });
+
+  it('should respond 400 if the body contains invalid email tuple (invalid email)', function(done) {
+    const body = [{ objectType: 'email', id: 'not a valid email' }];
+
+    this.helpers.api.loginAsUser(app, adminUser.emails[0], password, (err, requestAsMember) => {
+      expect(err).to.not.exist;
+      requestAsMember(request(app).post(`/api/groups/${group.id}/members?action=add`).send(body))
+        .expect(400)
+        .end((err, res) => {
+          expect(err).to.not.exist;
+          expect(res.body.error.details).to.equal('body must be an array of valid member tuples {objectType, id}');
+          done();
+        });
+    });
+  });
+
   it('should respond 404 if group is not found', function(done) {
     const body = [];
 
@@ -179,6 +209,23 @@ describe('The update group members API: POST /groups/:id/members', () => {
   });
 
   describe('The remove members API: POST /groups/:id/members?action=remove', function() {
+    it('should respond 400 when trying to remove non existing member', function(done) {
+      const body = [
+        { objectType: 'email', id: 'not_a_member@email.com' }
+      ];
+
+      this.helpers.api.loginAsUser(app, adminUser.emails[0], password, (err, requestAsMember) => {
+        expect(err).to.not.exist;
+        requestAsMember(request(app).post(`/api/groups/${group.id}/members?action=remove`).send(body))
+          .expect(400)
+          .end((err, res) => {
+            expect(err).to.not.exist;
+            expect(res.body.error.details).to.match(/some members are not belonged to group/);
+            done();
+          });
+      });
+    });
+
     it('should respond 204 on success (remove external member)', function(done) {
       const body = [
         { objectType: 'email', id: 'outsider@external.org' }
@@ -227,25 +274,41 @@ describe('The update group members API: POST /groups/:id/members', () => {
   });
 
   describe('The add members API: POST /api/groups/:id/members?action=add', function() {
-    it('should return 200 without members which are invalid user or already existing member', function(done) {
+    it('should respond 400 when trying to add user member which does not exist', function(done) {
       const members = [
-        { id: new ObjectId(), objectType: 'user'},
-        { id: adminUser.id, objectType: 'user'},
-        { id: adminUser.preferredEmail, objectType: 'email'},
-        { id: 'outsider@external.org', objectType: 'email' }
+        { id: new ObjectId(), objectType: 'user'}
       ];
 
       this.helpers.api.loginAsUser(app, adminUser.emails[0], password, (err, requestAsMember) => {
         expect(err).to.not.exist;
-        const req = requestAsMember(request(app).post(`/api/groups/${group.id}/members?action=add`));
 
-        req.expect(200);
-        req.send(members);
-        req.end((err, res) => {
-          expect(err).to.not.exist;
-          expect(res.body.length).equal(0);
-          done();
-        });
+        requestAsMember(request(app).post(`/api/groups/${group.id}/members?action=add`))
+          .expect(400)
+          .send(members)
+          .end((err, res) => {
+            expect(err).to.not.exist;
+            expect(res.body.error.details).to.match(/some members are invalid/);
+            done();
+          });
+      });
+    });
+
+    it('should respond 409 when trying to add already existing member', function(done) {
+      const members = [
+        { id: adminUser.id, objectType: 'user'}
+      ];
+
+      this.helpers.api.loginAsUser(app, adminUser.emails[0], password, (err, requestAsMember) => {
+        expect(err).to.not.exist;
+
+        requestAsMember(request(app).post(`/api/groups/${group.id}/members?action=add`))
+          .expect(409)
+          .send(members)
+          .end((err, res) => {
+            expect(err).to.not.exist;
+            expect(res.body.error.details).to.match(/some members are already added/);
+            done();
+          });
       });
     });
 

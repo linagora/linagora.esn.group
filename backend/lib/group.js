@@ -11,14 +11,28 @@ module.exports = dependencies => {
   const Group = mongoose.model('Group');
 
   return {
+    addMembers,
     create,
     deleteById,
     getById,
     getMemberEmail,
     getAllMembers,
     list,
+    removeMembers,
     updateById
   };
+
+  function addMembers(group, members) {
+    return q.denodeify(coreCollaboration.member.addMembers)(group, members)
+      .then(data => {
+        publish(EVENTS.MEMBERS_ADDED, {
+          id: group.id,
+          payload: { group, members }
+        });
+
+        return data;
+      });
+  }
 
   function create(group) {
     return Group.create(group).then(group => {
@@ -54,6 +68,18 @@ module.exports = dependencies => {
         publish(EVENTS.DELETED, { id: groupId, payload: group });
 
         return group;
+      });
+  }
+
+  function removeMembers(group, members) {
+    return q.denodeify(coreCollaboration.member.removeMembers)(group, members)
+      .then(data => {
+        publish(EVENTS.MEMBERS_REMOVED, {
+          id: group.id,
+          payload: { group, members }
+        });
+
+        return data;
       });
   }
 
