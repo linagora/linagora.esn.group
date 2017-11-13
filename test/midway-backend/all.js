@@ -45,11 +45,12 @@ before(function(done) {
   const nodeModulesPath = path.normalize(
     path.join(__dirname, '../../node_modules/')
   );
-  const nodeModulesLoader = manager.loaders.filesystem(nodeModulesPath, true);
-  const loader = manager.loaders.code(require('../../index.js'), true);
 
-  manager.appendLoader(nodeModulesLoader);
+  const loader = manager.loaders.code(require('../../index.js'), true);
+  const nodeModulesLoader = manager.loaders.filesystem(nodeModulesPath, true);
+
   manager.appendLoader(loader);
+  manager.appendLoader(nodeModulesLoader);
 
   loader.load(MODULE_NAME, done);
 });

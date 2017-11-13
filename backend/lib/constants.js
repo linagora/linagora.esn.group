@@ -10,7 +10,9 @@ module.exports = {
   EVENTS: {
     CREATED: 'group:created',
     DELETED: 'group:deleted',
-    UPDATED: 'group:updated'
+    UPDATED: 'group:updated',
+    MEMBERS_ADDED: 'group:members:added',
+    MEMBERS_REMOVED: 'group:members:removed'
   },
   SEARCH: {
     TYPE_NAME: 'groups',
