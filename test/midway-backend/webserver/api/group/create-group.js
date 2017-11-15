@@ -117,7 +117,7 @@ describe('The create group API: POST /groups', () => {
     });
   });
 
-  it('should return 400 if group email is used', function(done) {
+  it('should return 400 if group email is used by another group', function(done) {
     const group = {
       name: 'example',
       email: 'example@lngr.org'
@@ -137,12 +137,31 @@ describe('The create group API: POST /groups', () => {
           req.expect(400);
           req.end((err, res) => {
             expect(err).to.not.exist;
-            expect(res.body.error.details).to.equal('email is used by another group');
+            expect(res.body.error.details).to.equal('email is already in use');
 
             done();
           });
         }))
       .catch(done);
+  });
+
+  it('should return 400 if group email is used by user', function(done) {
+    this.helpers.api.loginAsUser(app, user.emails[0], password, (err, requestAsMember) => {
+      expect(err).to.not.exist;
+      const req = requestAsMember(request(app).post('/api/groups'));
+
+      req.send({
+        name: 'group',
+        email: user.emails[0]
+      });
+      req.expect(400);
+      req.end((err, res) => {
+        expect(err).to.not.exist;
+        expect(res.body.error.details).to.equal('email is already in use');
+
+        done();
+      });
+    });
   });
 
   it('should create group with a filtered list of members, without duplicated or invalid emails', function(done) {

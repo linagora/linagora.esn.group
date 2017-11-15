@@ -55,14 +55,11 @@ module.exports = (dependencies, lib) => {
       return send400Error('email is not a valid email address', res);
     }
 
-    lib.group.list({ email })
-      .then(groups => {
-        if (groups.length === 1 && groups[0].email === req.group.email || !groups.length) {
-          return next();
-        }
+    lib.group.isEmailAvailableToUse(email, [req.group]).then(available => {
+      if (!available) { return send400Error('email is already in use', res); }
 
-        send400Error('email is used by another group', res);
-      })
+      next();
+    })
       .catch(err => send500Error('Unable to validate email', err, res));
   }
 
@@ -85,15 +82,15 @@ module.exports = (dependencies, lib) => {
       return send400Error('members must be an array', res);
     }
 
-    lib.group.list({ email })
-      .then(groups => {
-        if (groups.length) {
-          return send400Error('email is used by another group', res);
-        }
-        req.body.members = [...new Set(members)].filter(member => emailAddresses.parseOneAddress(member) !== null);
+    lib.group.isEmailAvailableToUse(email).then(function(available) {
+      if (!available) {
+        return send400Error('email is already in use', res);
+      }
 
-        next();
-      })
+      req.body.members = [...new Set(members)].filter(member => emailAddresses.parseOneAddress(member) !== null);
+
+      next();
+    })
       .catch(err => send500Error('Unable to validate email', err, res));
   }
 

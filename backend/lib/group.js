@@ -8,6 +8,7 @@ module.exports = dependencies => {
   const pubsub = dependencies('pubsub').local;
   const coreCollaboration = dependencies('collaboration');
   const mongoose = dependencies('db').mongo.mongoose;
+  const coreUser = dependencies('user');
   const Group = mongoose.model('Group');
 
   return {
@@ -20,7 +21,8 @@ module.exports = dependencies => {
     list,
     removeMembers,
     resolveMember,
-    updateById
+    updateById,
+    isEmailAvailableToUse
   };
 
   function addMembers(group, members) {
@@ -132,5 +134,17 @@ module.exports = dependencies => {
     if (id && payload) {
       pubsub.topic(topicName).publish(new Event(null, topicName, OBJECT_TYPE, String(id), payload));
     }
+  }
+
+  function isEmailAvailableToUse(email, whiteListGroup = []) {
+    return list({ email })
+      .then(groups => {
+        const noGroupConflict = !groups[0] || whiteListGroup.some(group => groups[0].id === group.id);
+
+        if (noGroupConflict) {
+          return q.ninvoke(coreUser, 'findByEmail', email)
+            .then(user => !user);
+        }
+      });
   }
 };
