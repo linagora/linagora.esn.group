@@ -8,10 +8,11 @@ var expect = chai.expect;
 describe('The groupService', function() {
   var $rootScope;
   var GROUP_EVENTS;
-  var groupService, groupApiClient;
+  var groupService, groupApiClient, userAPI;
   var attendeeService;
 
   beforeEach(function() {
+
     module('linagora.esn.group');
 
     inject(function(
@@ -19,13 +20,15 @@ describe('The groupService', function() {
       _groupService_,
       _groupApiClient_,
       _GROUP_EVENTS_,
-      _attendeeService_
+      _attendeeService_,
+      _userAPI_
     ) {
       $rootScope = _$rootScope_;
       groupApiClient = _groupApiClient_;
       groupService = _groupService_;
       GROUP_EVENTS = _GROUP_EVENTS_;
       attendeeService = _attendeeService_;
+      userAPI = _userAPI_;
     });
   });
 
@@ -284,6 +287,67 @@ describe('The groupService', function() {
       $rootScope.$digest();
 
       expect($rootScope.$broadcast).to.have.been.calledWith(GROUP_EVENTS.GROUP_DELETED, group);
+    });
+  });
+
+  describe('The isEmailAvailableToUse function', function() {
+    it('should resolve value of false if email is used by another group', function(done) {
+      var response = { data: [{ id: 123, name: 'group' }] };
+
+      groupApiClient.list = sinon.stub().returns($q.when(response));
+
+      groupService.isEmailAvailableToUse('email', []).then(function(result) {
+        expect(groupApiClient.list).to.have.been.calledWith({ email: 'email' });
+        expect(result).to.not.be.ok;
+        done();
+      });
+
+      $rootScope.$digest();
+    });
+
+    it('should resolve value of false if email is used by another user', function(done) {
+      var response = { data: [{ id: 123, name: 'group' }] };
+
+      groupApiClient.list = sinon.stub().returns($q.when({ data: [] }));
+      userAPI.getUsersByEmail = sinon.stub().returns($q.when(response));
+
+      groupService.isEmailAvailableToUse('email', []).then(function(result) {
+        expect(result).to.equal(false);
+        expect(userAPI.getUsersByEmail).to.have.been.calledWith('email');
+        done();
+      });
+
+      $rootScope.$digest();
+    });
+
+    it('should resolve value of true if email is not used by any group nor user', function(done) {
+      var response = { data: [] };
+
+      userAPI.getUsersByEmail = sinon.stub().returns($q.when(response));
+      groupApiClient.list = sinon.stub().returns($q.when(response));
+
+      groupService.isEmailAvailableToUse('email', []).then(function(result) {
+        expect(result).to.equal(true);
+        expect(userAPI.getUsersByEmail).to.have.been.calledWith('email');
+        done();
+      });
+
+      $rootScope.$digest();
+    });
+
+    it('should resolve value of true if email is not changed', function(done) {
+      var group = { id: 123, name: 'group' };
+
+      userAPI.getUsersByEmail = sinon.stub().returns($q.when({ data: [] }));
+      groupApiClient.list = sinon.stub().returns($q.when({ data: [group] }));
+
+      groupService.isEmailAvailableToUse('email', [group]).then(function(result) {
+        expect(result).to.equal(true);
+        expect(groupApiClient.list).to.have.been.calledWith({ email: 'email' });
+        done();
+      });
+
+      $rootScope.$digest();
     });
   });
 });

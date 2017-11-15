@@ -41,6 +41,12 @@ angular.module('esn.async-action', [])
   });
 angular.module('esn.core', [])
   .constant('_', _);
+angular.module('esn.user', [])
+  .factory('userAPI', function() {
+    return {
+      getUsersByEmail: {}
+    };
+  });
 angular.module('esn.attendee', [])
   .constant('ESN_ATTENDEE_DEFAULT_TEMPLATE_URL', '')
   .factory('attendeeService', function() {

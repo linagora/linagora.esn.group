@@ -13,7 +13,8 @@
     asyncAction,
     session,
     groupApiClient,
-    GROUP_EVENTS
+    GROUP_EVENTS,
+    userAPI
   ) {
     var MEMBER_SEARCH_LIMIT = 20;
 
@@ -23,7 +24,8 @@
       deleteGroup: deleteGroup,
       update: update,
       removeMembers: removeMembers,
-      searchMemberCandidates: searchMemberCandidates
+      searchMemberCandidates: searchMemberCandidates,
+      isEmailAvailableToUse: isEmailAvailableToUse
     };
 
     function create(group) {
@@ -135,5 +137,22 @@
         $rootScope.$broadcast(GROUP_EVENTS.GROUP_DELETED, group);
       });
     }
+
+    function isEmailAvailableToUse(email, whiteListGroups) {
+      whiteListGroups = whiteListGroups || [];
+
+      return groupApiClient.list({ email: email })
+        .then(function(response) {
+          var group = response.data[0];
+          var noGroupConflict = !group || whiteListGroups.some(function(groupItem) { return group.id === groupItem.id; });
+
+          if (noGroupConflict) {
+            return userAPI.getUsersByEmail(email).then(function(response) {
+              return !response.data[0];
+            });
+          }
+        });
+    }
+
   }
 })(angular);

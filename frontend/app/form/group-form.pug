@@ -4,7 +4,7 @@ ng-form(name="form")
       esn-form-group(label=__('Name'))
         input.form-control(type="text", ng-model="$ctrl.group.name", name="groupName", required)
     .col-md-6
-      group-email-input(email="$ctrl.group.email", form="form")
+      group-email-input(email="$ctrl.group.email", form="form", availability-checker="$ctrl.emailAvailabilityChecker(email)")
   .row(ng-if="!$ctrl.updateMode")
     .col-xs-6
       h5 #{__('Members')}

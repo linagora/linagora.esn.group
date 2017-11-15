@@ -7,7 +7,8 @@
       controller: 'GroupEmailInputController',
       bindings: {
         email: '=',
-        form: '<'
+        form: '<',
+        availabilityChecker: '&'
       }
     });
 })(angular);

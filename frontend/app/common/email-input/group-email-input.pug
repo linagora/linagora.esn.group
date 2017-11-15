@@ -1,3 +1,3 @@
-esn-form-group(label=__('Email'), form='$ctrl.form', pattern-error-message=__('Invalid email'))
+esn-form-group(label=__('Email'), form='$ctrl.form', pattern-error-message=__('Invalid email'), async-validator-error-message=__('Email is already in use. Try another one.'), async-validator="$ctrl.checker")
   input.form-control(type="text", maxlength="255", pattern="([a-zA-Z0-9_.+-]+)", ng-model="$ctrl.emailName", ng-change="$ctrl.buildEmail()", name="groupEmail", required)
 span(title="{{$ctrl.domainName}}") @{{::$ctrl.domainName}}
