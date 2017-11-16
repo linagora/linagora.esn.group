@@ -30,7 +30,7 @@ describe('The groupForm component', function() {
   }
 
   it('should display inputs to create/update group', function() {
-    var element = initComponent();
+    var element = initComponent('<group-form group="group" />');
 
     expect(element.find('input[ng-model="$ctrl.group.name"]')).to.have.length(1);
     expect(element.find('group-email-input')).to.have.length(1);

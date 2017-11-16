@@ -119,7 +119,26 @@ describe('The update group API: POST /groups/:id', () => {
       req.expect(400);
       req.end((err, res) => {
         expect(err).to.not.exist;
-        expect(res.body.error.details).to.equal('email is used by another group');
+        expect(res.body.error.details).to.equal('email is already in use');
+
+        done();
+      });
+    });
+  });
+
+  it('should return 400 if group email is used by user', function(done) {
+    this.helpers.api.loginAsUser(app, adminUser.emails[0], password, (err, requestAsMember) => {
+      expect(err).to.not.exist;
+      const req = requestAsMember(request(app).post('/api/groups'));
+
+      req.send({
+        name: 'group',
+        email: adminUser.emails[0]
+      });
+      req.expect(400);
+      req.end((err, res) => {
+        expect(err).to.not.exist;
+        expect(res.body.error.details).to.equal('email is already in use');
 
         done();
       });

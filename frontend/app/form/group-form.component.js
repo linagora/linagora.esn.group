@@ -9,6 +9,7 @@
       group: '=',
       newMembers: '=',
       updateMode: '@'
-    }
+    },
+    controller: 'GroupFormController'
   });
 })(angular);

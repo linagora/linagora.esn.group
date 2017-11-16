@@ -11,6 +11,7 @@
     'esn.http',
     'esn.infinite-list',
     'esn.core',
+    'esn.user',
     'esn.async-action',
     'esn.session',
     'esn.attendee',
