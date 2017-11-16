@@ -5,5 +5,6 @@ block left
   span.title.ellipsis {{$ctrl.group.name}}
 
 block right
-  button.btn-link.btn-icon.button(esn-modal-launcher="/group/app/delete/group-delete.html")
+  div(dynamic-directive="group-display-subheader-actions")
+  button.btn-link.btn-icon.button(title=__('Delete'), esn-modal-launcher="/group/app/delete/group-delete.html")
     i.mdi.mdi-delete
