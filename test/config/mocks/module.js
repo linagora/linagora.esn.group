@@ -40,7 +40,14 @@ angular.module('esn.async-action', [])
     };
   });
 angular.module('esn.core', [])
-  .constant('_', _);
+  .constant('_', _)
+  .factory('emailService', function() {
+    return {
+      isValidEmail: function() {
+        return true;
+      }
+    };
+  });
 angular.module('esn.user', [])
   .factory('userAPI', function() {
     return {

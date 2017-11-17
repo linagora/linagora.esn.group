@@ -7,7 +7,7 @@ var expect = chai.expect;
 
 describe('The GroupMemberAutoCompleteController', function() {
   var $controller, $rootScope, $scope, $elementMock;
-  var elementScrollService;
+  var elementScrollService, emailService;
 
   beforeEach(function() {
     module('linagora.esn.group');
@@ -20,10 +20,11 @@ describe('The GroupMemberAutoCompleteController', function() {
       $provide.value('$element', $elementMock);
     });
 
-    inject(function(_$controller_, _$rootScope_, _elementScrollService_) {
+    inject(function(_$controller_, _$rootScope_, _elementScrollService_, _emailService_) {
       $controller = _$controller_;
       $rootScope = _$rootScope_;
       elementScrollService = _elementScrollService_;
+      emailService = _emailService_;
     });
   });
 
@@ -42,6 +43,17 @@ describe('The GroupMemberAutoCompleteController', function() {
 
     beforeEach(function() {
       newMembers = [{ email: 'user1@abc.com' }];
+    });
+
+    it('should disallow adding invalid email address', function() {
+      emailService.isValidEmail = sinon.spy(function() { return false; });
+
+      var controller = initController();
+      var $tag = { email: 'invalid..@email' };
+      var response = controller.onTagAdding($tag);
+
+      expect(response).to.be.false;
+      expect(emailService.isValidEmail).to.have.been.calledWith($tag.email);
     });
 
     it('should not add new tag if it already have been existed in array of new member emails', function() {

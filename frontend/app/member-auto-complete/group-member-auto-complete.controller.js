@@ -4,7 +4,13 @@
   angular.module('linagora.esn.group')
     .controller('GroupMemberAutoCompleteController', GroupMemberAutoCompleteController);
 
-  function GroupMemberAutoCompleteController($element, elementScrollService, groupService, _) {
+  function GroupMemberAutoCompleteController(
+    $element,
+    _,
+    elementScrollService,
+    emailService,
+    groupService
+  ) {
     var self = this;
 
     self.search = function(query) {
@@ -12,7 +18,7 @@
     };
 
     self.onTagAdding = function($tag) {
-      return !_isDuplicatedMember($tag, self.newMembers);
+      return emailService.isValidEmail($tag.email) && !_isDuplicatedMember($tag, self.newMembers);
     };
 
     self.onTagAdded = function() {
