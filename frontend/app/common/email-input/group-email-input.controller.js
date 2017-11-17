@@ -4,12 +4,17 @@
   angular.module('linagora.esn.group')
     .controller('GroupEmailInputController', GroupEmailInputController);
 
-    function GroupEmailInputController($q, session) {
+    function GroupEmailInputController(
+      $q,
+      session,
+      emailService
+    ) {
       var self = this;
 
       self.$onInit = $onInit;
-      self.buildEmail = buildEmail;
-      self.checker = checker;
+      self.availabilityValidator = availabilityValidator;
+      self.emailValidator = emailValidator;
+      self.onChange = onChange;
 
       function $onInit() {
         self.domainName = session.domain.name;
@@ -22,12 +27,12 @@
         }
       }
 
-      function buildEmail() {
-        self.email = [self.emailName, '@', self.domainName].join('');
+      function onChange() {
+        self.email = buildEmail(self.emailName);
       }
 
-      function checker(emailName) {
-        var email = [emailName, '@', self.domainName].join('');
+      function availabilityValidator(emailName) {
+        var email = buildEmail(emailName);
         var emailAvailability = self.availabilityChecker({ email: email });
 
         return emailAvailability.then(function(available) {
@@ -37,5 +42,12 @@
         });
       }
 
+      function emailValidator(emailName) {
+        return emailService.isValidEmail(buildEmail(emailName));
+      }
+
+      function buildEmail(emailName) {
+        return [emailName, self.domainName].join('@');
+      }
     }
 })(angular);
