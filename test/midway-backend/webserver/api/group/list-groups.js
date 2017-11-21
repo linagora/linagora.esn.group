@@ -110,5 +110,19 @@ describe('GET /groups', () => {
           });
       });
     });
+
+    it('should return 200 with a group matching email query (case insentive)', function(done) {
+      this.helpers.api.loginAsUser(app, user.emails[0], password, (err, requestAsMember) => {
+        expect(err).to.not.exist;
+        requestAsMember(request(app).get(`/api/groups?email=${createdGroup1.email.toUpperCase()}`))
+          .expect(200)
+          .end((err, res) => {
+            expect(err).to.not.exist;
+            expect(res.body.length).to.equal(1);
+            expect(res.body[0]).to.shallowDeepEqual({ id: createdGroup1.id });
+            done();
+          });
+      });
+    });
   });
 });

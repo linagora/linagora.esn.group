@@ -14,6 +14,7 @@ module.exports = dependencies => {
       required: true,
       trim: true,
       unique: true,
+      lowercase: true,
       validate: [validateEmail, 'Invalid email address']
     }
   };
