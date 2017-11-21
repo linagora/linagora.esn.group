@@ -69,10 +69,11 @@
     }
 
     function removeMembers(groupId, members) {
+      var subject = members.length > 1 ? 'members' : 'member';
       var notificationMessages = {
-        progressing: esnI18nService.translate('Removing %s members...', members.length),
-        success: esnI18nService.translate('Removed %s members', members.length),
-        failure: 'Failed to remove members'
+        progressing: esnI18nService.translate('Removing %s ' + subject + '...', members.length),
+        success: esnI18nService.translate('Removed %s ' + subject, members.length),
+        failure: 'Failed to remove ' + subject
       };
 
       return asyncAction(notificationMessages, function() {
@@ -87,10 +88,11 @@
         return $q.reject(new Error('group.id is required'));
       }
 
+      var subject = members.length > 1 ? 'members' : 'member';
       var notificationMessages = {
-        progressing: 'Adding members...',
-        success: esnI18nService.translate('Added %s members', members.length),
-        failure: 'Failed to add members'
+        progressing: 'Adding ' + subject + '...',
+        success: esnI18nService.translate('Added %s ' + subject, members.length),
+        failure: 'Failed to add ' + subject
       };
 
       return asyncAction(notificationMessages, function() {
