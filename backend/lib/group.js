@@ -49,7 +49,7 @@ module.exports = dependencies => {
     const query = {};
 
     if (options.email) {
-      query.email = options.email;
+      query.email = String(options.email).toLowerCase();
     }
 
     if (options.domainId) {
