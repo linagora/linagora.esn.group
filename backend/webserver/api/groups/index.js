@@ -12,7 +12,7 @@ module.exports = function(dependencies, lib, router) {
 
   router.post('/groups',
     authorizationMW.requiresAPILogin,
-    domainMW.loadDomainByHostname,
+    domainMW.loadSessionDomain,
     middleware.canCreate,
     middleware.validateGroupCreation,
     controller.create
@@ -20,14 +20,14 @@ module.exports = function(dependencies, lib, router) {
 
   router.get('/groups',
     authorizationMW.requiresAPILogin,
-    domainMW.loadDomainByHostname,
+    domainMW.loadSessionDomain,
     middleware.canList,
     controller.list
   );
 
   router.get('/groups/:id',
     authorizationMW.requiresAPILogin,
-    domainMW.loadDomainByHostname,
+    domainMW.loadSessionDomain,
     helperMW.checkIdInParams('id', MODEL_NAME),
     middleware.load,
     middleware.canGet,
@@ -36,7 +36,7 @@ module.exports = function(dependencies, lib, router) {
 
   router.post('/groups/:id',
     authorizationMW.requiresAPILogin,
-    domainMW.loadDomainByHostname,
+    domainMW.loadSessionDomain,
     helperMW.checkIdInParams('id', MODEL_NAME),
     middleware.load,
     middleware.canUpdate,
@@ -46,7 +46,7 @@ module.exports = function(dependencies, lib, router) {
 
   router.delete('/groups/:id',
     authorizationMW.requiresAPILogin,
-    domainMW.loadDomainByHostname,
+    domainMW.loadSessionDomain,
     helperMW.checkIdInParams('id', MODEL_NAME),
     middleware.load,
     middleware.canDelete,
@@ -55,7 +55,7 @@ module.exports = function(dependencies, lib, router) {
 
   router.get('/groups/:id/members',
     authorizationMW.requiresAPILogin,
-    domainMW.loadDomainByHostname,
+    domainMW.loadSessionDomain,
     helperMW.checkIdInParams('id', MODEL_NAME),
     middleware.load,
     middleware.canGetMembers,
@@ -64,7 +64,7 @@ module.exports = function(dependencies, lib, router) {
 
   router.post('/groups/:id/members',
     authorizationMW.requiresAPILogin,
-    domainMW.loadDomainByHostname,
+    domainMW.loadSessionDomain,
     helperMW.checkIdInParams('id', MODEL_NAME),
     helperMW.requireInQuery('action'),
     helperMW.requireBodyAsArray,
