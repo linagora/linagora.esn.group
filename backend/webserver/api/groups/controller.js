@@ -173,9 +173,7 @@ module.exports = function(dependencies, lib) {
   }
 
   function isMember(group, member) {
-    return member && group.members.some(memberObj =>
-      String(memberObj.member.id) === String(member.id) && memberObj.member.objectType === member.objectType
-    );
+    return member && group.members.some(memberObj => coreTuple.isEqual(memberObj.member, member));
   }
 
   function verifyMemberTuple(member) {
@@ -183,7 +181,7 @@ module.exports = function(dependencies, lib) {
       return q.ninvoke(coreUser, 'get', member.id)
         .then(user => {
           if (user) {
-            return member;
+            return coreTuple.user(member.id);
           }
         });
     }
@@ -195,7 +193,7 @@ module.exports = function(dependencies, lib) {
             return coreTuple.user(user.id);
           }
 
-          return member;
+          return coreTuple.email(member.id);
         });
     }
   }

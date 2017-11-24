@@ -219,13 +219,13 @@ describe('The create group API: POST /groups', () => {
     });
   });
 
-  it('should create a group with a list of members', function(done) {
+  it('should create a group with a list of members and convert email member to lower case', function(done) {
     const group = {
       name: 'groupname',
       email: 'group@linagora.com',
       members: [
         user.emails[0],
-        'user@external.com'
+        'User@External.com'
       ]
     };
 

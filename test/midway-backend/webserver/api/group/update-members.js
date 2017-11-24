@@ -226,9 +226,32 @@ describe('The update group members API: POST /groups/:id/members', () => {
       });
     });
 
-    it('should respond 204 on success (remove external member)', function(done) {
+    it('should respond 204 on success (remove email member)', function(done) {
       const body = [
         { objectType: 'email', id: 'outsider@external.org' }
+      ];
+
+      this.helpers.api.loginAsUser(app, adminUser.emails[0], password, (err, requestAsMember) => {
+        expect(err).to.not.exist;
+        requestAsMember(request(app).post(`/api/groups/${group.id}/members?action=remove`).send(body))
+          .expect(204)
+          .end(err => {
+            expect(err).to.not.exist;
+
+            lib.group.getById(group.id)
+              .then(group => {
+                expect(group.members).to.have.length(1);
+                expect(group.members[0].member).to.shallowDeepEqual({ objectType: 'user', id: adminUser._id });
+                done();
+              })
+              .catch(err => done(err || 'should resolve'));
+          });
+      });
+    });
+
+    it('should respond 204 on success (remove email member, case insensitive)', function(done) {
+      const body = [
+        { objectType: 'email', id: 'Outsider@External.org' }
       ];
 
       this.helpers.api.loginAsUser(app, adminUser.emails[0], password, (err, requestAsMember) => {
@@ -312,10 +335,29 @@ describe('The update group members API: POST /groups/:id/members', () => {
       });
     });
 
-    it('should return 200 with resolved added members', function(done) {
+    it('should respond 409 when trying to add already existing member (email member, case insensitive)', function(done) {
+      const members = [
+        { id: 'Outsider@External.org', objectType: 'email'}
+      ];
+
+      this.helpers.api.loginAsUser(app, adminUser.emails[0], password, (err, requestAsMember) => {
+        expect(err).to.not.exist;
+
+        requestAsMember(request(app).post(`/api/groups/${group.id}/members?action=add`))
+          .expect(409)
+          .send(members)
+          .end((err, res) => {
+            expect(err).to.not.exist;
+            expect(res.body.error.details).to.match(/some members are already added/);
+            done();
+          });
+      });
+    });
+
+    it('should return 200 with resolved added members and convert email member to lower case', function(done) {
       const members = [
         { id: regularUser.preferredEmail, objectType: 'email'},
-        { id: 'test@email.com', objectType: 'email'}
+        { id: 'Test@email.com', objectType: 'email'}
       ];
 
       this.helpers.api.loginAsUser(app, adminUser.emails[0], password, (err, requestAsMember) => {
