@@ -354,10 +354,10 @@ describe('The update group members API: POST /groups/:id/members', () => {
       });
     });
 
-    it('should return 200 with resolved added members', function(done) {
+    it('should return 200 with resolved added members and convert email member to lower case', function(done) {
       const members = [
         { id: regularUser.preferredEmail, objectType: 'email'},
-        { id: 'test@email.com', objectType: 'email'}
+        { id: 'Test@email.com', objectType: 'email'}
       ];
 
       this.helpers.api.loginAsUser(app, adminUser.emails[0], password, (err, requestAsMember) => {

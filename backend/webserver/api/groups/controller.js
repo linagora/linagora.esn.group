@@ -181,7 +181,7 @@ module.exports = function(dependencies, lib) {
       return q.ninvoke(coreUser, 'get', member.id)
         .then(user => {
           if (user) {
-            return member;
+            return coreTuple.user(member.id);
           }
         });
     }
@@ -193,7 +193,7 @@ module.exports = function(dependencies, lib) {
             return coreTuple.user(user.id);
           }
 
-          return member;
+          return coreTuple.email(member.id);
         });
     }
   }
