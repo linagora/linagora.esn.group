@@ -173,9 +173,7 @@ module.exports = function(dependencies, lib) {
   }
 
   function isMember(group, member) {
-    return member && group.members.some(memberObj =>
-      String(memberObj.member.id) === String(member.id) && memberObj.member.objectType === member.objectType
-    );
+    return member && group.members.some(memberObj => coreTuple.isEqual(memberObj.member, member));
   }
 
   function verifyMemberTuple(member) {
