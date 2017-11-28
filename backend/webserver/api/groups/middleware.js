@@ -65,6 +65,7 @@ module.exports = (dependencies, lib) => {
 
   function validateGroupCreation(req, res, next) {
     const { name, email, members } = req.body;
+    const domain = req.domain;
 
     if (!name) {
       return send400Error('name is required', res);
@@ -74,8 +75,14 @@ module.exports = (dependencies, lib) => {
       return send400Error('email is required', res);
     }
 
-    if (emailAddresses.parseOneAddress(email) === null) {
+    const parsedEmail = emailAddresses.parseOneAddress(email);
+
+    if (!parsedEmail) {
       return send400Error('email is not a valid email address', res);
+    }
+
+    if (parsedEmail.domain !== domain.name) {
+      return send400Error(`email must belong to domain "${domain.name}"`, res);
     }
 
     if (members && !Array.isArray(members)) {

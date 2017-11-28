@@ -6,7 +6,7 @@ const path = require('path');
 const MODULE_NAME = 'linagora.esn.group';
 
 describe('The create group API: POST /groups', () => {
-  let app, deployOptions, user, lib;
+  let app, deployOptions, user, domain, lib;
   const password = 'secret';
 
   beforeEach(function(done) {
@@ -28,6 +28,7 @@ describe('The create group API: POST /groups', () => {
           return done(err);
         }
         user = models.users[0];
+        domain = models.domain;
         lib = this.helpers.modules.current.lib.lib;
 
         done();
@@ -42,6 +43,10 @@ describe('The create group API: POST /groups', () => {
     });
   });
 
+  function buildEmail(local) {
+    return `${local}@${domain.name}`;
+  }
+
   it('should return 401 if not logged in', function(done) {
     this.helpers.api.requireLogin(app, 'post', '/api/groups', done);
   });
@@ -51,7 +56,7 @@ describe('The create group API: POST /groups', () => {
       expect(err).to.not.exist;
       const req = requestAsMember(request(app).post('/api/groups'));
 
-      req.send({ email: 'group@lngr.com' });
+      req.send({ email: buildEmail('mygroup') });
       req.expect(400);
       req.end((err, res) => {
         expect(err).to.not.exist;
@@ -97,6 +102,25 @@ describe('The create group API: POST /groups', () => {
     });
   });
 
+  it('should return 400 if group email does not belong to current domain', function(done) {
+    this.helpers.api.loginAsUser(app, user.emails[0], password, (err, requestAsMember) => {
+      expect(err).to.not.exist;
+      const req = requestAsMember(request(app).post('/api/groups'));
+
+      req.send({
+        name: 'group',
+        email: 'email@whatever'
+      });
+      req.expect(400);
+      req.end((err, res) => {
+        expect(err).to.not.exist;
+        expect(res.body.error.details).to.equal(`email must belong to domain "${domain.name}"`);
+
+        done();
+      });
+    });
+  });
+
   it('shoud return 400 if members given is not a list ', function(done) {
     this.helpers.api.loginAsUser(app, user.emails[0], password, (err, requestAsMember) => {
       expect(err).to.not.exist;
@@ -104,7 +128,7 @@ describe('The create group API: POST /groups', () => {
 
       req.send({
         name: 'group',
-        email: 'group@lngr.com',
+        email: buildEmail('mygroup'),
         members: 'invalid'
       });
       req.expect(400);
@@ -120,11 +144,11 @@ describe('The create group API: POST /groups', () => {
   it('should return 400 if group email is used by another group', function(done) {
     const group = {
       name: 'example',
-      email: 'example@lngr.org'
+      email: buildEmail('mygroup')
     };
 
     lib.group.create(group)
-      .then(createdGroup => this.helpers.api.loginAsUser(app, user.emails[0], password, (err, requestAsMember) => {
+      .then(() => this.helpers.api.loginAsUser(app, user.emails[0], password, (err, requestAsMember) => {
           if (err) {
             return done(err);
           }
@@ -132,7 +156,7 @@ describe('The create group API: POST /groups', () => {
 
           req.send({
             name: 'another group',
-            email: createdGroup.email
+            email: group.email
           });
           req.expect(400);
           req.end((err, res) => {
@@ -167,7 +191,7 @@ describe('The create group API: POST /groups', () => {
   it('should create group with a filtered list of members, without duplicated or invalid emails', function(done) {
     const group = {
       name: 'groupname',
-      email: 'group@linagora.com',
+      email: buildEmail('mygroup'),
       members: [
         'external@outside.org',
         'external@outside.org',
@@ -198,31 +222,10 @@ describe('The create group API: POST /groups', () => {
     });
   });
 
-  it('should create a group', function(done) {
-    const group = {
-      name: 'groupname',
-      email: 'group@linagora.com',
-      members: []
-    };
-
-    this.helpers.api.loginAsUser(app, user.emails[0], password, (err, requestAsMember) => {
-      expect(err).to.not.exist;
-      const req = requestAsMember(request(app).post('/api/groups'));
-
-      req.send(group);
-      req.expect(201);
-      req.end((err, res) => {
-        expect(err).to.not.exist;
-        expect(res.body).to.shallowDeepEqual(group);
-        done();
-      });
-    });
-  });
-
   it('should create a group with a list of members and convert email member to lower case', function(done) {
     const group = {
       name: 'groupname',
-      email: 'group@linagora.com',
+      email: buildEmail('mygroup'),
       members: [
         user.emails[0],
         'User@External.com'
@@ -238,8 +241,8 @@ describe('The create group API: POST /groups', () => {
       req.end((err, res) => {
         expect(err).to.not.exist;
         expect(res.body).to.shallowDeepEqual({
-          name: 'groupname',
-          email: 'group@linagora.com',
+          name: group.name,
+          email: group.email,
           members: [
             {
               member: {
