@@ -16,6 +16,7 @@ module.exports = dependencies => {
     create,
     deleteById,
     getById,
+    getByEmail,
     getMemberEmail,
     getAllMembers,
     list,
@@ -112,6 +113,10 @@ module.exports = dependencies => {
 
   function getById(id) {
     return Group.findOne({ _id: id });
+  }
+
+  function getByEmail(email) {
+    return Group.findOne({ email: email.toLowerCase() });
   }
 
   function getMemberEmail(member) {

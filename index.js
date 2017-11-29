@@ -13,6 +13,7 @@ const myAwesomeModule = new AwesomeModule(AWESOME_MODULE_NAME, {
   dependencies: [
     new Dependency(Dependency.TYPE_NAME, 'linagora.esn.core.logger', 'logger'),
     new Dependency(Dependency.TYPE_NAME, 'linagora.esn.core.webserver.wrapper', 'webserver-wrapper'),
+    new Dependency(Dependency.TYPE_NAME, 'linagora.esn.core.availability', 'availability'),
     new Dependency(Dependency.TYPE_NAME, 'linagora.esn.core.db', 'db'),
     new Dependency(Dependency.TYPE_NAME, 'linagora.esn.core.collaboration', 'collaboration'),
     new Dependency(Dependency.TYPE_NAME, 'linagora.esn.core.user', 'user'),
@@ -75,7 +76,7 @@ const myAwesomeModule = new AwesomeModule(AWESOME_MODULE_NAME, {
     },
 
     start: function(dependencies, callback) {
-      this.lib.search.start();
+      this.lib.init();
 
       callback();
     }
