@@ -62,6 +62,54 @@ describe('The create group API: POST /groups', () => {
     });
   });
 
+  it('should return 400 if name is an object', function(done) {
+    this.helpers.api.loginAsUser(app, user.emails[0], password, (err, requestAsMember) => {
+      expect(err).to.not.exist;
+      const req = requestAsMember(request(app).post('/api/groups'));
+
+      req.send({ name: {}, email: 'group@lngr.com' });
+      req.expect(400);
+      req.end((err, res) => {
+        expect(err).to.not.exist;
+        expect(res.body.error.details).to.equal('name must be a non-empty string');
+
+        done();
+      });
+    });
+  });
+
+  it('should return 400 if name is an array', function(done) {
+    this.helpers.api.loginAsUser(app, user.emails[0], password, (err, requestAsMember) => {
+      expect(err).to.not.exist;
+      const req = requestAsMember(request(app).post('/api/groups'));
+
+      req.send({ name: ['group', 'name'], email: 'group@lngr.com' });
+      req.expect(400);
+      req.end((err, res) => {
+        expect(err).to.not.exist;
+        expect(res.body.error.details).to.equal('name must be a non-empty string');
+
+        done();
+      });
+    });
+  });
+
+  it('should return 400 if name is an empty string', function(done) {
+    this.helpers.api.loginAsUser(app, user.emails[0], password, (err, requestAsMember) => {
+      expect(err).to.not.exist;
+      const req = requestAsMember(request(app).post('/api/groups'));
+
+      req.send({ name: '  ', email: 'group@lngr.com' });
+      req.expect(400);
+      req.end((err, res) => {
+        expect(err).to.not.exist;
+        expect(res.body.error.details).to.equal('name must be a non-empty string');
+
+        done();
+      });
+    });
+  });
+
   it('should return 400 if no email is given', function(done) {
     this.helpers.api.loginAsUser(app, user.emails[0], password, (err, requestAsMember) => {
       expect(err).to.not.exist;

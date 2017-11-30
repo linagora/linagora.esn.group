@@ -70,6 +70,10 @@ module.exports = (dependencies, lib) => {
       return send400Error('name is required', res);
     }
 
+    if (typeof name !== 'string' || !name.trim()) {
+      return send400Error('name must be a non-empty string', res);
+    }
+
     if (!email) {
       return send400Error('email is required', res);
     }
