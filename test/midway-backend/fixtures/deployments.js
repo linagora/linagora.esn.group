@@ -7,7 +7,7 @@ module.exports = {
 function groupModule() {
   return {
     domain: {
-      name: 'group-domain',
+      name: 'open-paas.org',
       hostnames: [
         'localhost',
         '127.0.0.1'
@@ -22,7 +22,7 @@ function groupModule() {
         accounts: [{
           type: 'email',
           hosted: true,
-          emails: ['itadmin@lng.net']
+          emails: ['itadmin@open-paas.org']
         }]
       },
       {
@@ -32,7 +32,7 @@ function groupModule() {
         accounts: [{
           type: 'email',
           hosted: true,
-          emails: ['jdoe@lng.net']
+          emails: ['jdoe@open-paas.org']
         }]
       }
     ]
