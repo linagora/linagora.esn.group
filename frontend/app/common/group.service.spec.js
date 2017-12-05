@@ -350,4 +350,30 @@ describe('The groupService', function() {
       $rootScope.$digest();
     });
   });
+
+  describe('The isGroupMemberEmail function', function() {
+    it('should return false if there is existing member of given email', function(done) {
+      groupApiClient.getMembers = sinon.stub().returns($q.when({ data: [{ objectType: 'user', id: '123'}] }));
+
+      groupService.isGroupMemberEmail('groupId', 'email@exampl.com')
+        .then(function(result) {
+          expect(result).to.equal(false);
+          done();
+        });
+
+      $rootScope.$digest();
+    });
+
+    it('should return true if there is no existing member of given email', function(done) {
+      groupApiClient.getMembers = sinon.stub().returns($q.when({ data: [] }));
+
+      groupService.isGroupMemberEmail('groupId', 'email@exampl.com')
+        .then(function(result) {
+          expect(result).to.equal(true);
+          done();
+        });
+
+      $rootScope.$digest();
+    });
+  });
 });
