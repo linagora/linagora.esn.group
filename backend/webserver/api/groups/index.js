@@ -59,6 +59,7 @@ module.exports = function(dependencies, lib, router) {
     helperMW.checkIdInParams('id', MODEL_NAME),
     middleware.load,
     middleware.canGetMembers,
+    middleware.refineGetMembersQuery,
     controller.getMembers
   );
 

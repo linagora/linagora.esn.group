@@ -116,6 +116,35 @@ describe('The get group members API: GET /groups/:id/members', () => {
       .catch(done);
   });
 
+  describe('filtering members with email query', function() {
+    it('should respond 200 with empty list if the email query is given but not a valid email', function(done) {
+      this.helpers.api.loginAsUser(app, adminUser.emails[0], password, (err, requestAsMember) => {
+        expect(err).to.not.exist;
+        requestAsMember(request(app).get(`/api/groups/${group.id}/members?email=invalidemail`))
+          .expect(200)
+          .end((err, res) => {
+            expect(err).to.not.exist;
+            expect(res.body).to.have.length(0);
+            done();
+          });
+      });
+    });
+
+    it('should respond 200 with member filtered by email query', function(done) {
+      this.helpers.api.loginAsUser(app, adminUser.emails[0], password, (err, requestAsMember) => {
+        expect(err).to.not.exist;
+        requestAsMember(request(app).get(`/api/groups/${group.id}/members?email=${adminUser.preferredEmail}`))
+          .expect(200)
+          .end((err, res) => {
+            expect(err).to.not.exist;
+            expect(res.body).to.have.length(1);
+            expect(res.body[0].id).to.equal(adminUser.id);
+            done();
+          });
+      });
+    });
+  });
+
   it('should respond 200 with the members list if the current user is not a domain admin', function(done) {
     this.helpers.api.loginAsUser(app, regularUser.emails[0], password, (err, requestAsMember) => {
       expect(err).to.not.exist;

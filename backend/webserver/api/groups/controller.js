@@ -87,6 +87,14 @@ module.exports = function(dependencies, lib) {
       offset: +req.query.offset
     };
 
+    if (req.query.objectTypeFilter) {
+      query.objectTypeFilter = req.query.objectTypeFilter;
+    }
+
+    if (req.query.idFilter) {
+      query.idFilter = req.query.idFilter;
+    }
+
     q.denodeify(coreCollaboration.member.getMembers)(req.group, OBJECT_TYPE, query)
       .then(members => members.map(denormalizeMember))
       .then(members => {
