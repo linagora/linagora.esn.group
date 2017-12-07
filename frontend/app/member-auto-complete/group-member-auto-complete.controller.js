@@ -6,6 +6,7 @@
 
   function GroupMemberAutoCompleteController(
     $element,
+    $q,
     _,
     elementScrollService,
     emailService,
@@ -14,11 +15,19 @@
     var self = this;
 
     self.search = function(query) {
-      return groupService.searchMemberCandidates(query, self.ignoreMembers);
+      var ignoreMembers = self.group ? self.group.members : [];
+
+      return groupService.searchMemberCandidates(query, ignoreMembers);
     };
 
     self.onTagAdding = function($tag) {
-      return emailService.isValidEmail($tag.email) && !_isDuplicatedMember($tag, self.newMembers);
+      var isValidTag = emailService.isValidEmail($tag.email) && !_isDuplicatedMember($tag, self.newMembers);
+
+      if (!isValidTag || !self.group) {
+        return isValidTag;
+      }
+
+      return groupService.isGroupMemberEmail(self.group.id, $tag.email);
     };
 
     self.onTagAdded = function() {

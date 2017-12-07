@@ -8,7 +8,7 @@
     controller: 'GroupMemberAutoCompleteController',
     bindings: {
       newMembers: '=',
-      ignoreMembers: '<'
+      group: '<'
     }
   });
 })(angular);

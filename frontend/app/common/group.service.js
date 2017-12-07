@@ -25,7 +25,8 @@
       update: update,
       removeMembers: removeMembers,
       searchMemberCandidates: searchMemberCandidates,
-      isEmailAvailableToUse: isEmailAvailableToUse
+      isEmailAvailableToUse: isEmailAvailableToUse,
+      isGroupMemberEmail: isGroupMemberEmail
     };
 
     function create(group) {
@@ -153,6 +154,13 @@
               return !response.data[0];
             });
           }
+        });
+    }
+
+    function isGroupMemberEmail(groupId, email) {
+      return groupApiClient.getMembers(groupId, { email: email })
+        .then(function(response) {
+          return !response.data || !(response.data.length > 0);
         });
     }
 

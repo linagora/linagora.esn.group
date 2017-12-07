@@ -75,7 +75,7 @@
     /**
      * Get group members
      * @param  {String} groupId - The group ID
-     * @param  {Object} options - Query option, possible attributes are limit and offset
+     * @param  {Object} options - Query option, possible attributes are limit, offset or email
      * @return {Promise}        - Resolve response with member list
      */
     function getMembers(groupId, options) {

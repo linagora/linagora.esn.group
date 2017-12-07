@@ -1,11 +1,13 @@
 'use strict';
 
+const q = require('q');
 const emailAddresses = require('email-addresses');
 const composableMW = require('composable-middleware');
 
 module.exports = (dependencies, lib) => {
   const authorizationMW = dependencies('authorizationMW');
   const coreTuple = dependencies('tuple');
+  const coreUser = dependencies('user');
   const {
     send400Error,
     send403Error,
@@ -22,6 +24,7 @@ module.exports = (dependencies, lib) => {
     canUpdate,
     canUpdateMembers,
     load,
+    refineGetMembersQuery,
     validateGroupCreation,
     validateGroupUpdate,
     validateMembers
@@ -165,6 +168,35 @@ module.exports = (dependencies, lib) => {
     }
 
     next();
+  }
+
+  function refineGetMembersQuery(req, res, next) {
+    const email = req.query.email;
+
+    if (!email) {
+      return next();
+    }
+
+    if (emailAddresses.parseOneAddress(email) === null) {
+      return res.status(200).json([]);
+    }
+
+    let tuple;
+
+    q.denodeify(coreUser.findByEmail)(email)
+      .then(user => {
+        if (user) {
+          tuple = coreTuple.user(user.id);
+        } else {
+          tuple = coreTuple.email(email);
+        }
+
+        req.query.objectTypeFilter = tuple.objectType;
+        req.query.idFilter = tuple.id;
+
+        next();
+      })
+      .catch(err => send500Error('Unable to validate email', err, res));
   }
 };
 

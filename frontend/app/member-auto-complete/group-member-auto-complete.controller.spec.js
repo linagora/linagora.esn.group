@@ -7,7 +7,7 @@ var expect = chai.expect;
 
 describe('The GroupMemberAutoCompleteController', function() {
   var $controller, $rootScope, $scope, $elementMock;
-  var elementScrollService, emailService;
+  var elementScrollService, emailService, groupService;
 
   beforeEach(function() {
     module('linagora.esn.group');
@@ -20,11 +20,18 @@ describe('The GroupMemberAutoCompleteController', function() {
       $provide.value('$element', $elementMock);
     });
 
-    inject(function(_$controller_, _$rootScope_, _elementScrollService_, _emailService_) {
+    inject(function(
+      _$controller_,
+      _$rootScope_,
+      _elementScrollService_,
+      _emailService_,
+      _groupService_
+    ) {
       $controller = _$controller_;
       $rootScope = _$rootScope_;
       elementScrollService = _elementScrollService_;
       emailService = _emailService_;
+      groupService = _groupService_;
     });
   });
 
@@ -64,6 +71,26 @@ describe('The GroupMemberAutoCompleteController', function() {
       var response = controller.onTagAdding($tag);
 
       expect(response).to.be.false;
+    });
+
+    it('should not add new email tag if the email is used by a group member', function(done) {
+      var controller = initController();
+      var $tag = { email: 'existing-member@current.grp' };
+
+      controller.group = {
+        id: 'groupId',
+        members: [{ id: 'member' }]
+      };
+      groupService.isGroupMemberEmail = sinon.stub().returns($q.when(false));
+
+      controller.onTagAdding($tag)
+        .then(function(result) {
+          expect(groupService.isGroupMemberEmail).to.have.been.calledWith('groupId', $tag.email);
+          expect(result).to.equal(false);
+          done();
+        });
+
+      $rootScope.$digest();
     });
 
     it('should add new tag if it does not exist in list of tags', function() {
