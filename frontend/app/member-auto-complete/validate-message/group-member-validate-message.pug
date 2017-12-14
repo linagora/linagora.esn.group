@@ -1,0 +1,5 @@
+.has-error(ng-switch='$ctrl.error')
+  .help-block(ng-switch-when='invalidEmail')
+    | #{__('Invalid email')}
+  .help-block(ng-switch-when='existedMember')
+    | #{__('Email is already used by a group member')}

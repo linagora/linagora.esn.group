@@ -24,10 +24,17 @@
       var isValidTag = emailService.isValidEmail($tag.email) && !_isDuplicatedMember($tag, self.newMembers);
 
       if (!isValidTag || !self.group) {
+        self.error = isValidTag ? false : 'invalidEmail';
+
         return isValidTag;
       }
 
-      return groupService.isGroupMemberEmail(self.group.id, $tag.email);
+      return groupService.isGroupMemberEmail(self.group.id, $tag.email)
+        .then(function(isValidMember) {
+          self.error = isValidMember ? false : 'existedMember';
+
+          return isValidMember;
+        });
     };
 
     self.onTagAdded = function() {
