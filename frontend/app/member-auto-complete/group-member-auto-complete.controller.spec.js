@@ -60,6 +60,7 @@ describe('The GroupMemberAutoCompleteController', function() {
       var response = controller.onTagAdding($tag);
 
       expect(response).to.be.false;
+      expect(controller.error).to.equal('invalidEmail');
       expect(emailService.isValidEmail).to.have.been.calledWith($tag.email);
     });
 
@@ -71,6 +72,7 @@ describe('The GroupMemberAutoCompleteController', function() {
       var response = controller.onTagAdding($tag);
 
       expect(response).to.be.false;
+      expect(controller.error).to.equal('invalidEmail');
     });
 
     it('should not add new email tag if the email is used by a group member', function(done) {
@@ -86,6 +88,7 @@ describe('The GroupMemberAutoCompleteController', function() {
       controller.onTagAdding($tag)
         .then(function(result) {
           expect(groupService.isGroupMemberEmail).to.have.been.calledWith('groupId', $tag.email);
+          expect(controller.error).to.equal('existedMember');
           expect(result).to.equal(false);
           done();
         });

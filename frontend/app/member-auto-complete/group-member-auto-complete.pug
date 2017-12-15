@@ -19,3 +19,5 @@
             max-results-to-show= '20',
             template='/views/modules/auto-complete/attendees.html'
           )
+      group-member-validate-message(ng-class="$ctrl.error ? 'dirty' : 'pristine'", error='$ctrl.error')
+  

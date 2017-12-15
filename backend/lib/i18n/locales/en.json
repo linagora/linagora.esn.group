@@ -47,5 +47,6 @@
   "Delete group?": "Delete group?",
   "Group %s will be deleted and the email address of %s will be no longer available": "Group %s will be deleted and the email address of %s will be no longer available",
   "Invalid email": "Invalid email",
-  "Email is already in use. Try another one.": "Email is already in use. Try another one."
+  "Email is already in use. Try another one.": "Email is already in use. Try another one.",
+  "Email is already used by a group member": "Email is already used by a group member"
 }
