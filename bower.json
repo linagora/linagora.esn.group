@@ -1,7 +1,7 @@
 {
   "name": "linagora.esn.group",
   "main": "index.js",
-  "version": "0.6.1-dev",
+  "version": "0.6.2-dev",
   "authors": [
     "Linagora Folks <openpaas@linagora.com>"
   ],
