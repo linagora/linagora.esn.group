@@ -220,7 +220,7 @@ describe('The update group members API: POST /groups/:id/members', () => {
           .expect(400)
           .end((err, res) => {
             expect(err).to.not.exist;
-            expect(res.body.error.details).to.match(/some members are not belonged to group/);
+            expect(res.body.error.details).to.match(/some members do not belong to group/);
             done();
           });
       });
