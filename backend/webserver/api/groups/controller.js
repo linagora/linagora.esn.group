@@ -172,7 +172,7 @@ module.exports = function(dependencies, lib) {
     const alreadyRemovedMembers = members.filter(member => !isMember(group, member));
 
     if (alreadyRemovedMembers.length > 0) {
-      return send400Error(`some members are not belonged to group: ${JSON.stringify(alreadyRemovedMembers)}`, res);
+      return send400Error(`some members do not belong to group: ${JSON.stringify(alreadyRemovedMembers)}`, res);
     }
 
     lib.group.removeMembers(group, members)
