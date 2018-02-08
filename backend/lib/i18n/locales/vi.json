@@ -12,7 +12,6 @@
   "Cancel": "Hủy",
   "Create": "Tạo",
   "Name": "Tên",
-  "Email": "Thư điện tử",
   "Members": "Thành viên",
   "Creating group...": "Đang tạo nhóm...",
   "Group created": "Tạo nhóm thành công",
@@ -47,6 +46,5 @@
   "Delete group?": "Xóa nhóm?",
   "Group %s will be deleted and the email address of %s will be no longer available": "Nhóm %s sẽ bị xóa và địa chỉ email sau %s sẽ không thể sử dụng được nữa.",
   "Invalid email": "Email không hợp lệ",
-  "Email is already in use. Try another one.": "Email đã tồn tại. Thử email khác.",
   "Email is already used by a group member": "Email đã được sử dụng bởi thành viên nhóm"
 }
