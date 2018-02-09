@@ -2,8 +2,13 @@ ng-form(name="form")
   .row.p-l-15.p-r-15
     esn-form-group(label=__('Name'))
       input.form-control(type="text", ng-model="$ctrl.group.name", name="groupName", required)
-  .row.p-l-15.p-r-15
-    group-email-input(email="$ctrl.group.email", form="form", availability-checker="$ctrl.emailAvailabilityChecker(email)")
+  .row.p-l-15.p-r-15.p-t-10
+    esn-email-input(
+      form="form",
+      email="$ctrl.group.email",
+      domain-name="$ctrl.domainName"
+      availability-checker="$ctrl.emailAvailabilityChecker(email)"
+    )
   .row(ng-if="!$ctrl.updateMode")
     .col-xs-6
       h5 #{__('Members')}

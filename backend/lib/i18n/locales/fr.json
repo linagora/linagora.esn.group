@@ -12,7 +12,6 @@
   "Cancel": "Annuler",
   "Create": "Créer",
   "Name": "Nom",
-  "Email": "Email",
   "Members": "Membres",
   "Creating group...": "Création d'groupe...",
   "Group created": "Créé par l'groupe",
@@ -47,6 +46,5 @@
   "Delete group?": "Supprimer un groupe?",
   "Group %s will be deleted and the email address of %s will be no longer available": "Le groupe %s sera supprimé et l'adresse e-mail de %s ne sera plus disponible",
   "Invalid email": "Email invalide",
-  "Email is already in use. Try another one.": "Cet email est déjà utilisé. Essayez un autre.",
   "Email is already used by a group member": "L'adresse email est déjà utilisée par un membre du groupe"
 }
