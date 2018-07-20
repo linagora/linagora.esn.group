@@ -34,7 +34,7 @@ module.exports = dependencies => {
           payload: { group, members }
         });
 
-        return data;
+        return data[0];
       });
   }
 

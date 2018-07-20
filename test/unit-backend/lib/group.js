@@ -49,7 +49,7 @@ describe('The group module', function() {
       const members = [{}, {}];
 
       collaborationMock.member = {
-        addMembers: sinon.spy(function(g, m, callback) { callback(); })
+        addMembers: sinon.spy(function(g, m, callback) { callback(null, []); })
       };
       pubsub.local.topic.withArgs(CONSTANTS.EVENTS.MEMBERS_ADDED).returns(topic);
 
