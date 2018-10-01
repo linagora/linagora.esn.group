@@ -220,12 +220,12 @@ describe('The groupService', function() {
       limit = 20;
     });
 
-    it('should call attendeeService.getAttendeeCandidates with query, limit, user and contact as required objectTypes', function(done) {
+    it('should call attendeeService.getAttendeeCandidates with query, limit, user, contact and group as required objectTypes', function(done) {
       attendeeService.getAttendeeCandidates = sinon.stub().returns($q.when(candidates));
 
       groupService.searchMemberCandidates(query)
         .then(function(members) {
-          expect(attendeeService.getAttendeeCandidates).to.have.been.calledWith(query, limit, ['user', 'contact']);
+          expect(attendeeService.getAttendeeCandidates).to.have.been.calledWith(query, limit, ['user', 'contact', 'group']);
           expect(members).to.shallowDeepEqual(candidates);
 
           done();
@@ -241,7 +241,7 @@ describe('The groupService', function() {
 
       groupService.searchMemberCandidates(query)
         .then(function(members) {
-          expect(attendeeService.getAttendeeCandidates).to.have.been.calledWith(query, limit, ['user', 'contact']);
+          expect(attendeeService.getAttendeeCandidates).to.have.been.calledWith(query, limit, ['user', 'contact', 'group']);
           expect(members.length).to.equal(candidates.length);
           expect(members).to.shallowDeepEqual(candidates);
 
@@ -261,7 +261,7 @@ describe('The groupService', function() {
 
       groupService.searchMemberCandidates(query, ignoreCandidates)
         .then(function(members) {
-          expect(attendeeService.getAttendeeCandidates).to.have.been.calledWith(query, limit, ['user', 'contact']);
+          expect(attendeeService.getAttendeeCandidates).to.have.been.calledWith(query, limit, ['user', 'contact', 'group']);
           expect(members.length).to.equal(3);
           expect(members).to.include(candidates[0]);
           expect(members).to.include(candidates[1]);

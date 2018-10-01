@@ -10,12 +10,14 @@
     _,
     elementScrollService,
     emailService,
-    groupService
+    groupService,
+    GROUP_OBJECT_TYPE
   ) {
     var self = this;
 
     self.search = function(query) {
-      var ignoreMembers = self.group ? self.group.members : [];
+      var groupAsMember = {member: {objectType: GROUP_OBJECT_TYPE, id: self.group.email}};
+      var ignoreMembers = self.group ? [groupAsMember].concat(self.group.members) : [groupAsMember];
 
       return groupService.searchMemberCandidates(query, ignoreMembers);
     };
