@@ -1,9 +1,9 @@
-'use strict';
-
-module.exports = function(dependencies) {
+module.exports = dependencies => {
   const coreAvailability = dependencies('availability');
+  const collaboration = dependencies('collaboration');
   const constants = require('./constants');
   const models = require('./db')(dependencies);
+  const denormalizer = require('./denormalizer')(dependencies);
   const group = require('./group')(dependencies);
   const search = require('./search')(dependencies);
 
@@ -23,5 +23,6 @@ module.exports = function(dependencies) {
         return group.getByEmail(email).then(group => !group);
       }
     });
+    collaboration.memberDenormalize.registerDenormalizer(constants.OBJECT_TYPE, denormalizer.denormalizeAsMember);
   }
 };

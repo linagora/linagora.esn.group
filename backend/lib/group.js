@@ -124,6 +124,8 @@ module.exports = dependencies => {
       return member.member.preferredEmail;
     } else if (member.objectType === MEMBER_TYPES.EMAIL) {
       return member.member;
+    } else if (member.objectType === MEMBER_TYPES.GROUP) {
+      return member.member.email;
     }
 
     return null;
