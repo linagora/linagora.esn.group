@@ -1,0 +1,9 @@
+.member-container
+  .pull-left.p-r-15
+    group-selectable(item="$ctrl.member")
+      img(src='/group/images/group-icon.svg')
+  .media-body(ui-sref="group.display({groupId: $ctrl.member.member._id})")
+    .lv-title
+      h4.media-heading {{::$ctrl.member.member.name}}
+      span
+        a(ng-href='mailto:{{::$ctrl.member.member.email}}', op-inbox-compose) {{::$ctrl.member.member.email}}

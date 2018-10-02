@@ -15,14 +15,18 @@
   ) {
     var self = this;
 
-    self.search = function(query) {
+    self.search = search;
+    self.onTagAdded = onTagAdded;
+    self.onTagAdding = onTagAdding;
+
+    function search(query) {
       var groupAsMember = {member: {objectType: GROUP_OBJECT_TYPE, id: self.group.email}};
       var ignoreMembers = self.group ? [groupAsMember].concat(self.group.members) : [groupAsMember];
 
       return groupService.searchMemberCandidates(query, ignoreMembers);
-    };
+    }
 
-    self.onTagAdding = function($tag) {
+    function onTagAdding($tag) {
       var isValidTag = emailService.isValidEmail($tag.email) && !_isDuplicatedMember($tag, self.newMembers);
 
       if (!isValidTag || !self.group) {
@@ -37,11 +41,11 @@
 
           return isValidMember;
         });
-    };
+    }
 
-    self.onTagAdded = function() {
+    function onTagAdded() {
       elementScrollService.autoScrollDown($element.find('div.tags'));
-    };
+    }
 
     function _isDuplicatedMember(newMember, members) {
       return !!_.find(members, { email: newMember.email });

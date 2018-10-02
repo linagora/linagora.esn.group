@@ -12,6 +12,7 @@
           .then(function(response) {
             return response.data.map(function(group) {
               group.displayName = group.name;
+              group.objectType = GROUP_OBJECT_TYPE;
 
               return group;
             });
