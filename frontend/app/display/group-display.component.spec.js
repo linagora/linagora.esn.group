@@ -167,6 +167,6 @@ describe('The groupDisplay component', function() {
     $rootScope.$broadcast(GROUP_EVENTS.GROUP_DELETED, 'deleted');
     $rootScope.$digest();
 
-    expect($state.go).has.been.calledWith('group.list');
+    expect($state.go).has.been.calledWith('^');
   });
 });
