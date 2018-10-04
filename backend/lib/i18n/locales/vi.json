@@ -46,5 +46,6 @@
   "Delete group?": "Xóa nhóm?",
   "Group %s will be deleted and the email address of %s will be no longer available": "Nhóm %s sẽ bị xóa và địa chỉ email sau %s sẽ không thể sử dụng được nữa.",
   "Invalid email": "Email không hợp lệ",
-  "Email is already used by a group member": "Email đã được sử dụng bởi thành viên nhóm"
+  "Email is already used by a group member": "Email đã được sử dụng bởi thành viên nhóm",
+  "Groups Management": "Quản lý nhóm"
 }

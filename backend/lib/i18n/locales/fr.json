@@ -8,13 +8,13 @@
   "Email:": "Email:",
   "Back": "Retour",
   "No member": "Aucun membre",
-  "New group": "New group",
+  "New group": "Nouveau groupe",
   "Cancel": "Annuler",
   "Create": "Créer",
   "Name": "Nom",
   "Members": "Membres",
-  "Creating group...": "Création d'groupe...",
-  "Group created": "Créé par l'groupe",
+  "Creating group...": "Création du groupe...",
+  "Group created": "Le groupe a été créé",
   "Failed to create group": "Impossible de créer un groupe",
   "Type a name or email...": "Entrer un nom ou email...",
   "Save": "Enregistrer",
@@ -43,8 +43,9 @@
   "Adding member...": "Ajout de membre ...",
   "showing %s of %s": "afficher %s de %s",
   "Delete": "Supprimer",
-  "Delete group?": "Supprimer un groupe?",
+  "Delete group?": "Supprimer le groupe?",
   "Group %s will be deleted and the email address of %s will be no longer available": "Le groupe %s sera supprimé et l'adresse e-mail de %s ne sera plus disponible",
   "Invalid email": "Email invalide",
-  "Email is already used by a group member": "L'adresse email est déjà utilisée par un membre du groupe"
+  "Email is already used by a group member": "L'adresse email est déjà utilisée par un membre du groupe",
+  "Groups Management": "Gestion des groupes"
 }
