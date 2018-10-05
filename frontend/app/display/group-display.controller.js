@@ -54,7 +54,7 @@
       });
 
       $scope.$on(GROUP_EVENTS.GROUP_DELETED, function() {
-        $state.go('group.list');
+        $state.go('^');
       });
 
       $scope.$on(GROUP_EVENTS.GROUP_MEMBERS_REMOVED, function(event, members) {
