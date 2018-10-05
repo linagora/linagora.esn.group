@@ -21,6 +21,8 @@ module.exports = dependencies => {
 
   const GroupSchema = baseCollaboration(GroupDefinition, CONSTANTS.OBJECT_TYPE);
 
+  collaborationModule.memberResolver.registerResolver(CONSTANTS.OBJECT_TYPE, CONSTANTS.MODEL_NAME);
+
   return collaborationModule.registerCollaborationModel(CONSTANTS.OBJECT_TYPE, CONSTANTS.MODEL_NAME, GroupSchema);
 };
 

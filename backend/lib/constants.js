@@ -5,7 +5,8 @@ module.exports = {
   MODEL_NAME: 'Group',
   MEMBER_TYPES: {
     USER: 'user',
-    EMAIL: 'email'
+    EMAIL: 'email',
+    GROUP: 'group'
   },
   EVENTS: {
     CREATED: 'group:created',

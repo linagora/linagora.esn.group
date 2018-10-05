@@ -11,10 +11,10 @@
     attendeeService,
     esnI18nService,
     asyncAction,
-    session,
     groupApiClient,
+    userAPI,
     GROUP_EVENTS,
-    userAPI
+    GROUP_OBJECT_TYPE
   ) {
     var MEMBER_SEARCH_LIMIT = 20;
 
@@ -104,7 +104,7 @@
     }
 
     function searchMemberCandidates(query, ignoreMembers) {
-      return attendeeService.getAttendeeCandidates(query, MEMBER_SEARCH_LIMIT, ['user', 'contact'])
+      return attendeeService.getAttendeeCandidates(query, MEMBER_SEARCH_LIMIT, ['user', 'contact', GROUP_OBJECT_TYPE])
         .then(function(candidates) {
           return candidates.filter(function(candidate) {
             return candidate.email;

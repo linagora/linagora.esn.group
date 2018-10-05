@@ -184,24 +184,33 @@ module.exports = function(dependencies, lib) {
     return member && group.members.some(memberObj => coreTuple.isEqual(memberObj.member, member));
   }
 
-  function verifyMemberTuple(member) {
-    if (member.objectType === MEMBER_TYPES.USER) {
-      return q.ninvoke(coreUser, 'get', member.id)
+  function verifyMemberTuple(tuple) {
+    if (tuple.objectType === MEMBER_TYPES.USER) {
+      return q.ninvoke(coreUser, 'get', tuple.id)
         .then(user => {
           if (user) {
-            return coreTuple.user(member.id);
+            return coreTuple.user(tuple.id);
           }
         });
     }
 
-    if (member.objectType === MEMBER_TYPES.EMAIL) {
-      return q.ninvoke(coreUser, 'findByEmail', member.id)
+    if (tuple.objectType === MEMBER_TYPES.GROUP) {
+      return lib.group.getById(tuple.id)
+        .then(group => {
+          if (group) {
+            return tuple;
+          }
+        });
+    }
+
+    if (tuple.objectType === MEMBER_TYPES.EMAIL) {
+      return q.ninvoke(coreUser, 'findByEmail', tuple.id)
         .then(user => {
           if (user) {
             return coreTuple.user(user.id);
           }
 
-          return coreTuple.email(member.id);
+          return coreTuple.email(tuple.id);
         });
     }
   }

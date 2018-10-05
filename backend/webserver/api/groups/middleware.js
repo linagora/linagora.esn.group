@@ -1,6 +1,5 @@
-'use strict';
-
 const q = require('q');
+const { MEMBER_TYPES } = require('../../../lib/constants');
 const emailAddresses = require('email-addresses');
 const composableMW = require('composable-middleware');
 
@@ -151,17 +150,7 @@ module.exports = (dependencies, lib) => {
   }
 
   function validateMembers(req, res, next) {
-    const hasInvalidTuple = req.body.some(tuple => {
-      if (!tuple) {
-        return true;
-      }
-
-      try {
-        return !coreTuple.get(tuple.objectType, tuple.id);
-      } catch (err) {
-        return true;
-      }
-    });
+    const hasInvalidTuple = req.body.some(tuple => !tuple || !tuple.id || !tuple.objectType || Object.values(MEMBER_TYPES).indexOf(tuple.objectType) === -1);
 
     if (hasInvalidTuple) {
       return send400Error('body must be an array of valid member tuples {objectType, id}', res);
