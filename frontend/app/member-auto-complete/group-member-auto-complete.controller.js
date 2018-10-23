@@ -6,7 +6,6 @@
 
   function GroupMemberAutoCompleteController(
     $element,
-    $q,
     _,
     elementScrollService,
     emailService,
@@ -20,8 +19,11 @@
     self.onTagAdding = onTagAdding;
 
     function search(query) {
-      var groupAsMember = {member: {objectType: GROUP_OBJECT_TYPE, id: self.group.email}};
-      var ignoreMembers = self.group ? [groupAsMember].concat(self.group.members) : [groupAsMember];
+      var ignoreMembers = self.group && self.group.members ? self.group.members : [];
+
+      if (self.group && self.group.email) {
+        ignoreMembers.push({member: {objectType: GROUP_OBJECT_TYPE, id: self.group.email}});
+      }
 
       return groupService.searchMemberCandidates(query, ignoreMembers);
     }
@@ -32,6 +34,11 @@
       if (!isValidTag || !self.group) {
         self.error = isValidTag ? false : 'invalidEmail';
 
+        return isValidTag;
+      }
+
+      if (!self.group.id) {
+        // we are creating the group, it does not have any id for now...
         return isValidTag;
       }
 

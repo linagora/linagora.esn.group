@@ -13,4 +13,4 @@ ng-form(name="form")
     .col-xs-6
       h5 #{__('Members')}
   .row(ng-if="!$ctrl.updateMode")
-    group-member-auto-complete(new-members="$ctrl.newMembers")
+    group-member-auto-complete(new-members="$ctrl.newMembers", group="$ctrl.group")

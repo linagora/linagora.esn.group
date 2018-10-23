@@ -75,6 +75,20 @@ describe('The GroupMemberAutoCompleteController', function() {
       expect(controller.error).to.equal('invalidEmail');
     });
 
+    it('should add new tag if the group.id is undefined', function() {
+      var controller = initController();
+      var $tag = { email: 'existing-member@current.grp' };
+
+      controller.group = {
+        members: [{ id: 'member' }]
+      };
+
+      var response = controller.onTagAdding($tag);
+
+      expect(response).to.be.true;
+      expect(controller.error).to.be.undefined;
+    });
+
     it('should not add new email tag if the email is used by a group member', function(done) {
       var controller = initController();
       var $tag = { email: 'existing-member@current.grp' };
@@ -118,6 +132,58 @@ describe('The GroupMemberAutoCompleteController', function() {
       controller.onTagAdded();
 
       expect(elementScrollService.autoScrollDown).to.have.been.calledOnce;
+    });
+  });
+
+  describe('The search function', function() {
+    var query;
+
+    beforeEach(function() {
+      query = 'The query';
+      groupService.searchMemberCandidates = sinon.stub();
+    });
+
+    it('should search with empty array when group is not defined', function() {
+      var controller = initController();
+
+      controller.search(query);
+
+      expect(groupService.searchMemberCandidates).to.have.been.calledWith(query, []);
+    });
+
+    it('should search with empty array when group members is undefined', function() {
+      var controller = initController();
+
+      controller.group = {};
+      controller.search(query);
+
+      expect(groupService.searchMemberCandidates).to.have.been.calledWith(query, []);
+    });
+
+    it('should search with group members as ignored members', function() {
+      var controller = initController();
+
+      controller.group = {
+        members: [{member: {objectType: 'user', id: 'foo'}}]
+      };
+      controller.search(query);
+
+      expect(groupService.searchMemberCandidates).to.have.been.calledWith(query, controller.group.members);
+    });
+
+    it('should add the current group email as ignored when group email is defined', function() {
+      var controller = initController();
+
+      controller.group = {
+        email: 'group1@open-paas.org',
+        members: [{member: {objectType: 'user', id: 'foo'}}]
+      };
+      controller.search(query);
+
+      expect(groupService.searchMemberCandidates).to.have.been.calledWith(query, [
+        controller.group.members[0],
+        {member: {objectType: 'group', id: controller.group.email}}
+      ]);
     });
   });
 });
