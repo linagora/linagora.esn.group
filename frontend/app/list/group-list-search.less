@@ -1,0 +1,41 @@
+.group-list-search {
+  .flex-row;
+  .flex-vertical-centered;
+
+  padding: 10px;
+  height: 36px;
+
+  > form {
+    .flex;
+    width: 100%;
+
+    button.btn-icon {
+      width: 30px;
+      height: 30px;
+    }
+  }
+
+  .placeholder(@secondaryTextColor);
+
+  .group-list-search-field {
+    width: 100%;
+    color: @secondaryTextColor !important; /* override default form color from material */
+    margin-bottom: 10px;
+    padding-left: 32px;
+    padding-right: 32px;
+    background: transparent;
+  }
+
+  .group-list-search-close {
+    margin-left: -30px;
+  }
+
+  .group-list-search-icon {
+    margin-right: -30px;
+  }
+
+  i.mdi {
+    color: @secondaryTextColor;
+    font-size: 1.4em;
+  }
+}

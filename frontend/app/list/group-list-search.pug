@@ -1,0 +1,7 @@
+.group-list-search
+  form(role="form", ng-submit="$ctrl.doSearch()")
+    button.btn.btn-icon.btn-link.group-list-search-icon(type="submit", title="search", ng-click="$ctrl.doSearch()")
+      i.mdi.mdi-magnify
+    input.group-list-search-field.form-control(type='text', ng-model='$ctrl.query', placeholder=__("Search"))
+    button.btn.btn-icon.btn-link.group-list-search-close(ng-click="$ctrl.clear($event)", ng-show="$ctrl.query")
+      i.mdi.mdi-close-circle
