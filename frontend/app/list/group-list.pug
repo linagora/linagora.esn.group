@@ -1,4 +1,5 @@
 .card.fadeIn200ms
+  group-list-search(on-query="$ctrl.search(query)", on-clear="$ctrl.clearSearch()")
   infinite-list(load-more-elements='$ctrl.loadMoreElements()', scroll-inside-container="$ctrl.scrollInsideContainer")
     .listview.lv-bordered.lv-lg(ng-if="$ctrl.elements.length > 0")
       .lv-body

@@ -16,12 +16,14 @@
     var self = this;
     var DEFAULT_LIMIT = 20;
 
-    var options = {
+    self.options = {
       offset: 0,
       limit: DEFAULT_LIMIT
     };
 
     self.$onInit = $onInit;
+    self.search = search;
+    self.clearSearch = clearSearch;
 
     function $onInit() {
       self.onCreateBtnClick = onCreateBtnClick;
@@ -38,15 +40,47 @@
     }
 
     function _loadNextItems() {
-      options.offset = self.elements.length;
+      self.options.offset = self.elements.length;
 
-      return groupApiClient.list(options)
+      return groupApiClient.list(self.options)
         .then(function(response) {
           return response.data;
         });
     }
 
+    function search(query) {
+      self.options = {
+        query: query,
+        offset: 0,
+        limit: DEFAULT_LIMIT
+      };
+      _reload();
+    }
+
+    function clearSearch() {
+      self.options = {
+        offset: 0,
+        limit: DEFAULT_LIMIT
+      };
+      _reload();
+    }
+
+    function _resetInfiniteScroll() {
+      self.elements = [];
+      self.infiniteScrollCompleted = false;
+      self.loadMoreElements = infiniteScrollHelper(self, _loadNextItems);
+    }
+
+    function _reload() {
+      _resetInfiniteScroll();
+      self.loadMoreElements();
+    }
+
     function onCreateBtnClick() {
+      if (self.options.query) {
+        clearSearch();
+      }
+
       $modal({
         templateUrl: '/group/app/create/group-create.html',
         backdrop: 'static',
