@@ -7,18 +7,19 @@ var expect = chai.expect;
 
 describe('The GroupListController', function() {
   var $rootScope, $controller, $scope;
-  var $modalMock, infiniteScrollHelperMock;
+  var $modalMock, infiniteScrollHelperMock, loadMoreElements;
   var GROUP_EVENTS;
   var groups;
 
   beforeEach(function() {
-    infiniteScrollHelperMock = sinon.spy();
-    $modalMock = {};
+    loadMoreElements = sinon.spy();
+    infiniteScrollHelperMock = sinon.stub().returns(loadMoreElements);
+    $modalMock = sinon.spy();
     groups = [{ foo: 'bar' }];
 
     angular.mock.module(function($provide) {
       $provide.value('infiniteScrollHelper', infiniteScrollHelperMock);
-      $provide.value('$modal', $modalMock);
+      $provide.constant('$modal', $modalMock);
     });
   });
 
@@ -80,5 +81,67 @@ describe('The GroupListController', function() {
     $rootScope.$broadcast(GROUP_EVENTS.GROUP_DELETED, testGroup);
 
     expect(controller.elements).to.not.include(testGroup);
+  });
+
+  describe('The search function', function() {
+    it('should reset infinitescroll and search groups', function() {
+      var controller = initController();
+      var query = 'My search query';
+
+      controller.elements = ['foo', 'bar', 'baz'];
+      controller.infiniteScrollCompleted = true;
+
+      controller.search(query);
+
+      expect(controller.elements).to.be.empty;
+      expect(controller.infiniteScrollCompleted).to.be.false;
+      expect(controller.loadMoreElements).to.have.been.called;
+      expect(controller.options).to.deep.equals({
+        offset: 0,
+        limit: 20,
+        query: query
+      });
+    });
+  });
+
+  describe('The clearSearch function', function() {
+    it('should reset infinitescroll and list groups', function() {
+      var controller = initController();
+
+      controller.elements = ['foo', 'bar', 'baz'];
+      controller.infiniteScrollCompleted = true;
+
+      controller.clearSearch();
+
+      expect(controller.elements).to.be.empty;
+      expect(controller.infiniteScrollCompleted).to.be.false;
+      expect(controller.loadMoreElements).to.have.been.called;
+      expect(controller.options).to.deep.equals({
+        offset: 0,
+        limit: 20
+      });
+    });
+  });
+
+  describe('The onCreateBtnClick function', function() {
+    it('should open the modal', function() {
+      var controller = initController();
+
+      controller.onCreateBtnClick();
+
+      expect($modalMock).to.have.been.called;
+      expect(loadMoreElements).to.not.have.been.called;
+    });
+
+    it('should reset the infinitescroll if there is a search', function() {
+      var controller = initController();
+
+      controller.options.query = 'The query';
+
+      controller.onCreateBtnClick();
+
+      expect($modalMock).to.have.been.called;
+      expect(loadMoreElements).to.have.been.called;
+    });
   });
 });
