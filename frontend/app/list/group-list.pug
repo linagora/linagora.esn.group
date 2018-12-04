@@ -1,14 +1,18 @@
-.card.fadeIn200ms
+.card
   group-list-search(on-query="$ctrl.search(query)", on-clear="$ctrl.clearSearch()")
-  infinite-list(load-more-elements='$ctrl.loadMoreElements()', scroll-inside-container="$ctrl.scrollInsideContainer")
+
+  infinite-list.lv-body(load-more-elements='$ctrl.loadMoreElements()')
     .listview.lv-bordered.lv-lg(ng-if="$ctrl.elements.length > 0")
-      .lv-body
-        group-list-item.lv-item.p-0.clickable(group='group', on-delete-btn-click="$ctrl.deleteGroup(group)", ng-repeat="group in $ctrl.elements")
-.empty-message(ng-if="!$ctrl.elements.length && $ctrl.infiniteScrollCompleted")
-  img(src="/group/images/group-icon.svg")
-  .message
-    | #{__('No group')}
-div(ng-if='$ctrl.infiniteScrollDisabled')
-  .text-center(openpaas-logo-spinner, spinner-start-active='1', spinner-size='0.5')
+      group-list-item.lv-item.p-0.clickable(
+        ng-repeat="group in $ctrl.elements",
+        group='group',
+        on-delete-btn-click="$ctrl.deleteGroup(group)"
+      )
+  .empty-message(ng-if="!$ctrl.elements.length && $ctrl.infiniteScrollCompleted")
+    img(src="/group/images/group-icon.svg")
+    .message
+      | #{__('No group')}
+  div(ng-if='$ctrl.infiniteScrollDisabled')
+    .text-center(openpaas-logo-spinner, spinner-start-active='1', spinner-size='0.5')
 
 fab(icon="plus", ng-click="$ctrl.onCreateBtnClick()")
