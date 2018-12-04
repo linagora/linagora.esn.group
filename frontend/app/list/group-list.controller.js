@@ -11,10 +11,11 @@
     infiniteScrollHelper,
     groupApiClient,
     groupService,
-    GROUP_EVENTS
+    GROUP_EVENTS,
+    ELEMENTS_PER_REQUEST
   ) {
     var self = this;
-    var DEFAULT_LIMIT = 20;
+    var DEFAULT_LIMIT = ELEMENTS_PER_REQUEST || 20;
 
     self.options = {
       offset: 0,
@@ -28,7 +29,7 @@
     function $onInit() {
       self.onCreateBtnClick = onCreateBtnClick;
       self.deleteGroup = groupService.deleteGroup;
-      self.loadMoreElements = infiniteScrollHelper(self, _loadNextItems);
+      self.loadMoreElements = infiniteScrollHelper(self, _loadNextItems, null, DEFAULT_LIMIT);
 
       $scope.$on(GROUP_EVENTS.GROUP_CREATED, function(event, group) {
         _onGroupCreated(group);
@@ -68,7 +69,7 @@
     function _resetInfiniteScroll() {
       self.elements = [];
       self.infiniteScrollCompleted = false;
-      self.loadMoreElements = infiniteScrollHelper(self, _loadNextItems);
+      self.loadMoreElements = infiniteScrollHelper(self, _loadNextItems, null, DEFAULT_LIMIT);
     }
 
     function _reload() {

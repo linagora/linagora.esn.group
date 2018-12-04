@@ -20,6 +20,7 @@ describe('The GroupListController', function() {
     angular.mock.module(function($provide) {
       $provide.value('infiniteScrollHelper', infiniteScrollHelperMock);
       $provide.constant('$modal', $modalMock);
+      $provide.constant('ELEMENTS_PER_REQUEST', null);
     });
   });
 
