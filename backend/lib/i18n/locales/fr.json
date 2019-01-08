@@ -48,5 +48,6 @@
   "Invalid email": "Email invalide",
   "Email is already used by a group member": "L'adresse email est déjà utilisée par un membre du groupe",
   "Groups Management": "Gestion des groupes",
-  "Search": "Rechercher"
+  "Search": "Rechercher",
+  "A problem occurred while getting data, try refreshing this page!": "Un problème s'est produit lors du chargement de certaines données, essayez de recharger la page!"
 }

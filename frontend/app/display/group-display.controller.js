@@ -22,10 +22,16 @@
     self.deleteGroup = deleteGroup;
 
     function $onInit() {
+      self.status = 'loading';
+
       groupApiClient
         .get(groupId)
         .then(function(resp) {
           self.group = resp.data;
+          self.status = 'loaded';
+        })
+        .catch(function() {
+          self.status = 'error';
         });
 
       initListeners();

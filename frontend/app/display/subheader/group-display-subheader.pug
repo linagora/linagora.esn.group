@@ -2,9 +2,10 @@ extends /modules/subheader/responsive-subheader.pug
 
 block left
   group-subheader-back-button
-  span.title.ellipsis {{$ctrl.group.name}}
+  span.title.ellipsis {{::$ctrl.group.name}}
 
 block right
-  div(dynamic-directive="group-display-subheader-actions")
-  button.btn-link.btn-icon.button(title=__('Delete'), esn-modal-launcher="/group/app/delete/group-delete.html")
-    i.mdi.mdi-delete
+  div(ng-if="$ctrl.group")
+    div(dynamic-directive="group-display-subheader-actions")
+    button.btn-link.btn-icon.button(title=__('Delete'), esn-modal-launcher="/group/app/delete/group-delete.html")
+      i.mdi.mdi-delete
