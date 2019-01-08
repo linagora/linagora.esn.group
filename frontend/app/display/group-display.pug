@@ -1,20 +1,30 @@
 sub-header
   group-display-subheader(group="$ctrl.group", on-delete-btn-click="$ctrl.deleteGroup()")
 
-.card.fadeIn200ms.information
-  .card-header.ch-alt
-    h2 #{__('Information')}
-    ui.actions
-      li
-        a(href="", title=__('Edit group information') ng-click="$ctrl.onEditBtnClick()")
-          i.mdi.mdi-pencil
-  .card-body.card-padding
-    dl.dl-horizontal
-      dt #{__('Name:')}
-      dd(title="{{$ctrl.group.name}}") {{$ctrl.group.name}}
-    dl.dl-horizontal
-      dt #{__('Email:')}
-      dd
-        a(ng-href='mailto:{{$ctrl.group.email}}', op-inbox-compose, title="{{$ctrl.group.email}}") {{$ctrl.group.email}}
+div(ng-switch="$ctrl.status")
+  div(ng-switch-when="loaded")
+    .card.fadeIn200ms.information
+      .card-header.ch-alt
+        h2 #{__('Information')}
+        ui.actions
+          li
+            a(href="", title=__('Edit group information') ng-click="$ctrl.onEditBtnClick()")
+              i.mdi.mdi-pencil
+      .card-body.card-padding
+        dl.dl-horizontal
+          dt #{__('Name:')}
+          dd(title="{{$ctrl.group.name}}") {{$ctrl.group.name}}
+        dl.dl-horizontal
+          dt #{__('Email:')}
+          dd
+            a(ng-href='mailto:{{$ctrl.group.email}}', op-inbox-compose, title="{{$ctrl.group.email}}") {{$ctrl.group.email}}
 
-group-member-list(ng-if="$ctrl.group", group="$ctrl.group")
+    group-member-list(ng-if="$ctrl.group", group="$ctrl.group")
+
+  div(ng-switch-when="loading")
+    .text-center(openpaas-logo-spinner, spinner-start-active='1', spinner-size='0.5')
+
+  .group-display-error-message(ng-switch-when="error")
+    i.icon.mdi.mdi-alert-circle
+    .message
+      | #{__('A problem occurred while getting data, try refreshing this page!')}

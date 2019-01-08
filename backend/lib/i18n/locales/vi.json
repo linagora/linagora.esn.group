@@ -48,5 +48,6 @@
   "Invalid email": "Email không hợp lệ",
   "Email is already used by a group member": "Email đã được sử dụng bởi thành viên nhóm",
   "Groups Management": "Quản lý nhóm",
-  "Search": "Tìm kiếm"
+  "Search": "Tìm kiếm",
+  "A problem occurred while getting data, try refreshing this page!": "Có lỗi xảy ra, hãy thử tải lại trình duyệt!"
 }
