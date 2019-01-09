@@ -6,11 +6,13 @@ module.exports = dependencies => {
   const denormalizer = require('./denormalizer')(dependencies);
   const group = require('./group')(dependencies);
   const search = require('./search')(dependencies);
+  const registry = require('./registry')(dependencies);
 
   return {
     constants,
     group,
     models,
+    registry,
     search,
     init
   };

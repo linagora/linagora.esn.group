@@ -35,17 +35,15 @@ describe('The lib/search/denormalize module', function() {
       });
     });
 
-    it('should return information of new group on update event', function() {
+    it('should return information of updated group on update event', function() {
       const event = {
         name: EVENTS.UPDATED,
-        payload: {
-          new: { name: 'group name', email: 'group@email.com' }
-        }
+        payload: { name: 'group name', email: 'group@email.com' }
       };
 
       expect(getModule().denormalize(event)).to.deep.equal({
-        name: event.payload.new.name,
-        email: event.payload.new.email
+        name: event.payload.name,
+        email: event.payload.email
       });
     });
   });

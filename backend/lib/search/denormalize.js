@@ -1,5 +1,3 @@
-const { EVENTS } = require('../constants');
-
 module.exports = {
   denormalize,
   getId
@@ -24,10 +22,6 @@ function getId(event) {
 }
 
 function extractGroupFromEvent(event) {
-  if (event.name === EVENTS.UPDATED) {
-    return event.payload.new;
-  }
-
   return event.payload;
 }
 

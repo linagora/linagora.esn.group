@@ -1,11 +1,12 @@
 const q = require('q');
+const mockery = require('mockery');
 const sinon = require('sinon');
 const { expect } = require('chai');
 const models = require('linagora-rse').core.models;
 const { Event } = models;
 
 describe('The group module', function() {
-  let pubsub, db, mongooseModels, topic, _id, group, collaborationMock, CONSTANTS;
+  let pubsub, db, mongooseModels, topic, _id, group, collaborationMock, handlerMock, CONSTANTS;
   let getModule;
 
   beforeEach(function() {
@@ -40,31 +41,29 @@ describe('The group module', function() {
     this.moduleHelpers.addDep('db', db);
     this.moduleHelpers.addDep('collaboration', collaborationMock);
 
-    getModule = () => require(this.moduleHelpers.backendPath + '/lib/group')(this.moduleHelpers.dependencies);
+    getModule = () => require(`${this.moduleHelpers.backendPath}/lib/group`)(this.moduleHelpers.dependencies);
   });
 
   describe('The addMembers function', function() {
-    it('should add members to group and publish event on success', function(done) {
+    it('should add members to group', function(done) {
       const group = { id: '123' };
       const members = [{}, {}];
 
       collaborationMock.member = {
         addMembers: sinon.spy(function(g, m, callback) { callback(null, []); })
       };
-      pubsub.local.topic.withArgs(CONSTANTS.EVENTS.MEMBERS_ADDED).returns(topic);
+      handlerMock = {
+        addGroupMembers: sinon.stub().returns(Promise.resolve())
+      };
+      mockery.registerMock('./registry', () => ({
+        getHandlers: () => [handlerMock]
+      }));
 
       getModule().addMembers(group, members)
         .then(() => {
           expect(collaborationMock.member.addMembers).to.have.been.calledOnce;
           expect(collaborationMock.member.addMembers).to.have.been.calledWith(group, members);
-          expect(topic.publish).to.have.been.calledWith(
-            sinon.match.instanceOf(Event).and(sinon.match({
-              id: group.id,
-              name: CONSTANTS.EVENTS.MEMBERS_ADDED,
-              payload: { group, members }
-            }))
-          );
-
+          expect(handlerMock.addGroupMembers).to.have.been.calledWith(group, members);
           done();
         })
         .catch(err => done(err || 'should resolve'));
@@ -72,11 +71,17 @@ describe('The group module', function() {
   });
 
   describe('The create function', function() {
-    it('should call mongoose and publish created event in local pubsub on success', function(done) {
+    it('should create a group', function(done) {
       const created = { _id, name: 'The Group name' };
 
       pubsub.local.topic.withArgs(CONSTANTS.EVENTS.CREATED).returns(topic);
       mongooseModels.Group.create.returns(Promise.resolve(created));
+      handlerMock = {
+        createGroup: sinon.stub().returns(Promise.resolve())
+      };
+      mockery.registerMock('./registry', () => ({
+        getHandlers: () => [handlerMock]
+      }));
 
       getModule().create(group).then(result => {
         expect(mongooseModels.Group.create).to.have.been.calledWith(group);
@@ -89,9 +94,9 @@ describe('The group module', function() {
             payload: created
           }))
         );
-
+        expect(handlerMock.createGroup).to.have.been.calledWith(created);
         done();
-      });
+      }).catch(err => done(err || 'should resolve'));
     });
   });
 
@@ -103,6 +108,13 @@ describe('The group module', function() {
       mongooseModels.Group.findOneAndUpdate.returns({ exec: () => Promise.resolve(group) });
       mongooseModels.Group.findOne.returns(Promise.resolve(updated));
 
+      handlerMock = {
+        updateGroup: sinon.stub().returns(Promise.resolve())
+      };
+      mockery.registerMock('./registry', () => ({
+        getHandlers: () => [handlerMock]
+      }));
+
       getModule().updateById(_id, group).then(result => {
         expect(mongooseModels.Group.findOneAndUpdate).to.have.been.calledWith({ _id }, { $set: group });
         expect(result).to.deep.equals(updated);
@@ -111,12 +123,13 @@ describe('The group module', function() {
           sinon.match.instanceOf(Event).and(sinon.match({
             id: _id,
             name: CONSTANTS.EVENTS.UPDATED,
-            payload: { old: group, new: updated }
+            payload: updated
           }))
         );
+        expect(handlerMock.updateGroup).to.have.been.calledWith(group, updated);
 
         done();
-      });
+      }).catch(err => done(err || 'should resolve'));
     });
   });
 
@@ -126,6 +139,12 @@ describe('The group module', function() {
 
       pubsub.local.topic.withArgs(CONSTANTS.EVENTS.DELETED).returns(topic);
       mongooseModels.Group.findByIdAndRemove.returns({ exec: () => Promise.resolve(deleted) });
+      handlerMock = {
+        deleteGroup: sinon.stub().returns(Promise.resolve())
+      };
+      mockery.registerMock('./registry', () => ({
+        getHandlers: () => [handlerMock]
+      }));
 
       getModule().deleteById(_id).then(result => {
         expect(mongooseModels.Group.findByIdAndRemove).to.have.been.calledWith(_id);
@@ -138,7 +157,7 @@ describe('The group module', function() {
             payload: deleted
           }))
         );
-
+        expect(handlerMock.deleteGroup).to.have.been.calledWith(deleted);
         done();
       });
     });
@@ -146,12 +165,19 @@ describe('The group module', function() {
     it('should not publish in topic if group to delete does not exist', function(done) {
       pubsub.local.topic.withArgs(CONSTANTS.EVENTS.DELETED).returns(topic);
       mongooseModels.Group.findByIdAndRemove.returns({ exec: () => Promise.resolve() });
+      handlerMock = {
+        deleteGroup: sinon.stub().returns(Promise.resolve())
+      };
+      mockery.registerMock('./registry', () => ({
+        getHandlers: () => [handlerMock]
+      }));
 
       getModule().deleteById(_id).then(result => {
         expect(result).to.be.undefined;
         expect(mongooseModels.Group.findByIdAndRemove).to.have.been.calledWith(_id);
         expect(pubsub.local.topic).to.not.have.been.calledWith(CONSTANTS.EVENTS.DELETED);
         expect(topic.publish).to.not.have.been.called;
+        expect(handlerMock.deleteGroup).to.have.been.called;
 
         done();
       });
@@ -211,27 +237,25 @@ describe('The group module', function() {
   });
 
   describe('The removeMembers function', function() {
-    it('should remove members from group and publish event on success', function(done) {
+    it('should remove members from group', function(done) {
       const group = { id: '123' };
       const members = [{}, {}];
 
       collaborationMock.member = {
         removeMembers: sinon.spy(function(g, m, callback) { callback(); })
       };
-      pubsub.local.topic.withArgs(CONSTANTS.EVENTS.MEMBERS_REMOVED).returns(topic);
+      handlerMock = {
+        removeGroupMembers: sinon.stub().returns(Promise.resolve())
+      };
+      mockery.registerMock('./registry', () => ({
+        getHandlers: () => [handlerMock]
+      }));
 
       getModule().removeMembers(group, members)
         .then(() => {
           expect(collaborationMock.member.removeMembers).to.have.been.calledOnce;
           expect(collaborationMock.member.removeMembers).to.have.been.calledWith(group, members);
-          expect(topic.publish).to.have.been.calledWith(
-            sinon.match.instanceOf(Event).and(sinon.match({
-              id: group.id,
-              name: CONSTANTS.EVENTS.MEMBERS_REMOVED,
-              payload: { group, members }
-            }))
-          );
-
+          expect(handlerMock.removeGroupMembers).to.have.been.calledWith(group, members);
           done();
         })
         .catch(err => done(err || 'should resolve'));

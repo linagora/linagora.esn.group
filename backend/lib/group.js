@@ -10,6 +10,7 @@ module.exports = dependencies => {
   const mongoose = dependencies('db').mongo.mongoose;
   const coreUser = dependencies('user');
   const Group = mongoose.model('Group');
+  const registry = require('./registry')(dependencies);
 
   return {
     addMembers,
@@ -29,20 +30,28 @@ module.exports = dependencies => {
   function addMembers(group, members) {
     return q.denodeify(coreCollaboration.member.addMembers)(group, members)
       .then(data => {
-        publish(EVENTS.MEMBERS_ADDED, {
-          id: group.id,
-          payload: { group, members }
-        });
+        const addingMembersHandlers = registry.getHandlers()
+          .map(handler => handler.addGroupMembers && handler.addGroupMembers(group, members)).filter(Boolean);
 
-        return data[0];
+        return Promise.all(addingMembersHandlers)
+        .then(() => data[0]);
       });
   }
 
   function create(group) {
     return Group.create(group).then(group => {
-      publish(EVENTS.CREATED, { id: String(group._id), payload: group });
+      const creatingHandlers = registry.getHandlers()
+        .map(handler => handler.createGroup && handler.createGroup(group)).filter(Boolean);
 
-      return group;
+      return Promise.all(creatingHandlers)
+        .then(() => {
+          publish(EVENTS.CREATED, {
+            id: group._id,
+            payload: group
+          });
+
+          return group;
+        });
     });
   }
 
@@ -69,21 +78,29 @@ module.exports = dependencies => {
     return Group.findByIdAndRemove(groupId)
       .exec()
       .then(group => {
-        publish(EVENTS.DELETED, { id: groupId, payload: group });
+        const deletingHandlers = registry.getHandlers()
+          .map(handler => handler.deleteGroup && handler.deleteGroup(group)).filter(Boolean);
 
-        return group;
+        return Promise.all(deletingHandlers)
+        .then(() => {
+          publish(EVENTS.DELETED, {
+            id: groupId,
+            payload: group
+          });
+
+          return group;
+        });
       });
   }
 
   function removeMembers(group, members) {
     return q.denodeify(coreCollaboration.member.removeMembers)(group, members)
       .then(data => {
-        publish(EVENTS.MEMBERS_REMOVED, {
-          id: group.id,
-          payload: { group, members }
-        });
+        const removingMembersHandlers = registry.getHandlers()
+          .map(handler => handler.removeGroupMembers && handler.removeGroupMembers(group, members)).filter(Boolean);
 
-        return data;
+        return Promise.all(removingMembersHandlers)
+        .then(() => data);
       });
   }
 
@@ -101,12 +118,18 @@ module.exports = dependencies => {
       .exec()
       .then(oldGroup =>
         getById(groupId).then(newGroup => {
-          publish(EVENTS.UPDATED, {
-            id: groupId,
-            payload: { old: oldGroup, new: newGroup }
-          });
+          const updatingHandlers = registry.getHandlers()
+            .map(handler => handler.updateGroup && handler.updateGroup(oldGroup, newGroup)).filter(Boolean);
 
-          return newGroup;
+          return Promise.all(updatingHandlers)
+            .then(() => {
+              publish(EVENTS.UPDATED, {
+                id: groupId,
+                payload: newGroup
+              });
+
+              return newGroup;
+            });
         })
       );
   }
