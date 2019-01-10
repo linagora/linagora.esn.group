@@ -12,11 +12,14 @@ describe('The groupDisplay component', function() {
 
   beforeEach(function() {
     module('jadeTemplates');
-    angular.mock.module('linagora.esn.group', function($provide) {
+    module('linagora.esn.group');
+
+    module(function($provide) {
       $provide.value('infiniteScrollHelper', function(scope) {
         scope.elements = scope.elements || [];
       });
       $provide.value('$modal', sinon.spy());
+      $provide.constant('ELEMENTS_PER_REQUEST', null);
     });
   });
 
