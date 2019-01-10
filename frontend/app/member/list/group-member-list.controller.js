@@ -10,10 +10,11 @@
     _,
     infiniteScrollHelper,
     groupApiClient,
-    GROUP_EVENTS
+    GROUP_EVENTS,
+    ELEMENTS_PER_REQUEST
   ) {
     var self = this;
-    var DEFAULT_LIMIT = 20;
+    var DEFAULT_LIMIT = ELEMENTS_PER_REQUEST || 20;
     var options = {
       offset: 0,
       limit: DEFAULT_LIMIT
@@ -23,7 +24,7 @@
     self.onAddMembersBtnClick = onAddMembersBtnClick;
 
     function $onInit() {
-      self.loadMoreElements = infiniteScrollHelper(self, _loadNextItems);
+      self.loadMoreElements = infiniteScrollHelper(self, _loadNextItems, null, DEFAULT_LIMIT);
       $scope.$on(GROUP_EVENTS.GROUP_MEMBERS_REMOVED, function(event, data) {
         _onMembersRemoved(data);
       });
