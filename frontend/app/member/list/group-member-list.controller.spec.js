@@ -10,10 +10,13 @@ describe('The GroupMemberListController', function() {
   var infiniteScrollHelperMock, GROUP_EVENTS;
 
   beforeEach(function() {
+    module('linagora.esn.group');
+
     infiniteScrollHelperMock = sinon.spy();
 
-    angular.mock.module('linagora.esn.group', function($provide) {
+    module(function($provide) {
       $provide.value('infiniteScrollHelper', infiniteScrollHelperMock);
+      $provide.constant('ELEMENTS_PER_REQUEST', null);
     });
 
     inject(function(
