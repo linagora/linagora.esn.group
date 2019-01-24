@@ -7,6 +7,7 @@ module.exports = dependencies => {
   const group = require('./group')(dependencies);
   const search = require('./search')(dependencies);
   const registry = require('./registry')(dependencies);
+  const people = require('./people')(dependencies);
 
   return {
     constants,
@@ -19,6 +20,7 @@ module.exports = dependencies => {
 
   function init() {
     search.start();
+    people.init();
     coreAvailability.email.addChecker({
       name: 'group',
       check(email) {
