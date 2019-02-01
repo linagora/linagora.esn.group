@@ -57,6 +57,14 @@ module.exports = dependencies => {
       };
     }
 
+    if (query.excludeGroupIds) {
+      elasticsearchQuery.query.bool.must_not = {
+        terms: {
+          _id: query.excludeGroupIds
+        }
+      };
+    }
+
     logger.debug('Searching groups with options', {
       domainId: query.domainId,
       esQuery,
