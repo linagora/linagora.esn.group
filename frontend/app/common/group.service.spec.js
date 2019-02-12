@@ -271,6 +271,38 @@ describe('The groupService', function() {
 
       $rootScope.$digest();
     });
+
+    it('should sort attendees by group, user, contact', function(done) {
+      candidates = [
+        { objectType: 'contact', id: 'contact1', email: 'contact1@domain.com' },
+        { objectType: 'user', id: 'user1', email: 'user1@domain.com' },
+        { objectType: 'contact', id: 'contact2', email: 'contact2@domain.com' },
+        { objectType: 'group', id: 'group1', email: 'group1@domain.com' },
+        { objectType: 'contact', id: 'contact3', email: 'contact3@domain.com' },
+        { objectType: 'group', id: 'group2', email: 'group2@domain.com' },
+        { objectType: 'user', id: 'user2', email: 'user2@domain.com' }
+      ];
+
+      attendeeService.getAttendeeCandidates = sinon.stub().returns($q.when(candidates));
+
+      groupService.searchMemberCandidates(query)
+        .then(function(members) {
+          expect(attendeeService.getAttendeeCandidates).to.have.been.calledWith(query, limit, ['user', 'contact', 'group']);
+          expect(members).to.shallowDeepEqual({
+            length: 7,
+            0: { objectType: 'group' },
+            1: { objectType: 'group' },
+            2: { objectType: 'user' },
+            3: { objectType: 'user' },
+            4: { objectType: 'contact' },
+            5: { objectType: 'contact' },
+            6: { objectType: 'contact' }
+          });
+          done();
+        });
+
+      $rootScope.$digest();
+    });
   });
 
   describe('The deleteGroup function', function() {

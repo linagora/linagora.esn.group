@@ -104,7 +104,13 @@
     }
 
     function searchMemberCandidates(query, ignoreMembers) {
-      return attendeeService.getAttendeeCandidates(query, MEMBER_SEARCH_LIMIT, ['user', 'contact', GROUP_OBJECT_TYPE])
+      var priorities = {
+        group: 1,
+        user: 2,
+        contact: 3
+      };
+
+      return attendeeService.getAttendeeCandidates(query, MEMBER_SEARCH_LIMIT, ['user', 'contact', GROUP_OBJECT_TYPE], _.identity)
         .then(function(candidates) {
           return candidates.filter(function(candidate) {
             return candidate.email;
@@ -120,6 +126,16 @@
           }
 
           return candidates;
+        })
+        .then(function(candidates) {
+          return _.chain(candidates)
+            .map(function(candidate) {
+              candidate.priority = priorities[candidate.objectType] || 0;
+
+              return candidate;
+            })
+            .sortBy('priority')
+            .value();
         });
     }
 
