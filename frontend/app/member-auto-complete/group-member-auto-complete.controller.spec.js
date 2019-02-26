@@ -45,6 +45,30 @@ describe('The GroupMemberAutoCompleteController', function() {
     return controller;
   }
 
+  describe('The $onInit fn', function() {
+    it('should collect member and group id to excluded members list', function() {
+      var controller = initController();
+
+      controller.group = {
+        id: 'group1',
+        members: [
+          { member: { id: 'user', objectType: 'user' } },
+          { member: { id: 'contact', objectType: 'contact' } },
+          { member: { id: 'group', objectType: 'group' } }
+        ]
+      };
+
+      controller.$onInit();
+
+      expect(controller.excludedMembers).to.shallowDeepEqual([
+        { id: 'group1', objectType: 'group' },
+        { id: 'user', objectType: 'user' },
+        { id: 'contact', objectType: 'contact' },
+        { id: 'group', objectType: 'group' }
+      ]);
+    });
+  });
+
   describe('The onTagAdding fn', function() {
     var newMembers;
 
@@ -124,12 +148,23 @@ describe('The GroupMemberAutoCompleteController', function() {
   });
 
   describe('The onTagAdded fn', function() {
+    it('should add $tag to the excluded members list', function() {
+      var controller = initController();
+
+      elementScrollService.autoScrollDown = angular.noop;
+      controller.onTagAdded({ id: '123', objectType: 'user' });
+
+      expect(controller.excludedMembers).to.shallowDeepEqual([
+        { id: '123', objectType: 'user' }
+      ]);
+    });
+
     it('should call elementScrollService.autoScrollDown', function() {
       elementScrollService.autoScrollDown = sinon.spy();
 
       var controller = initController();
 
-      controller.onTagAdded();
+      controller.onTagAdded({});
 
       expect(elementScrollService.autoScrollDown).to.have.been.calledOnce;
     });
@@ -160,30 +195,14 @@ describe('The GroupMemberAutoCompleteController', function() {
       expect(groupService.searchMemberCandidates).to.have.been.calledWith(query, []);
     });
 
-    it('should search with group members as ignored members', function() {
+    it('should pass excluded members list to #searchMemberCandidates', function() {
       var controller = initController();
 
-      controller.group = {
-        members: [{member: {objectType: 'user', id: 'foo'}}]
-      };
+      controller.group = {};
+      controller.excludedMembers = [{ objectType: 'foo', id: 'bar' }];
       controller.search(query);
 
-      expect(groupService.searchMemberCandidates).to.have.been.calledWith(query, controller.group.members);
-    });
-
-    it('should add the current group email as ignored when group email is defined', function() {
-      var controller = initController();
-
-      controller.group = {
-        email: 'group1@open-paas.org',
-        members: [{member: {objectType: 'user', id: 'foo'}}]
-      };
-      controller.search(query);
-
-      expect(groupService.searchMemberCandidates).to.have.been.calledWith(query, [
-        controller.group.members[0],
-        {member: {objectType: 'group', id: controller.group.email}}
-      ]);
+      expect(groupService.searchMemberCandidates).to.have.been.calledWith(query, controller.excludedMembers);
     });
   });
 });

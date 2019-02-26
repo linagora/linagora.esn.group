@@ -14,18 +14,27 @@
   ) {
     var self = this;
 
+    self.excludedMembers = [];
     self.search = search;
+    self.$onInit = $onInit;
     self.onTagAdded = onTagAdded;
     self.onTagAdding = onTagAdding;
 
-    function search(query) {
-      var ignoreMembers = self.group && self.group.members ? self.group.members : [];
+    function $onInit() {
+      if (self.group && self.group.id) {
+        _addToExcludedList({
+          id: self.group.id,
+          objectType: GROUP_OBJECT_TYPE
+        });
 
-      if (self.group && self.group.email) {
-        ignoreMembers.push({member: {objectType: GROUP_OBJECT_TYPE, id: self.group.email}});
+        !_.isEmpty(self.group.members) && self.group.members.forEach(function(member) {
+          _addToExcludedList(member.member);
+        });
       }
+    }
 
-      return groupService.searchMemberCandidates(query, ignoreMembers);
+    function search(query) {
+      return groupService.searchMemberCandidates(query, self.excludedMembers);
     }
 
     function onTagAdding($tag) {
@@ -50,12 +59,24 @@
         });
     }
 
-    function onTagAdded() {
+    function onTagAdded($tag) {
+      _addToExcludedList($tag);
       elementScrollService.autoScrollDown($element.find('div.tags'));
     }
 
     function _isDuplicatedMember(newMember, members) {
       return !!_.find(members, { email: newMember.email });
+    }
+
+    function _addToExcludedList(member) {
+      if (!member || !member.id || !member.objectType || member.objectType === 'email') {
+        return;
+      }
+
+      self.excludedMembers.push({
+        id: member.id,
+        objectType: member.objectType
+      });
     }
   }
 })(angular);
