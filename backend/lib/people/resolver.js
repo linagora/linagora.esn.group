@@ -4,12 +4,13 @@ module.exports = dependencies => {
   const searchLib = require('../search')(dependencies);
   const groupLib = require('../group')(dependencies);
 
-  return ({ term, context, pagination }) => {
+  return ({ term, context, pagination, excludes }) => {
     const query = {
       search: term,
       limit: pagination.limit,
       userId: String(context.user._id),
-      domainId: String(context.domain._id)
+      domainId: String(context.domain._id),
+      excludeGroupIds: excludes.map(tuple => tuple.id)
     };
 
     return searchLib.search(query)
