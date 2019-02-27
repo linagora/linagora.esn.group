@@ -220,7 +220,7 @@ describe('The groupService', function() {
       limit = 20;
     });
 
-    it('should call attendeeService.getAttendeeCandidates with query, limit, user, contact and group as required objectTypes', function(done) {
+    it('should call attendeeService.getAttendeeCandidates with query, limit, user, contact and group as required objectType', function(done) {
       attendeeService.getAttendeeCandidates = sinon.stub().returns($q.when(candidates));
 
       groupService.searchMemberCandidates(query)
@@ -251,21 +251,17 @@ describe('The groupService', function() {
       $rootScope.$digest();
     });
 
-    it('should return a list of candidates without ignored members', function(done) {
+    it('should call #getAttendeeCandidates with a list of ignored members', function(done) {
       var ignoreCandidates = [
-        { member: { id: candidates[2].email, objectTypes: 'email'} },
-        { member: { id: candidates[3].id, objectTypes: 'user' } }
+        { id: 'user1', objectType: 'user'},
+        { id: 'user2', objectType: 'user' }
       ];
 
       attendeeService.getAttendeeCandidates = sinon.stub().returns($q.when(candidates));
 
       groupService.searchMemberCandidates(query, ignoreCandidates)
-        .then(function(members) {
-          expect(attendeeService.getAttendeeCandidates).to.have.been.calledWith(query, limit, ['user', 'contact', 'group']);
-          expect(members.length).to.equal(3);
-          expect(members).to.include(candidates[0]);
-          expect(members).to.include(candidates[1]);
-          expect(members).to.include(candidates[4]);
+        .then(function() {
+          expect(attendeeService.getAttendeeCandidates).to.have.been.calledWith(query, limit, ['user', 'contact', 'group'], ignoreCandidates);
           done();
         });
 

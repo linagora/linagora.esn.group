@@ -110,22 +110,11 @@
         contact: 3
       };
 
-      return attendeeService.getAttendeeCandidates(query, MEMBER_SEARCH_LIMIT, ['user', 'contact', GROUP_OBJECT_TYPE], _.identity)
+      return attendeeService.getAttendeeCandidates(query, MEMBER_SEARCH_LIMIT, ['user', 'contact', GROUP_OBJECT_TYPE], ignoreMembers, _.identity)
         .then(function(candidates) {
           return candidates.filter(function(candidate) {
             return candidate.email;
           });
-        })
-        .then(function(candidates) {
-          if (ignoreMembers) {
-            return candidates.filter(function(candidate) {
-              return !_.any(ignoreMembers, function(ignore) {
-                return ignore.member.id === candidate.id || ignore.member.id === candidate.email;
-              });
-            });
-          }
-
-          return candidates;
         })
         .then(function(candidates) {
           return _.chain(candidates)
