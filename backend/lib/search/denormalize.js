@@ -1,20 +1,13 @@
 module.exports = {
   denormalize,
+  denormalizeFromEvent,
   getId
 };
 
-function denormalize(event) {
+function denormalizeFromEvent(event) {
   const group = extractGroupFromEvent(event);
-  const result = {
-    name: group.name,
-    email: group.email
-  };
 
-  if (group.domain_ids && group.domain_ids.length) {
-    result.domain_id = String(group.domain_ids[0]);
-  }
-
-  return result;
+  return denormalize(group);
 }
 
 function getId(event) {
@@ -27,4 +20,17 @@ function extractGroupFromEvent(event) {
 
 function extractGroupIdFromEvent(event) {
   return String(event.id);
+}
+
+function denormalize(group) {
+  const result = {
+    name: group.name,
+    email: group.email
+  };
+
+  if (group.domain_ids && group.domain_ids.length) {
+    result.domain_id = String(group.domain_ids[0]);
+  }
+
+  return result;
 }

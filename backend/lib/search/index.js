@@ -4,6 +4,7 @@ module.exports = dependencies => {
   const logger = dependencies('logger');
   const elasticsearch = dependencies('elasticsearch');
   const listener = require('./listener')(dependencies);
+  const reindex = require('./reindex')(dependencies);
 
   return {
     search,
@@ -96,5 +97,7 @@ module.exports = dependencies => {
   function start() {
     logger.info('Subscribing to group events for indexing');
     listener.register();
+    logger.info('Register group reindexing mechanism in elasticsearch');
+    reindex.register();
   }
 };
