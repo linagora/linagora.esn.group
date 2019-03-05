@@ -24,7 +24,8 @@ module.exports = dependencies => {
     removeMembers,
     resolveMember,
     updateById,
-    isEmailAvailableToUse
+    isEmailAvailableToUse,
+    listByCursor
   };
 
   function addMembers(group, members) {
@@ -176,5 +177,9 @@ module.exports = dependencies => {
             .then(user => !user);
         }
       });
+  }
+
+  function listByCursor() {
+    return Group.find().cursor();
   }
 };

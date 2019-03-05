@@ -1,5 +1,5 @@
 const { SEARCH, EVENTS } = require('../constants');
-const { denormalize, getId} = require('./denormalize');
+const { denormalizeFromEvent, getId} = require('./denormalize');
 
 module.exports = dependencies => {
   const listeners = dependencies('elasticsearch').listeners;
@@ -16,7 +16,7 @@ module.exports = dependencies => {
         remove: EVENTS.DELETED,
         update: EVENTS.UPDATED
       },
-      denormalize,
+      denormalize: denormalizeFromEvent,
       getId,
       type: SEARCH.TYPE_NAME,
       index: SEARCH.INDEX_NAME
