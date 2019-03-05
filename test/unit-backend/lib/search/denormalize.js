@@ -16,7 +16,7 @@ describe('The lib/search/denormalize module', function() {
         payload: { name: 'group name', email: 'group@email.com' }
       };
 
-      expect(getModule().denormalizeFromEvent(event)).to.deep.equal({
+      expect(getModule().denormalize(event)).to.deep.equal({
         name: event.payload.name,
         email: event.payload.email
       });
@@ -28,7 +28,7 @@ describe('The lib/search/denormalize module', function() {
         payload: { name: 'group name', email: 'group@email.com', domain_ids: ['1', '2', '3'] }
       };
 
-      expect(getModule().denormalizeFromEvent(event)).to.deep.equal({
+      expect(getModule().denormalize(event)).to.deep.equal({
         name: event.payload.name,
         email: event.payload.email,
         domain_id: event.payload.domain_ids[0]
@@ -41,7 +41,7 @@ describe('The lib/search/denormalize module', function() {
         payload: { name: 'group name', email: 'group@email.com' }
       };
 
-      expect(getModule().denormalizeFromEvent(event)).to.deep.equal({
+      expect(getModule().denormalize(event)).to.deep.equal({
         name: event.payload.name,
         email: event.payload.email
       });
@@ -55,23 +55,6 @@ describe('The lib/search/denormalize module', function() {
       };
 
       expect(getModule().getId(event)).to.equal(String(event.id));
-    });
-  });
-
-  describe('The denomorlize function', function() {
-    it('should return group name, email and first domain ID of group', function() {
-      const group = {
-        _id: 1,
-        name: 'groupName',
-        email: 'groupEmail',
-        domain_ids: ['1', '2', '3']
-      };
-
-      expect(getModule().denormalize(group)).to.deep.equal({
-        name: 'groupName',
-        email: 'groupEmail',
-        domain_id: '1'
-      });
     });
   });
 });
