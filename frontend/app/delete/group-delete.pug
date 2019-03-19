@@ -2,9 +2,9 @@
   .modal-dialog
     .modal-content
       .modal-header
-        h4.modal-title #{__('Delete group?')}
+        h4.modal-title #{__('Delete mailing list?')}
       .modal-body
-        p #{__('Group %s will be deleted and the email address of %s will be no longer available', '{{$ctrl.group.name}}', '{{$ctrl.group.email}}')}
+        p #{__('Mailing list %s will be deleted and the email address of %s will be no longer available', '{{$ctrl.group.name}}', '{{$ctrl.group.email}}')}
       .modal-footer
         button.btn.btn-link(ng-click="$hide()")
           | #{__('Cancel')}
