@@ -40,7 +40,8 @@
     "sinon-chai": "2.8.0",
     "socket.io": "1.2.1",
     "supertest": "2.0.0",
-    "time-grunt": "1.4.0"
+    "time-grunt": "1.4.0",
+    "esn-elasticsearch-configuration": "github:linagora/esn-elasticsearch-configuration#build"
   },
   "scripts": {
     "test": "grunt test",
