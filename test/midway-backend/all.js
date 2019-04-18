@@ -5,6 +5,7 @@
 const chai = require('chai');
 const path = require('path');
 const testConfig = require('../config/servers-conf');
+const EsConfig = require('esn-elasticsearch-configuration');
 const basePath = path.resolve(__dirname + '/../../node_modules/linagora-rse');
 const backendPath = path.normalize(__dirname + '/../../backend');
 const MODULE_NAME = 'linagora.esn.james';
@@ -53,4 +54,36 @@ before(function(done) {
   manager.appendLoader(nodeModulesLoader);
 
   loader.load(MODULE_NAME, done);
+});
+
+beforeEach(function(done) {
+  const esnConf = new EsConfig({
+    host: this.testEnv.serversConfig.elasticsearch.host,
+    port: this.testEnv.serversConfig.elasticsearch.port
+  });
+
+  esnConf.setup('groups.idx', 'groups')
+  .then(() => done())
+  .catch(err => {
+    console.error('Error while setup ES indices', err);
+    done();
+  });
+});
+
+afterEach(function(done) {
+  const esnConf = new EsConfig({
+    host: this.testEnv.serversConfig.elasticsearch.host,
+    port: this.testEnv.serversConfig.elasticsearch.port
+  });
+
+  esnConf.deleteIndex('groups.idx', 'groups')
+  .then(() => done())
+  .catch(err => {
+    console.error('Error while clear ES indices', err);
+    done();
+  });
+});
+
+afterEach(function(done) {
+  this.helpers.mongo.dropDatabase(err => done(err));
 });

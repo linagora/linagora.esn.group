@@ -28,7 +28,6 @@ module.exports = dependencies => {
     const limit = query.limit || CONSTANTS.DEFAULT_LIMIT;
     const sortKey = query.sortKey || CONSTANTS.SEARCH.DEFAULT_SORT_KEY;
     const sortOrder = query.sortOrder || CONSTANTS.SEARCH.DEFAULT_SORT_ORDER;
-    const filters = [];
     const sort = {};
 
     sort[sortKey] = {
@@ -45,16 +44,10 @@ module.exports = dependencies => {
     };
 
     if (query.domainId) {
-      filters.push({
+      elasticsearchQuery.query.bool.filter = {
         term: {
           domain_id: String(query.domainId)
         }
-      });
-    }
-
-    if (filters.length) {
-      elasticsearchQuery.query.bool.filter = {
-        and: filters
       };
     }
 
@@ -68,7 +61,7 @@ module.exports = dependencies => {
 
     logger.debug('Searching groups with options', {
       domainId: query.domainId,
-      esQuery,
+      query: esQuery,
       offset,
       limit,
       sort

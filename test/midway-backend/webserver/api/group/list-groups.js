@@ -10,10 +10,12 @@ const MODULE_NAME = 'linagora.esn.group';
 
 describe('GET /groups', () => {
   let app, deployOptions, createdGroup1, createdGroup2, user, domain, lib, group1,
-    group2, groupNotInSameDomain;
+    group2, groupNotInSameDomain, esIntervalIndex;
   const password = 'secret';
 
   beforeEach(function(done) {
+    esIntervalIndex = this.testEnv.serversConfig.elasticsearch.interval_index;
+
     this.helpers.modules.initMidway(MODULE_NAME, err => {
       if (err) {
         return done(err);
@@ -57,6 +59,8 @@ describe('GET /groups', () => {
 
         done();
       });
+
+      this.helpers.modules.current.lib.lib.init(err => done(err));
     });
   });
 
@@ -123,6 +127,24 @@ describe('GET /groups', () => {
             done();
           });
       });
+    });
+  });
+
+  describe('GET /groups?query=', () => {
+    it('should search and return 200 with a list of groups that match search query', function(done) {
+      setTimeout(() => {
+        this.helpers.api.loginAsUser(app, user.emails[0], password, (err, requestAsMember) => {
+          expect(err).to.not.exist;
+          requestAsMember(request(app).get('/api/groups?query=group1'))
+            .expect(200)
+            .end((err, res) => {
+              expect(err).to.not.exist;
+              expect(res.body.length).to.equal(1);
+              expect(res.body).to.shallowDeepEqual([{ id: createdGroup1.id }]);
+              done();
+            });
+        });
+      }, esIntervalIndex);
     });
   });
 });
