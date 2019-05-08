@@ -23,6 +23,7 @@
     "grunt-lint-pattern": "0.1.4",
     "grunt-mocha-cli": "2.1.0",
     "grunt-puglint": "1.0.0",
+    "grunt-swagger-generate": "linagora/grunt-swagger-generate#d756f1a6c51897ddf94de8c2391bfcb14b7ca061",
     "karma": "1.7.0",
     "karma-chrome-launcher": "2.0.0",
     "karma-coverage": "1.1.2",
