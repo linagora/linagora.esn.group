@@ -9,7 +9,7 @@
         on-delete-btn-click="$ctrl.deleteGroup(group)"
       )
   .empty-message(ng-if="!$ctrl.elements.length && $ctrl.infiniteScrollCompleted")
-    img(src="/group/images/group-icon.svg")
+    .icon-svg(ng-include="'group/images/group-icon.svg'")
     .message
       | #{__('No mailing list')}
   div(ng-if='$ctrl.infiniteScrollDisabled')
