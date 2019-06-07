@@ -19,6 +19,7 @@
     self.$onInit = $onInit;
     self.onTagAdded = onTagAdded;
     self.onTagAdding = onTagAdding;
+    self.onTagRemoved = onTagRemoved;
 
     function $onInit() {
       if (self.group && self.group.id) {
@@ -62,6 +63,12 @@
     function onTagAdded($tag) {
       _addToExcludedList($tag);
       elementScrollService.autoScrollDown($element.find('div.tags'));
+    }
+
+    function onTagRemoved($tag) {
+      self.excludedMembers = self.excludedMembers.filter(function(excludedMember) {
+        return excludedMember.id !== $tag.id;
+      });
     }
 
     function _isDuplicatedMember(newMember, members) {
