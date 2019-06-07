@@ -205,4 +205,16 @@ describe('The GroupMemberAutoCompleteController', function() {
       expect(groupService.searchMemberCandidates).to.have.been.calledWith(query, controller.excludedMembers);
     });
   });
+
+  describe('The onTagRemoved method', function() {
+    it('should remove the removed tag in excluded members list', function() {
+      var controller = initController();
+      var tag = { id: '123', objectType: 'bar' };
+
+      controller.excludedMembers = [tag];
+      controller.onTagRemoved(tag);
+
+      expect(controller.excludedMembers).to.not.include(tag);
+    });
+  });
 });
