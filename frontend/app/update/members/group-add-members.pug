@@ -6,7 +6,7 @@
           button.close(type="button", data-dismiss="modal", aria-label=__('Close'), ng-click="$hide()")
             span(aria-hidden="true") &times;
           h4.modal-title #{__('Add members')}
-        group-member-auto-complete(new-members="$ctrl.newMembers", group="$ctrl.group")
+        group-member-auto-complete(new-members="$ctrl.newMembers", group="$ctrl.group", autofocus="true")
         .modal-footer.flex
           .flex-vertical-centered.flex-end
             button.btn.btn-link(type="button", ng-click="$hide()")
