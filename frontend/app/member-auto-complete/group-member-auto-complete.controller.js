@@ -6,6 +6,7 @@
 
   function GroupMemberAutoCompleteController(
     $element,
+    $timeout,
     _,
     elementScrollService,
     emailService,
@@ -31,6 +32,12 @@
         !_.isEmpty(self.group.members) && self.group.members.forEach(function(member) {
           _addToExcludedList(member.member);
         });
+      }
+
+      if (self.autofocus) {
+        $timeout(function() {
+          $element.find('tags-input input').focus();
+        }, 0);
       }
     }
 

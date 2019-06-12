@@ -8,7 +8,8 @@
     controller: 'GroupMemberAutoCompleteController',
     bindings: {
       newMembers: '=',
-      group: '<'
+      group: '<',
+      autofocus: '<'
     }
   });
 })(angular);
