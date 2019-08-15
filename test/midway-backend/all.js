@@ -8,7 +8,7 @@ const testConfig = require('../config/servers-conf');
 const EsConfig = require('esn-elasticsearch-configuration');
 const basePath = path.resolve(__dirname + '/../../node_modules/linagora-rse');
 const backendPath = path.normalize(__dirname + '/../../backend');
-const MODULE_NAME = 'linagora.esn.james';
+const MODULE_NAME = 'linagora.esn.group';
 let rse;
 
 before(function(done) {
@@ -54,6 +54,25 @@ before(function(done) {
   manager.appendLoader(nodeModulesLoader);
 
   loader.load(MODULE_NAME, done);
+});
+
+before(function(done) {
+  this.helpers.modules.initMidway(MODULE_NAME, err => {
+    if (err) {
+      return done(err);
+    }
+
+    const expressApp = require(this.testEnv.backendPath + '/webserver/application')(this.helpers.modules.current.deps);
+    const api = require(this.testEnv.backendPath + '/webserver/api')(this.helpers.modules.current.deps, this.helpers.modules.current.lib.lib);
+
+    expressApp.use(require('body-parser').json());
+    expressApp.use('/group/api', api);
+
+    this.helpers.modules.current.app = this.helpers.modules.getWebServer(expressApp);
+
+    this.helpers.modules.current.lib.lib.init();
+    done();
+  });
 });
 
 beforeEach(function(done) {
