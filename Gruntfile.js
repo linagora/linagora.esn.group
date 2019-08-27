@@ -108,7 +108,8 @@ module.exports = function(grunt) {
       options: {
         require: ['chai', 'mockery'],
         reporter: 'spec',
-        timeout: process.env.TEST_TIMEOUT || 5000
+        timeout: process.env.TEST_TIMEOUT || 5000,
+        exit: true
       },
       backend: {
         options: {
@@ -173,7 +174,7 @@ module.exports = function(grunt) {
   grunt.registerTask('test-midway-backend', ['splitfiles:midway']);
   grunt.registerTask('test-unit-backend', 'Test backend code', ['mochacli:backend']);
   grunt.registerTask('test-unit-frontend', 'Test frontend code', ['karma:unit']);
-  grunt.registerTask('test', ['linters', 'test-unit-frontend', 'test-unit-backend']);
+  grunt.registerTask('test', ['linters', 'test-unit-frontend', 'test-unit-backend', 'test-midway-backend']);
   grunt.registerTask('default', ['test']);
   grunt.registerTask('swagger-generate', 'Grunt plugin for swagger generate', ['swagger_generate']);
 };

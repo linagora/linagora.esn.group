@@ -3,70 +3,53 @@
 const request = require('supertest');
 const expect = require('chai').expect;
 const path = require('path');
-const ObjectId = require('mongoose').Types.ObjectId;
 const q = require('q');
-const MODULE_NAME = 'linagora.esn.group';
 
 describe('The update group API: POST /groups/:id', () => {
-  let app, deployOptions, lib;
+  let app, deployOptions, lib, ObjectId;
   let adminUser, regularUser, domain, group, group2;
   const password = 'secret';
 
   beforeEach(function(done) {
-    this.helpers.modules.initMidway(MODULE_NAME, err => {
+    ObjectId = this.testEnv.core.db.mongo.mongoose.Types.ObjectId;
+    app = this.helpers.modules.current.app;
+    deployOptions = {
+      fixtures: path.normalize(`${__dirname}/../../../fixtures/deployments`)
+    };
+
+    this.helpers.api.applyDomainDeployment('groupModule', deployOptions, (err, models) => {
       expect(err).to.not.exist;
-      const groupApp = require(this.testEnv.backendPath + '/webserver/application')(this.helpers.modules.current.deps);
-      const api = require(this.testEnv.backendPath + '/webserver/api')(this.helpers.modules.current.deps, this.helpers.modules.current.lib.lib);
+      adminUser = models.users[0];
+      regularUser = models.users[1];
+      domain = models.domain;
+      lib = this.helpers.modules.current.lib.lib;
 
-      groupApp.use(require('body-parser').json());
-      groupApp.use('/api', api);
-
-      app = this.helpers.modules.getWebServer(groupApp);
-      deployOptions = {
-        fixtures: path.normalize(`${__dirname}/../../../fixtures/deployments`)
-      };
-
-      this.helpers.api.applyDomainDeployment('groupModule', deployOptions, (err, models) => {
-        expect(err).to.not.exist;
-        adminUser = models.users[0];
-        regularUser = models.users[1];
-        domain = models.domain;
-        lib = this.helpers.modules.current.lib.lib;
-
-        q.all([
-          {
-            name: 'example',
-            email: 'example@lngr.org',
-            domain_ids: [domain.id]
-          }, {
-            name: 'anothergroup',
-            email: 'anothergroup@lngr.org',
-            domain_ids: [domain.id]
-          }
-        ].map(lib.group.create)).spread((createdGroup, createdGroup2) => {
-          group = createdGroup;
-          group2 = createdGroup2;
-          done();
-        }).catch(done);
-      });
-    });
-  });
-
-  afterEach(function(done) {
-    this.helpers.mongo.dropDatabase(err => {
-      if (err) return done(err);
-      this.testEnv.core.db.mongo.mongoose.connection.close(done);
+      q.all([
+        {
+          name: 'example',
+          email: 'example@lngr.org',
+          domain_ids: [domain.id]
+        }, {
+          name: 'anothergroup',
+          email: 'anothergroup@lngr.org',
+          domain_ids: [domain.id]
+        }
+      ].map(lib.group.create)).spread((createdGroup, createdGroup2) => {
+        group = createdGroup;
+        group2 = createdGroup2;
+        done();
+      }).catch(done);
     });
   });
 
   it('should return 401 if not logged in', function(done) {
-    this.helpers.api.requireLogin(app, 'post', '/api/groups/invalid', done);
+    this.helpers.api.requireLogin(app, 'post', '/group/api/groups/invalid', done);
   });
 
   it('should return 404 if group not found', function(done) {
     this.helpers.api.loginAsUser(app, adminUser.emails[0], password, (err, requestAsMember) => {
       expect(err).to.not.exist;
-      const req = requestAsMember(request(app).post('/api/groups/invalid'));
+      const req = requestAsMember(request(app).post('/group/api/groups/invalid'));
 
       req.expect(404);
       req.end((err, res) => {
@@ -81,7 +64,7 @@ describe('The update group API: POST /groups/:id', () => {
   it('should return 400 if no name and email given', function(done) {
     this.helpers.api.loginAsUser(app, adminUser.emails[0], password, (err, requestAsMember) => {
       expect(err).to.not.exist;
-      const req = requestAsMember(request(app).post(`/api/groups/${group.id}`));
+      const req = requestAsMember(request(app).post(`/group/api/groups/${group.id}`));
 
       req.expect(400);
       req.send({});
@@ -97,7 +80,7 @@ describe('The update group API: POST /groups/:id', () => {
   it('should return 400 if email is not valid', function(done) {
     this.helpers.api.loginAsUser(app, adminUser.emails[0], password, (err, requestAsMember) => {
       expect(err).to.not.exist;
-      const req = requestAsMember(request(app).post(`/api/groups/${group.id}`));
+      const req = requestAsMember(request(app).post(`/group/api/groups/${group.id}`));
 
       req.expect(400);
       req.send({ email: 'invalid' });
@@ -113,7 +96,7 @@ describe('The update group API: POST /groups/:id', () => {
   it('should return 400 if email is used by another group', function(done) {
     this.helpers.api.loginAsUser(app, adminUser.emails[0], password, (err, requestAsMember) => {
       expect(err).to.not.exist;
-      const req = requestAsMember(request(app).post(`/api/groups/${group.id}`));
+      const req = requestAsMember(request(app).post(`/group/api/groups/${group.id}`));
 
       req.send({ email: group2.email });
       req.expect(400);
@@ -129,7 +112,7 @@ describe('The update group API: POST /groups/:id', () => {
   it('should return 400 if group email is used by user', function(done) {
     this.helpers.api.loginAsUser(app, adminUser.emails[0], password, (err, requestAsMember) => {
       expect(err).to.not.exist;
-      const req = requestAsMember(request(app).post('/api/groups'));
+      const req = requestAsMember(request(app).post('/group/api/groups'));
 
       req.send({
         name: 'group',
@@ -153,7 +136,7 @@ describe('The update group API: POST /groups/:id', () => {
 
     this.helpers.api.loginAsUser(app, regularUser.emails[0], password, (err, requestAsMember) => {
       expect(err).to.not.exist;
-      requestAsMember(request(app).post(`/api/groups/${group.id}`).send(body))
+      requestAsMember(request(app).post(`/group/api/groups/${group.id}`).send(body))
         .expect(403)
         .end((err, res) => {
           expect(err).to.not.exist;
@@ -179,7 +162,7 @@ describe('The update group API: POST /groups/:id', () => {
       .then(createdGroup => {
         this.helpers.api.loginAsUser(app, adminUser.emails[0], password, (err, requestAsMember) => {
           expect(err).to.not.exist;
-          requestAsMember(request(app).post(`/api/groups/${createdGroup.id}`).send(body))
+          requestAsMember(request(app).post(`/group/api/groups/${createdGroup.id}`).send(body))
             .expect(403)
             .end((err, res) => {
               expect(err).to.not.exist;
@@ -205,7 +188,7 @@ describe('The update group API: POST /groups/:id', () => {
 
     this.helpers.api.loginAsUser(app, adminUser.emails[0], password, (err, requestAsMember) => {
       expect(err).to.not.exist;
-      const req = requestAsMember(request(app).post(`/api/groups/${group.id}`));
+      const req = requestAsMember(request(app).post(`/group/api/groups/${group.id}`));
 
       req.expect(200);
       req.send(updatedGroup);

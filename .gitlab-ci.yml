@@ -10,7 +10,7 @@ test:
   stage: test
   tags:
     - docker
-  image: docker-registry.linagora.com:5000/public-releases/openpaas-esn-test-helper:1.0.0
+  image: node:10-stretch
   services:
     - mongo:3.4
     - elasticsearch:2.4
@@ -20,8 +20,8 @@ test:
   script:
     - npm i
     - npm update
-    - bower i --allow-root
-    - grunt --chunk=1 --ci
+    - node_modules/bower/bin/bower i --allow-root
+    - node_modules/grunt/bin/grunt --chunk=1 --ci
 
 swagger:
   stage: swagger

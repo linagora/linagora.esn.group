@@ -5,69 +5,46 @@ const expect = require('chai').expect;
 const path = require('path');
 const q = require('q');
 const _ = require('lodash');
-const ObjectId = require('mongoose').Types.ObjectId;
-const MODULE_NAME = 'linagora.esn.group';
 
 describe('GET /groups', () => {
   let app, deployOptions, createdGroup1, createdGroup2, user, domain, lib, group1,
-    group2, groupNotInSameDomain, esIntervalIndex;
+    group2, groupNotInSameDomain, esIntervalIndex, ObjectId;
   const password = 'secret';
 
   beforeEach(function(done) {
+    ObjectId = this.testEnv.core.db.mongo.mongoose.Types.ObjectId;
     esIntervalIndex = this.testEnv.serversConfig.elasticsearch.interval_index;
+    app = this.helpers.modules.current.app;
+    deployOptions = {
+      fixtures: path.normalize(`${__dirname}/../../../fixtures/deployments`)
+    };
 
-    this.helpers.modules.initMidway(MODULE_NAME, err => {
+    this.helpers.api.applyDomainDeployment('groupModule', deployOptions, (err, models) => {
       if (err) {
         return done(err);
       }
-      const groupApp = require(this.testEnv.backendPath + '/webserver/application')(this.helpers.modules.current.deps);
-      const api = require(this.testEnv.backendPath + '/webserver/api')(this.helpers.modules.current.deps, this.helpers.modules.current.lib.lib);
-
-      groupApp.use(require('body-parser').json());
-      groupApp.use('/api', api);
-
-      app = this.helpers.modules.getWebServer(groupApp);
-      deployOptions = {
-        fixtures: path.normalize(`${__dirname}/../../../fixtures/deployments`)
+      user = models.users[0];
+      domain = models.domain;
+      lib = this.helpers.modules.current.lib.lib;
+      group1 = {
+        name: 'group1',
+        domain_ids: [domain._id],
+        email: 'group1@lngr.com',
+        members: []
       };
-
-      this.helpers.api.applyDomainDeployment('groupModule', deployOptions, (err, models) => {
-        if (err) {
-          return done(err);
-        }
-        user = models.users[0];
-        domain = models.domain;
-        lib = this.helpers.modules.current.lib.lib;
-        group1 = {
-          name: 'group1',
-          domain_ids: [domain._id],
-          email: 'group1@lngr.com',
-          members: []
-        };
-        group2 = {
-          name: 'group2',
-          domain_ids: [domain._id],
-          email: 'group2@lngr.com',
-          members: []
-        };
-        groupNotInSameDomain = {
-          name: 'group3',
-          domain_ids: [new ObjectId()],
-          email: 'group3@lngr.com',
-          members: []
-        };
-
-        done();
-      });
-
-      this.helpers.modules.current.lib.lib.init(err => done(err));
-    });
-  });
-
-  afterEach(function(done) {
-    this.helpers.mongo.dropDatabase(err => {
-      if (err) return done(err);
-      this.testEnv.core.db.mongo.mongoose.connection.close(done);
+      group2 = {
+        name: 'group2',
+        domain_ids: [domain._id],
+        email: 'group2@lngr.com',
+        members: []
+      };
+      groupNotInSameDomain = {
+        name: 'group3',
+        domain_ids: [new ObjectId()],
+        email: 'group3@lngr.com',
+        members: []
+      };
+      done();
     });
   });
 
@@ -82,13 +59,13 @@ describe('GET /groups', () => {
   });
 
   it('should return 401 if not logged in', function(done) {
-    this.helpers.api.requireLogin(app, 'post', '/api/groups', done);
+    this.helpers.api.requireLogin(app, 'post', '/group/api/groups', done);
   });
 
   it('should respond 200 with a list of groups in the current user domain domain', function(done) {
     this.helpers.api.loginAsUser(app, user.emails[0], password, (err, requestAsMember) => {
       expect(err).to.not.exist;
-      requestAsMember(request(app).get('/api/groups'))
+      requestAsMember(request(app).get('/group/api/groups'))
         .expect(200)
         .end((err, res) => {
           expect(err).to.not.exist;
@@ -104,7 +81,7 @@ describe('GET /groups', () => {
     it('should return 200 with a group matching email query', function(done) {
       this.helpers.api.loginAsUser(app, user.emails[0], password, (err, requestAsMember) => {
         expect(err).to.not.exist;
-        requestAsMember(request(app).get(`/api/groups?email=${createdGroup1.email}`))
+        requestAsMember(request(app).get(`/group/api/groups?email=${createdGroup1.email}`))
           .expect(200)
           .end((err, res) => {
             expect(err).to.not.exist;
@@ -118,7 +95,7 @@ describe('GET /groups', () => {
     it('should return 200 with a group matching email query (case insentive)', function(done) {
       this.helpers.api.loginAsUser(app, user.emails[0], password, (err, requestAsMember) => {
         expect(err).to.not.exist;
-        requestAsMember(request(app).get(`/api/groups?email=${createdGroup1.email.toUpperCase()}`))
+        requestAsMember(request(app).get(`/group/api/groups?email=${createdGroup1.email.toUpperCase()}`))
           .expect(200)
           .end((err, res) => {
             expect(err).to.not.exist;
@@ -135,7 +112,7 @@ describe('GET /groups', () => {
       setTimeout(() => {
         this.helpers.api.loginAsUser(app, user.emails[0], password, (err, requestAsMember) => {
           expect(err).to.not.exist;
-          requestAsMember(request(app).get('/api/groups?query=group1'))
+          requestAsMember(request(app).get('/group/api/groups?query=group1'))
             .expect(200)
             .end((err, res) => {
               expect(err).to.not.exist;

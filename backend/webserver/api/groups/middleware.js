@@ -7,6 +7,7 @@ module.exports = (dependencies, lib) => {
   const authorizationMW = dependencies('authorizationMW');
   const coreTuple = dependencies('tuple');
   const coreUser = dependencies('user');
+  const mongoose = dependencies('db').mongo.mongoose;
   const {
     send400Error,
     send403Error,
@@ -150,7 +151,22 @@ module.exports = (dependencies, lib) => {
   }
 
   function validateMembers(req, res, next) {
-    const hasInvalidTuple = req.body.some(tuple => !tuple || !tuple.id || !tuple.objectType || Object.values(MEMBER_TYPES).indexOf(tuple.objectType) === -1);
+    const hasInvalidTuple = req.body.some(tuple => {
+      if (
+        !tuple ||
+        !tuple.id ||
+        !tuple.objectType ||
+        Object.values(MEMBER_TYPES).indexOf(tuple.objectType) === -1
+      ) return true;
+
+      if (
+        tuple.objectType === MEMBER_TYPES.USER ||
+        tuple.objectType === MEMBER_TYPES.GROUP
+      ) return !mongoose.Types.ObjectId.isValid(tuple.id);
+
+      if (tuple.objectType === MEMBER_TYPES.EMAIL
+      ) return emailAddresses.parseOneAddress(tuple.id) === null;
+    });
 
     if (hasInvalidTuple) {
       return send400Error('body must be an array of valid member tuples {objectType, id}', res);
