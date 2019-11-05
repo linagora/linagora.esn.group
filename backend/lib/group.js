@@ -139,8 +139,14 @@ module.exports = dependencies => {
     return Group.findOne({ _id: id });
   }
 
-  function getByEmail(email) {
-    return Group.findOne({ email: email.toLowerCase() });
+  function getByEmail(email, options = {}) {
+    const query = { $and: [{ email: email.toLowerCase() }] };
+
+    if (options.domainIds) {
+      query.$and.push({ domain_ids: { $in: options.domainIds } });
+    }
+
+    return Group.findOne(query);
   }
 
   function getMemberEmail(member) {

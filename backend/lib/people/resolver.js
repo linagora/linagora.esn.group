@@ -1,23 +1,14 @@
-const Q = require('q');
-
 module.exports = dependencies => {
-  const searchLib = require('../search')(dependencies);
   const groupLib = require('../group')(dependencies);
+  const { FIELD_TYPES } = dependencies('people').constants;
 
-  return ({ term, context, pagination, excludes }) => {
-    const query = {
-      search: term,
-      limit: pagination.limit,
-      userId: String(context.user._id),
-      domainId: String(context.domain._id),
-      excludeGroupIds: excludes.map(tuple => tuple.id)
-    };
+  return ({ fieldType, value, context }) => {
+    if (fieldType === FIELD_TYPES.EMAIL_ADDRESS) {
+      return groupLib.getByEmail(value, {
+        domainIds: [context.domain._id]
+      });
+    }
 
-    return searchLib.search(query)
-      .then(searchResult => searchResult.list.map(group => groupLib.getById(group._id)))
-      .then(promises => Q.allSettled(promises))
-      .then(resolvedGroups => resolvedGroups.filter(_ => _.state === 'fulfilled').map(_ => _.value))
-      .then(resolvedGroups => resolvedGroups.filter(Boolean))
-      .then(groups => (groups || []));
+    return Promise.resolve();
   };
 };

@@ -284,4 +284,49 @@ describe('The group module', function() {
         .catch(err => done(err || 'should resolve'));
     });
   });
+
+  describe('The getByEmail function', () => {
+    it('should call User.findOne with query of email', function(done) {
+      mongooseModels.Group.findOne.returns(Promise.resolve());
+
+      getModule().getByEmail('foo@bar')
+        .then(() => {
+          expect(mongooseModels.Group.findOne).to.have.been.calledWith({
+            $and: [{ email: 'foo@bar' }]
+          });
+          done();
+        })
+        .catch(done);
+    });
+
+    it('should call User.findOne with query of lowercased email', function(done) {
+      mongooseModels.Group.findOne.returns(Promise.resolve());
+
+      getModule().getByEmail('fOo@bAr')
+        .then(() => {
+          expect(mongooseModels.Group.findOne).to.have.been.calledWith({
+            $and: [{ email: 'foo@bar' }]
+          });
+          done();
+        })
+        .catch(done);
+    });
+
+    it('should call User.findOne with query of email and domain if option.domainIds is provided', function(done) {
+      mongooseModels.Group.findOne.returns(Promise.resolve());
+
+      getModule().getByEmail('fOo@bAr', { domainIds: ['domain1'] })
+        .then(() => {
+          expect(mongooseModels.Group.findOne).to.have.been.calledWith({
+            $and: [{
+              email: 'foo@bar'
+            }, {
+              domain_ids: { $in: ['domain1']}
+            }]
+          });
+          done();
+        })
+        .catch(done);
+    });
+  });
 });
