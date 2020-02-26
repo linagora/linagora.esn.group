@@ -1,6 +1,6 @@
 {
   "name": "linagora.esn.group",
-  "version": "1.6.0-dev",
+  "version": "1.7.0-rc1",
   "description": "OpenPaaS module for group feature",
   "main": "index.js",
   "devDependencies": {
