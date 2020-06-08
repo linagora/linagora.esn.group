@@ -4,3 +4,4 @@ frontend/components
 *.log
 package-lock.json
 doc/REST_API/swagger/group-swagger.json
+dist/
