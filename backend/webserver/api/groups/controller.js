@@ -150,7 +150,11 @@ module.exports = function(dependencies, lib) {
           return send400Error(`some members are invalid ${JSON.stringify(invalidMembers)}`, res);
         }
 
-        const alreadyAddedMembers = members.filter(member => isMember(group, member));
+        const uniqueMembers = members.filter(
+          (member, index) => members.findIndex(otherMember => coreTuple.isEqual(member, otherMember)) === index
+        );
+
+        const alreadyAddedMembers = uniqueMembers.filter(member => isMember(group, member));
 
         if (alreadyAddedMembers.length > 0) {
           return send409Error(`some members are already added: ${JSON.stringify(alreadyAddedMembers)}`, res);
@@ -158,7 +162,7 @@ module.exports = function(dependencies, lib) {
 
         const membersBefore = group.members.slice(0);
 
-        lib.group.addMembers(group, members)
+        lib.group.addMembers(group, uniqueMembers)
           .then(updatedGroup => _.difference(updatedGroup.members, membersBefore))
           .then(addedMembers => q.all(addedMembers.map(fetchMember)))
           .then(members => res.status(200).json(members))
@@ -204,8 +208,18 @@ module.exports = function(dependencies, lib) {
     }
 
     if (tuple.objectType === MEMBER_TYPES.EMAIL) {
-      return q.ninvoke(coreUser, 'findByEmail', tuple.id)
-        .then(user => {
+      return q
+        .all([
+          q.fcall(function() {
+            return lib.group.getByEmail(tuple.id);
+          }),
+          q.ninvoke(coreUser, 'findByEmail', tuple.id)
+        ])
+        .then(function([group, user]) {
+          if (group) {
+            return coreTuple.group(group.id);
+          }
+
           if (user) {
             return coreTuple.user(user.id);
           }

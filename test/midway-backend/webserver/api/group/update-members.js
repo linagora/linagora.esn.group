@@ -349,6 +349,100 @@ describe('The update group members API: POST /groups/:id/members', () => {
       });
     });
 
+    describe('With an other group', () => {
+      let otherGroup;
+
+      beforeEach(function(done) {
+        ObjectId = this.testEnv.core.db.mongo.mongoose.Types.ObjectId;
+        app = this.helpers.modules.current.app;
+        deployOptions = {
+          fixtures: path.normalize(`${__dirname}/../../../fixtures/deployments`)
+        };
+
+        lib.group
+          .create({
+            name: 'Other Group',
+            email: 'othergroup@example.com',
+            domain_ids: [domain.id],
+            members: []
+          })
+          .then(createdGroup => {
+            otherGroup = createdGroup;
+            done();
+          })
+          .catch(done);
+      });
+
+      it('should return 200 with resolved added members and add group email as group member', function(done) {
+        const members = [{ id: group.email, objectType: 'email' }];
+
+        this.helpers.api.loginAsUser(
+          app,
+          adminUser.emails[0],
+          password,
+          (err, requestAsMember) => {
+            expect(err).to.not.exist;
+            const req = requestAsMember(
+              request(app).post(
+                `/group/api/groups/${otherGroup.id}/members?action=add`
+              )
+            );
+
+            req.expect(200);
+            req.send(members);
+            req.end((err, res) => {
+              expect(err).to.not.exist;
+              expect(res.body.length).equal(1);
+              expect(res.body[0]).to.shallowDeepEqual({
+                id: group.id,
+                objectType: 'group',
+                member: {
+                  email: group.email
+                }
+              });
+              done();
+            });
+          }
+        );
+      });
+
+      it('should return 200 with no duplicate for same group email and group member added', function(done) {
+        const members = [
+          { id: group.id, objectType: 'group' },
+          { id: group.email, objectType: 'email' }
+        ];
+
+        this.helpers.api.loginAsUser(
+          app,
+          adminUser.emails[0],
+          password,
+          (err, requestAsMember) => {
+            expect(err).to.not.exist;
+            const req = requestAsMember(
+              request(app).post(
+                `/group/api/groups/${otherGroup.id}/members?action=add`
+              )
+            );
+
+            req.expect(200);
+            req.send(members);
+            req.end((err, res) => {
+              expect(err).to.not.exist;
+              expect(res.body.length).equal(1);
+              expect(res.body[0]).to.shallowDeepEqual({
+                id: group.id,
+                objectType: 'group',
+                member: {
+                  email: group.email
+                }
+              });
+              done();
+            });
+          }
+        );
+      });
+    });
+
     it('should return 200 with resolved added members and convert email member to lower case', function(done) {
       const members = [
         { id: regularUser.preferredEmail, objectType: 'email'},
