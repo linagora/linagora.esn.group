@@ -254,42 +254,56 @@ describe('The create group API: POST /groups', () => {
   });
 
   it('should create a group with a list of members and convert email member to lower case', function(done) {
-    const group = {
-      name: 'groupname',
-      email: buildEmail('mygroup'),
-      members: [
-        user.emails[0],
-        'User@External.com'
-      ]
-    };
-
-    this.helpers.api.loginAsUser(app, user.emails[0], password, (err, requestAsMember) => {
-      expect(err).to.not.exist;
-      const req = requestAsMember(request(app).post('/group/api/groups'));
-
-      req.send(group);
-      req.expect(201);
-      req.end((err, res) => {
-        expect(err).to.not.exist;
-        expect(res.body).to.shallowDeepEqual({
-          name: group.name,
-          email: group.email,
+    lib.group
+      .create({
+        name: 'Other Group',
+        email: 'othergroup@example.com',
+        domain_ids: [domain.id]
+      })
+      .then(createdGroup => {
+        const group = {
+          name: 'groupname',
+          email: buildEmail('mygroup'),
           members: [
-            {
-              member: {
-                objectType: 'user',
-                id: user.id
-              }
-            }, {
-              member: {
-                objectType: 'email',
-                id: 'user@external.com'
-              }
-            }
+            user.emails[0],
+            createdGroup.email,
+            'User@External.com'
           ]
+        };
+
+        this.helpers.api.loginAsUser(app, user.emails[0], password, (err, requestAsMember) => {
+          expect(err).to.not.exist;
+          const req = requestAsMember(request(app).post('/group/api/groups'));
+
+          req.send(group);
+          req.expect(201);
+          req.end((err, res) => {
+            expect(err).to.not.exist;
+            expect(res.body).to.shallowDeepEqual({
+              name: group.name,
+              email: group.email,
+              members: [
+                {
+                  member: {
+                    objectType: 'user',
+                    id: user.id
+                  }
+                }, {
+                  member: {
+                    objectType: 'group',
+                    id: createdGroup.id
+                  }
+                }, {
+                  member: {
+                    objectType: 'email',
+                    id: 'user@external.com'
+                  }
+                }
+              ]
+            });
+            done();
+          });
         });
-        done();
-      });
     });
   });
 });
