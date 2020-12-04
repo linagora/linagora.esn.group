@@ -289,6 +289,61 @@ describe('The update group members API: POST /groups/:id/members', () => {
           });
       });
     });
+
+    it('should respond 204 on success (remove internal member by email)', function(done) {
+      const body = [
+        { objectType: 'email', id: adminUser.emails[0] }
+      ];
+
+      this.helpers.api.loginAsUser(app, adminUser.emails[0], password, (err, requestAsMember) => {
+        expect(err).to.not.exist;
+        requestAsMember(request(app).post(`/group/api/groups/${group.id}/members?action=remove`).send(body))
+          .expect(204)
+          .end(err => {
+            expect(err).to.not.exist;
+
+            lib.group.getById(group.id)
+              .then(group => {
+                expect(group.members).to.have.length(1);
+                expect(group.members[0].member).to.deep.equal({ objectType: 'email', id: 'outsider@external.org' });
+                done();
+              })
+              .catch(err => done(err || 'should resolve'));
+          });
+      });
+    });
+
+    it('should respond 204 on success (remove email member by email when user with this email exists)', function(done) {
+      const adminMember = { objectType: 'email', id: adminUser.emails[0] };
+
+      lib.group.create({
+        name: 'Other Group',
+        domain_ids: [domain.id],
+        email: 'example@abc.com',
+        members: [
+          {
+            member: adminMember
+          }
+        ]
+      }).then(createdGroup => {
+        expect(createdGroup.members).to.have.length(1);
+        this.helpers.api.loginAsUser(app, adminUser.emails[0], password, (err, requestAsMember) => {
+          expect(err).to.not.exist;
+          requestAsMember(request(app).post(`/group/api/groups/${createdGroup.id}/members?action=remove`).send([adminMember]))
+          .expect(204)
+          .end(err => {
+            expect(err).to.not.exist;
+
+            lib.group.getById(createdGroup.id)
+              .then(group => {
+                expect(group.members).to.have.length(0);
+                done();
+              })
+              .catch(err => done(err || 'should resolve'));
+          });
+        });
+      }).catch(done);
+    });
   });
 
   describe('The add members API: POST /group/api/groups/:id/members?action=add', function() {
