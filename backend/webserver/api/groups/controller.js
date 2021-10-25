@@ -44,14 +44,7 @@ module.exports = function(dependencies, lib) {
       .catch(err => send500Error('Unable to create group', err, res));
 
     function buildMemberFromEmail(email) {
-      return q.ninvoke(coreUser, 'findByEmail', email)
-        .then(user => {
-          if (user) {
-            return coreTuple.user(user._id);
-          }
-
-          return coreTuple.email(email);
-        })
+      return createTupleForEmail(email)
         .then(member => ({ member }));
     }
   }
@@ -150,7 +143,11 @@ module.exports = function(dependencies, lib) {
           return send400Error(`some members are invalid ${JSON.stringify(invalidMembers)}`, res);
         }
 
-        const alreadyAddedMembers = members.filter(member => isMember(group, member));
+        const uniqueMembers = members.filter(
+          (member, index) => members.findIndex(otherMember => coreTuple.isEqual(member, otherMember)) === index
+        );
+
+        const alreadyAddedMembers = uniqueMembers.filter(member => isMember(group, member));
 
         if (alreadyAddedMembers.length > 0) {
           return send409Error(`some members are already added: ${JSON.stringify(alreadyAddedMembers)}`, res);
@@ -158,26 +155,74 @@ module.exports = function(dependencies, lib) {
 
         const membersBefore = group.members.slice(0);
 
-        lib.group.addMembers(group, members)
+        lib.group.addMembers(group, uniqueMembers)
           .then(updatedGroup => _.difference(updatedGroup.members, membersBefore))
           .then(addedMembers => q.all(addedMembers.map(fetchMember)))
-          .then(members => res.status(200).json(members))
-          .catch(err => send500Error('Unable to add members', err, res));
-      });
+          .then(members => res.status(200).json(members));
+      }).catch(err => send500Error('Unable to add members', err, res));
   }
 
   function removeMembers(req, res) {
     const group = req.group;
-    const members = req.body;
-    const alreadyRemovedMembers = members.filter(member => !isMember(group, member));
 
-    if (alreadyRemovedMembers.length > 0) {
-      return send400Error(`some members do not belong to group: ${JSON.stringify(alreadyRemovedMembers)}`, res);
+    fetchMembersByEmail(req.body).then(fetchedMembers => {
+      const [flattenedMembers, membersNotInGroup] = processFetchedMembers(fetchedMembers, group);
+
+      if (membersNotInGroup.length > 0) {
+        return send400Error(`some members do not belong to group: ${JSON.stringify(membersNotInGroup)}`, res);
+      }
+
+      lib.group.removeMembers(group, flattenedMembers)
+        .then(() => res.status(204).end());
+    }).catch(err => send500Error('Unable to remove members', err, res));
+
+    function fetchMembersByEmail(members) {
+      return q.all(members.map(tuple => {
+        if (tuple.objectType === MEMBER_TYPES.EMAIL) {
+          return q
+            .all([
+              q.fcall(function() {
+                return lib.group.getByEmail(tuple.id);
+              }),
+              q.ninvoke(coreUser, 'findByEmail', tuple.id)
+            ])
+            .then(function([group, user]) {
+              if (group) {
+                return [tuple, { objectType: 'group', id: group.id }];
+              }
+
+              if (user) {
+                return [tuple, { objectType: 'user', id: user.id }];
+              }
+
+              return tuple;
+            });
+        }
+
+        return q(tuple);
+      }));
     }
 
-    lib.group.removeMembers(group, members)
-      .then(() => res.status(204).end())
-      .catch(err => send500Error('Unable to remove members', err, res));
+    function processFetchedMembers(fetchedMembers, group) {
+      const membersNotInGroup = [], flattenedMembers = [];
+
+      fetchedMembers.forEach(member => {
+        if (member.length === 2) {
+          if (!isMember(group, member[0]) && !isMember(group, member[1])) {
+            membersNotInGroup.push(member[0]);
+          }
+          flattenedMembers.push(member[0], member[1]);
+        } else {
+          if (!isMember(group, member)) {
+            membersNotInGroup.push(member);
+          }
+          flattenedMembers.push(member);
+        }
+
+      });
+
+      return [flattenedMembers, membersNotInGroup];
+    }
   }
 
   function isMember(group, member) {
@@ -204,15 +249,29 @@ module.exports = function(dependencies, lib) {
     }
 
     if (tuple.objectType === MEMBER_TYPES.EMAIL) {
-      return q.ninvoke(coreUser, 'findByEmail', tuple.id)
-        .then(user => {
-          if (user) {
-            return coreTuple.user(user.id);
-          }
-
-          return coreTuple.email(tuple.id);
-        });
+      return createTupleForEmail(tuple.id);
     }
+  }
+
+  function createTupleForEmail(email) {
+    return q
+      .all([
+        q.fcall(function() {
+          return lib.group.getByEmail(email);
+        }),
+        q.ninvoke(coreUser, 'findByEmail', email)
+      ])
+      .then(function([group, user]) {
+        if (group) {
+          return coreTuple.group(group.id);
+        }
+
+        if (user) {
+          return coreTuple.user(user.id);
+        }
+
+        return coreTuple.email(email);
+      });
   }
 
   function fetchMember(member) {
